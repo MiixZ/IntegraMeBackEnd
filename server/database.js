@@ -16,6 +16,8 @@ export async function query(sql, params) {
 };
 */
 
+//---------------------------------------------- FUNCIONES QUERY -----------------------------------------------------
+
 export async function getTodoByID(id) {             // Función de prueba que devolverá todos los datos de una tabla por un ID.
     const row = await pool.query(
       `SELECT * FROM todos WHERE id = ?`, [id]);
