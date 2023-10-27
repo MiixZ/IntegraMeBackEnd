@@ -1,25 +1,42 @@
-import mysql from 'mysql2';
-import dotenv from 'dotenv';
-dotenv.config();
+const mysql = require('mysql2');
 
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASS
-}).promise();
+const connection = mysql.createConnection({
+    host: '34.175.9.11',
+    port: 33060,
+    user: 'root',
+    password: 'integrame',
+    database: 'INTEGRAME'
+});
 
-/*
-export async function query(sql, params) {
-    const [rows, fields] = await pool.execute(sql, params);
-    return rows;
-};
-*/
-
-//---------------------------------------------- FUNCIONES QUERY -----------------------------------------------------
-
-export async function getTodoByID(id) {             // Función de prueba que devolverá todos los datos de una tabla por un ID.
-    const row = await pool.query(
-      `SELECT * FROM todos WHERE id = ?`, [id]);
-      return row;
+async function conectarBD() {
+    connection.connect((err) => {
+        if(err) {
+            console.error('Error conectando a la base de datos', err);
+            return;
+        }
+        console.log('Conectado a la base de datos');
+    });
 }
+
+async function desconectarBD() {
+    connection.end();
+}
+
+async function obtenerProfesores() {
+    return new Promise((resolve, reject) => {
+        connection.query('select * from PROFESORES', (error, results, fields) => {
+            if(error) {
+                console.error('Error obteniendo profesores', error);
+                reject(error);
+                return;
+            }
+            resolve(results);
+        });
+    });
+}
+
+module.exports = {
+    conectarBD,
+    desconectarBD,
+    obtenerProfesores
+};
