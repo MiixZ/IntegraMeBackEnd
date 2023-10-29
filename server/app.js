@@ -1,10 +1,26 @@
-import express from 'express';
+'use strict';
 
-//import { createServer } from 'http';
+require('dotenv').config();
+const express = require('express');
+const mysql = require('mysql2');
 
+const jwt = require('jsonwebtoken');
+const secret = process.env.JWT_SECRET;
+
+// Constants
+const PORT = 8080;
+const HOST = '0.0.0.0';
+
+const rtWeb = require('./web/router_web.js');
+const rtApi = require('./api/router_api.js');
+
+// App
 const app = express();
-app.use(express.json());
 
-app.listen(8080, () => {
-    console.log('Server escuchando en puerto 8080');
+app.use('/panelAdmin', rtWeb);
+
+app.use('/api', rtApi);
+
+app.listen(PORT, HOST, () => {
+    console.log(`Running on http://${HOST}:${PORT}`);
 });
