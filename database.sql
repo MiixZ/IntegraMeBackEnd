@@ -37,8 +37,8 @@ CREATE TABLE ADMINISTRADORES (
 
 CREATE TABLE USUARIOS (
     ID INT AUTO_INCREMENT PRIMARY KEY,
-    DNI_Usuario VARCHAR(9) NOT NULL,
-    Tipo_usuario ENUM('Alumno', 'Profesor', 'Administrador') NOT NULL UNIQUE
+    DNI_Usuario VARCHAR(9) NOT NULL UNIQUE,
+    Tipo_usuario ENUM('Alumno', 'Profesor', 'Administrador') NOT NULL
     --FOREIGN KEY (DNI_usuario) REFERENCES PROFESORES(DNI) ON DELETE CASCADE ON UPDATE CASCADE,
     --FOREIGN KEY (DNI_usuario) REFERENCES ADMINISTRADORES(DNI) ON DELETE CASCADE ON UPDATE CASCADE,
     --FOREIGN KEY (DNI_usuario) REFERENCES ALUMNOS(DNI) ON DELETE CASCADE ON UPDATE CASCADE
@@ -49,6 +49,13 @@ CREATE TABLE PLANTILLATAREA (
     Nombre VARCHAR(20) NOT NULL;
     Descripcion VARCHAR(100) NOT NULL;
     Dificultad INT NOT NULL;
+);
+
+CREATE TABLE TOKENS(
+    ID_usuarios INT,
+    Token VARCHAR(512) NOT NULL,
+    Expiration_date TIMESTAMP,
+    FOREIGN KEY (ID_usuarios) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- Crear un disparador para insertar automáticamente en la tabla usuarios cuando se añade un profesor
