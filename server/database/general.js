@@ -1,5 +1,6 @@
 require('dotenv').config();
 const mysql = require('mysql2');
+const bcrypt = require('bcrypt');
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -23,6 +24,17 @@ async function desconectarBD() {
     connection.end();
 }
 
+const encrypt = async (password) => {
+    return await bcrypt.hash(password, 10);
+}
+
+const compare = async (password, hash) => {
+    console.log('password:', password);
+    console.log('hash:', hash);
+    return await bcrypt.compare(password, hash);
+}
+
+
 /** GESTIÓN DE TOKENS
  * 
 const currentDate = new Date();
@@ -39,5 +51,7 @@ connection.query(
 module.exports = {
     conectarBD,
     desconectarBD,
-    connection
+    connection,
+    encrypt,
+    compare
 };

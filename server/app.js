@@ -3,6 +3,7 @@
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
+const bodyParser = require('body-parser');
 
 const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET;
@@ -16,6 +17,8 @@ const rtApi = require('./api/router_api.js');
 
 // App
 const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/panelAdmin', rtWeb);
 
