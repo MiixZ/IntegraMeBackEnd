@@ -19,4 +19,6 @@ routerProfesores.get('/get', async (req, res) => {
     }
 });
 
+
+
 module.exports = routerProfesores;

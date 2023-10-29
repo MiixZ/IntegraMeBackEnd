@@ -17,6 +17,7 @@ async function obtenerProfesores() {
     });
 }
 
+
 module.exports = {
     obtenerProfesores
 };
