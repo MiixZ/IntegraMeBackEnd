@@ -9,7 +9,7 @@ CREATE TABLE PROFESORES (
     Nombre VARCHAR(20) NOT NULL,
     Apellidos VARCHAR(50) NOT NULL,
     Password_hash VARCHAR(255) NOT NULL,
-    Aula_asignada INT NOT NULL,
+    Aula_asignada INT DEFAULT NULL,
     Direccion VARCHAR(50) NOT NULL,
     Num_telf INT NOT NULL,
     FOREIGN KEY (Aula_asignada) REFERENCES AULAS(Num_Aula) ON DELETE CASCADE ON UPDATE CASCADE
@@ -21,10 +21,12 @@ CREATE TABLE ALUMNOS (
     Nombre VARCHAR(20) NOT NULL,
     Apellidos VARCHAR(50) NOT NULL,
     Edad INT NOT NULL,
-    Aula_asignada INT NOT NULL,
+    ID_tutor INT DEFAULT NULL,
+    Aula_asignada INT DEFAULT NULL,
     Direccion VARCHAR(50) NOT NULL,
     Num_telf INT NOT NULL,
-    FOREIGN KEY (Aula_asignada) REFERENCES AULAS(Num_Aula) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (Aula_asignada) REFERENCES AULAS(Num_Aula) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_tutor) REFERENCES PROFESORES(ID_profesor) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE ADMINISTRADORES (
@@ -53,7 +55,7 @@ CREATE TABLE PLANTILLATAREA (
     Dificultad INT NOT NULL;
 );
 
-CREATE TABLE TOKENS(
+CREATE TABLE TOKENS (
     ID_usuario INT,
     Token VARCHAR(512) PRIMARY KEY NOT NULL,
     Expiration_date TIMESTAMP,
@@ -94,8 +96,6 @@ END;
 DELIMITER;
 
 
-
-
 DELIMITER //
 
 CREATE PROCEDURE ActualizarIDAlumno(IN DNI_param VARCHAR(9), IN nuevo_ID_alumno_param INT)
@@ -106,13 +106,11 @@ END //
 
 DELIMITER ;
 
-
-
---IMPORTANTE
+--IMPORTANTE --> Los delimiters cambian los ";" por "//" y viceversa
 
 DELIMITER //
 
-CREATE PROCEDURE InsertarAlumno(IN DNI_param VARCHAR(9), IN Nombre_param VARCHAR(20), IN Apellidos_param VARCHAR(50), IN Edad_param INT, IN Aula_asignada_param INT, IN Direccion_param VARCHAR(50), IN Num_Telf_param INT)
+CREATE PROCEDURE InsertarAlumno(IN DNI_param VARCHAR(9), IN Nombre_param VARCHAR(20), IN Apellidos_param VARCHAR(50), IN Edad_param INT, IN Direccion_param VARCHAR(50), IN Num_Telf_param INT)
 BEGIN
     DECLARE last_id INT;
 
@@ -123,8 +121,8 @@ BEGIN
     SELECT ID INTO last_id FROM USUARIOS WHERE DNI_Usuario = DNI_param;
 
     -- Inserción en la tabla ALUMNOS
-    INSERT INTO ALUMNOS (DNI, ID_alumno, Nombre, Apellidos, Edad, Aula_asignada, Direccion, Num_telf)
-    VALUES (DNI_param, last_id, Nombre_param, Apellidos_param, Edad_param, Aula_asignada_param, Direccion_param, Num_Telf_param);
+    INSERT INTO ALUMNOS (DNI, ID_alumno, Nombre, Apellidos, Edad, Direccion, Num_telf)
+    VALUES (DNI_param, last_id, Nombre_param, Apellidos_param, Edad_param, Direccion_param, Num_Telf_param);
 END //
 
 DELIMITER ;
@@ -132,7 +130,7 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE InsertarProfesor(IN DNI_param VARCHAR(9), IN Nombre_param VARCHAR(20), IN Apellidos_param VARCHAR(50), IN Password_param VARCHAR(255), IN Aula_asignada_param INT, IN Direccion_param VARCHAR(50), IN Num_Telf_param INT)
+CREATE PROCEDURE InsertarProfesor(IN DNI_param VARCHAR(9), IN Nombre_param VARCHAR(20), IN Apellidos_param VARCHAR(50), IN Password_param VARCHAR(255), IN Direccion_param VARCHAR(50), IN Num_Telf_param INT)
 BEGIN
     DECLARE last_id INT;
 
@@ -143,8 +141,8 @@ BEGIN
     SELECT ID INTO last_id FROM USUARIOS WHERE DNI_Usuario = DNI_param;
 
     -- Inserción en la tabla PROFESORES
-    INSERT INTO PROFESORES (DNI, ID_profesor, Nombre, Apellidos, Password_hash, Aula_asignada, Direccion, Num_telf)
-    VALUES (DNI_param, last_id, Nombre_param, Apellidos_param, Password_param, Aula_asignada_param, Direccion_param, Num_Telf_param);
+    INSERT INTO PROFESORES (DNI, ID_profesor, Nombre, Apellidos, Password_hash, Direccion, Num_telf)
+    VALUES (DNI_param, last_id, Nombre_param, Apellidos_param, Password_param, Direccion_param, Num_Telf_param);
 END //
 
 DELIMITER ;
@@ -168,7 +166,31 @@ END //
 
 DELIMITER ;
 
+/*
+DELIMITER //
+CREATE TRIGGER before_insert_alumno
+BEFORE INSERT ON ALUMNOS
+FOR EACH ROW
+BEGIN
+    DECLARE profesor_aula INT;
 
+    -- Obtener el valor de la columna 'Aula_asignada' del tutor asociado al alumno
+    SELECT Aula_asignada INTO profesor_aula
+    FROM PROFESORES
+    WHERE ID_profesor = NEW.ID_tutor;
+
+    -- Verificar si 'Aula_asignada' es nula en el profesor
+    IF profesor_aula IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No se puede insertar el alumno, el tutor no tiene aula asignada, crack.';
+    END IF;
+END;
+//
+DELIMITER ;
+--Este trigger se ejecutará antes de realizar una inserción en la tabla de ALUMNOS y verificará si el tutor asociado tiene la columna "Aula_asignada" no nula.
+--Si la columna es nula, se generará un error y la inserción del alumno se detendrá.
+--Asegúrate de ajustar el código según la estructura real de tus tablas y las relaciones entre ellas.
+*/
 
 INSERT INTO ALUMNOS (DNI, Nombre, Apellidos, Edad, Aula_asignada, Direccion, Num_Telf)
 VALUES

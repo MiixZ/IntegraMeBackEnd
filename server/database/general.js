@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
+const schedule = require('node-schedule');
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -29,24 +30,27 @@ const encrypt = async (password) => {
 }
 
 const compare = async (password, hash) => {
-    console.log('password:', password);
-    console.log('hash:', hash);
     return await bcrypt.compare(password, hash);
 }
 
 
-/** GESTIÓN DE TOKENS
- * 
-const currentDate = new Date();
-
-connection.query(
-    'DELETE FROM Tokens WHERE expiration_date < ?',
-    [currentDate],
-    (error, results) => {
-        // ... manejar el resultado y cerrar la conexión
-    }
-);
- */
+const job = schedule.scheduleJob('0 * * * *', async function() {
+    const currentDate = new Date();
+    return new Promise((resolve, reject) => {
+        // La fecha de expiración (un día después de la fecha en la que se creó el token)
+        connection.query('DELETE FROM TOKENS WHERE Expiration_date < ?',
+            [currentDate],
+            (error, results, fields) => {
+                if (error) {
+                    console.error('Error eliminado TOKENS', error);
+                    reject(error);
+                    return;
+                }
+                resolve(results);
+            }
+        );
+    })
+});
 
 module.exports = {
     conectarBD,
