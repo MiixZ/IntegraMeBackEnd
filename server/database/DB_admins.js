@@ -33,6 +33,10 @@ async function InsertarAdmin(DNI, NOMBRE, APELLIDOS, PASSWORD, DIRECCION, TELEFO
 }
 
 async function InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, DIRECCION, TELEFONO) {
+  /*
+  TODO: Comprobar que funcione el método.
+        Terminar método.
+  */
   const result = await new Promise((resolve, reject) => {
     connection.query('SELECT Aula_asignada FROM PROFESORES WHERE ID_profesor = ?',
                     [TUTOR], (error, results, fields) => {
