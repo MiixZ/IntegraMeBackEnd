@@ -12,6 +12,7 @@ const { encrypt, compare } = require('../../database/general.js');
 const jwt = require('jsonwebtoken');
 const secret_admin = process.env.JWT_SECRET_ADMIN;
 
+// FUNCIONA CORRECTAMENTE
 routerAdmin.post('/insertProf', async (req, res) => {
     try {
         // Coge el token enviado en el header de la solicitud
@@ -25,7 +26,7 @@ routerAdmin.post('/insertProf', async (req, res) => {
         }
 
         // Obtener datos del cuerpo de la solicitud
-        const { DNI, NOMBRE, APELLIDOS, PASSWORD, DIRECCION, TELEFONO } = req.body;
+        const { DNI, NOMBRE, APELLIDOS, PASSWORD, AULA, DIRECCION, TELEFONO } = req.body;
 
         // Verificar si todos los campos necesarios están presentes
         if (!DNI || !NOMBRE || !APELLIDOS || !PASSWORD || !DIRECCION || !TELEFONO) {
@@ -38,6 +39,10 @@ routerAdmin.post('/insertProf', async (req, res) => {
         // Insertar profesor
         const resultado = await database.InsertarProfesor(DNI, NOMBRE, APELLIDOS, passwordHash, DIRECCION, TELEFONO);
 
+        if (AULA) {
+            // Actualizar aula del profesor
+            await database.ActualizarAulaProfesor(DNI, AULA);
+        }
         // Enviar respuesta al cliente
         res.json(resultado);
     } catch (error) {
@@ -46,6 +51,7 @@ routerAdmin.post('/insertProf', async (req, res) => {
     }
 });
 
+// FUNCIONA CORRECTAMENTE
 routerAdmin.post('/insertAlum', async (req, res) => {
     try {
         // Coge el token enviado en el header de la solicitud
@@ -59,9 +65,9 @@ routerAdmin.post('/insertAlum', async (req, res) => {
 
         // Obtener datos del cuerpo de la solicitud
         const { DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, DIRECCION, TELEFONO } = req.body;
-
+        
         // Verificar si todos los campos necesarios están presentes
-        if (!DNI || !NOMBRE || !APELLIDOS || !EDAD || !TUTOR || !DIRECCION || !TELEFONO) {
+        if (!DNI || !NOMBRE || !APELLIDOS || !EDAD || !DIRECCION || !TELEFONO) {
             return res.status(400).json({ error: 'Todos los campos son obligatorios' });
         }
 
@@ -77,6 +83,7 @@ routerAdmin.post('/insertAlum', async (req, res) => {
     }
 });
 
+// FUNCIONA CORRECTAMENTE
 routerAdmin.post('/sesionAdmin/', async (req, res) => {
     try {
         // Obtener datos del cuerpo de la solicitud
@@ -102,7 +109,7 @@ routerAdmin.post('/sesionAdmin/', async (req, res) => {
 });
 
 
-// METODO PARA REGISTRAR UN ADMINISTRADOR, NO FORMARÁ PARTE DE LA APLICACIÓN
+// METODO PARA REGISTRAR UN ADMINISTRADOR, NO FORMARÁ PARTE DE LA APLICACIÓN. FUNCIONA CORRECTAMENTE
 routerAdmin.post('/registAdmin/', async (req, res) => {
     try {
         // Obtener datos del cuerpo de la solicitud

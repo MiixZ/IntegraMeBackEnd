@@ -18,6 +18,20 @@ async function InsertarProfesor(DNI, NOMBRE, APELLIDOS, PASSWORD, DIRECCION, TEL
   });
 }
 
+async function ActualizarAulaProfesor(DNI, AULA) {
+  return new Promise((resolve, reject) => {
+    connection.query('UPDATE PROFESORES SET Aula_asignada = ? WHERE DNI = ?',
+                    [AULA, DNI], (error, results, fields) => {
+      if (error) {
+        console.error('Error actualizando aula del profesor', error);
+        reject(error);
+        return;
+      }
+      resolve(results);
+    });
+  });
+}
+
 async function InsertarAdmin(DNI, NOMBRE, APELLIDOS, PASSWORD, DIRECCION, TELEFONO) {
   return new Promise((resolve, reject) => {
     connection.query('CALL InsertarAdministrador(?, ?, ?, ?, ?, ?)',
@@ -33,10 +47,6 @@ async function InsertarAdmin(DNI, NOMBRE, APELLIDOS, PASSWORD, DIRECCION, TELEFO
 }
 
 async function InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, DIRECCION, TELEFONO) {
-  /*
-  TODO: Comprobar que funcione el método.
-        Terminar método.
-  */
   const result = await new Promise((resolve, reject) => {
     connection.query('SELECT Aula_asignada FROM PROFESORES WHERE ID_profesor = ?',
                     [TUTOR], (error, results, fields) => {
@@ -46,12 +56,12 @@ async function InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, DIRECCION, TE
         return;
       }
       resolve(results);
-      });
     });
+  });
 
-  if (result[0].Aula_asignada != null) {
-    connection.query('CALL InsertarAlumno(?, ?, ?, ?, ?, ?, ?)',
-                    [DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, result[0].Aula_asignada, DIRECCION, TELEFONO], (error, results, fields) => {
+  const insertarAlumno = await new Promise((resolve, reject) => {
+    connection.query('CALL InsertarAlumno(?, ?, ?, ?, ?, ?)',
+                    [DNI, NOMBRE, APELLIDOS, EDAD, DIRECCION, TELEFONO], (error, results, fields) => {
       if (error) {
         console.error('Error insertando alumno', error);
         reject(error);
@@ -59,14 +69,37 @@ async function InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, DIRECCION, TE
       }
       resolve(results);
     });
+  });
+
+  // Cuando no existe el ID del profesor arriba, result[0].Aula_asignada es undefined aunque el alumno se inserta correctamente.
+  if (result[0].Aula_asignada != null) {
+    ActualizarAlumno(DNI, TUTOR, result[0].Aula_asignada);
+  } else if (TUTOR) {
+    ActualizarAlumno(DNI, TUTOR, null);
   }
+
+  return insertarAlumno;
+}
+
+async function ActualizarAlumno(DNI, ID_tutor, Aula_asignada) {
+  return new Promise((resolve, reject) => {
+    connection.query('UPDATE ALUMNOS SET ID_tutor = ?, Aula_asignada = ? WHERE DNI = ?',
+                    [ID_tutor, Aula_asignada, DNI], (error, results, fields) => {
+      if (error) {
+        console.error('Error actualizando alumno', error);
+        reject(error);
+        return;
+      }
+      resolve(results);
+    });
+  });
 }
 
 async function DatosAdmin(DNI) {
   return new Promise((resolve, reject) => {
     connection.query('SELECT Id_admin, Nombre, Apellidos FROM ADMINISTRADORES WHERE DNI = ?',
                 [DNI] , (error, results, fields) => {
-        if(error) {
+        if (error) {
             console.error('Error guardando token', error);
             reject(error);
             return;
@@ -80,7 +113,7 @@ async function GetPassword(DNI) {
   return new Promise((resolve, reject) => {
     connection.query('Select Password_hash from ADMINISTRADORES where DNI = ? limit 1',
                 [DNI] , (error, results, fields) => {
-        if(error) {
+        if (error) {
             console.error('Error guardando token', error);
             reject(error);
             return;
@@ -110,5 +143,6 @@ module.exports = {
     InsertarToken,
     GetPassword,
     DatosAdmin,
-    InsertarAdmin
+    InsertarAdmin,
+    ActualizarAulaProfesor
 };
