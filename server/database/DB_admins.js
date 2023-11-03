@@ -72,7 +72,7 @@ async function InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, DIRECCION, TE
   });
 
   // Cuando no existe el ID del profesor arriba, result[0].Aula_asignada es undefined aunque el alumno se inserta correctamente.
-  if (result[0].Aula_asignada != null) {
+  if (result.length > 0 && result[0].Aula_asignada != null) {
     ActualizarAlumno(DNI, TUTOR, result[0].Aula_asignada);
   } else if (TUTOR) {
     ActualizarAlumno(DNI, TUTOR, null);

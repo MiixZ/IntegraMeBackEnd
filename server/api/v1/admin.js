@@ -59,9 +59,6 @@ routerAdmin.post('/insertAlum', async (req, res) => {
         // Verifica si el token ha sido encryptado con el secret_admin
         const payload = jwt.verify(token, secret_admin);
 
-        if (Date.now() > payload.EXP) {
-            return res.status(401).json({ error: 'Token expirado' });
-        }
 
         // Obtener datos del cuerpo de la solicitud
         const { DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, DIRECCION, TELEFONO } = req.body;
