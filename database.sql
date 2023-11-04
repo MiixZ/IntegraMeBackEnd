@@ -5,38 +5,34 @@ CREATE TABLE AULAS (
 
 CREATE TABLE PROFESORES (
     ID_profesor INT PRIMARY KEY,
-    DNI VARCHAR(9) NOT NULL,
     Nombre VARCHAR(20) NOT NULL,
-    Apellidos VARCHAR(50) NOT NULL,
+    Apellido1 VARCHAR(50) NOT NULL,
+    Apellido2 VARCHAR(50) NOT NULL,
+    NickName VARCHAR(20) NOT NULL UNIQUE,
     Password_hash VARCHAR(255) NOT NULL,
     Aula_asignada INT DEFAULT NULL,
-    Direccion VARCHAR(50) NOT NULL,
-    Num_telf INT NOT NULL,
     FOREIGN KEY (Aula_asignada) REFERENCES AULAS(Num_Aula) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE ALUMNOS (
     ID_alumno INT PRIMARY KEY,
-    DNI VARCHAR(9) NOT NULL,
     Nombre VARCHAR(20) NOT NULL,
-    Apellidos VARCHAR(50) NOT NULL,
-    Edad INT NOT NULL,
+    Apellido1 VARCHAR(50) NOT NULL,
+    Apellido2 VARCHAR(50) NOT NULL,
+    NickName VARCHAR(20),
+    Curso INT DEFAULT NULL,
     ID_tutor INT DEFAULT NULL,
     Aula_asignada INT DEFAULT NULL,
-    Direccion VARCHAR(50) NOT NULL,
-    Num_telf INT NOT NULL,
     FOREIGN KEY (Aula_asignada) REFERENCES AULAS(Num_Aula) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_tutor) REFERENCES PROFESORES(ID_profesor) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE ADMINISTRADORES (
     ID_admin INT PRIMARY KEY,
-    DNI VARCHAR(9) NOT NULL,
     Nombre VARCHAR(20) NOT NULL,
-    Apellidos VARCHAR(50) NOT NULL,
+    Apellido1 VARCHAR(50) NOT NULL,
+    Apellido2 VARCHAR(50) NOT NULL,
     Password_hash VARCHAR(255) NOT NULL,
-    Direccion VARCHAR(50) NOT NULL,
-    Num_telf INT NOT NULL
 );
 
 CREATE TABLE USUARIOS (
@@ -68,7 +64,7 @@ CREATE TRIGGER Profesor_insert_trigger
 AFTER INSERT ON PROFESORES
 FOR EACH ROW
 BEGIN
-    INSERT INTO USUARIOS (DNI_Usuario, Tipo_usuario) VALUES (NEW.DNI, 'Profesor');
+    INSERT INTO USUARIOS (Tipo_usuario) VALUES ('Profesor');
 END;
 //
 DELIMITER;
@@ -79,7 +75,7 @@ CREATE TRIGGER Alumno_insert_trigger
 AFTER INSERT ON ALUMNOS
 FOR EACH ROW
 BEGIN
-    INSERT INTO USUARIOS (DNI_Usuario, Tipo_usuario) VALUES (NEW.DNI, 'Alumno');
+    INSERT INTO USUARIOS (Tipo_usuario) VALUES ('Alumno');
 END;
 //
 DELIMITER;
@@ -90,39 +86,29 @@ CREATE TRIGGER Administrador_insert_trigger
 AFTER INSERT ON ADMINISTRADOR
 FOR EACH ROW
 BEGIN
-    INSERT INTO USUARIOS (DNI_Usuario, Tipo_usuario) VALUES (NEW.DNI, 'Administrador');
+    INSERT INTO USUARIOS (Tipo_usuario) VALUES ('Administrador');
 END;
 //
 DELIMITER;
-
-
-DELIMITER //
-
-CREATE PROCEDURE ActualizarIDAlumno(IN DNI_param VARCHAR(9), IN nuevo_ID_alumno_param INT)
-BEGIN
-    -- Actualización en la tabla ALUMNOS
-    UPDATE ALUMNOS SET ID_alumno = nuevo_ID_alumno_param WHERE DNI = DNI_param;
-END //
-
-DELIMITER ;
 
 --IMPORTANTE --> Los delimiters cambian los ";" por "//" y viceversa
 
 DELIMITER //
 
-CREATE PROCEDURE InsertarAlumno(IN DNI_param VARCHAR(9), IN Nombre_param VARCHAR(20), IN Apellidos_param VARCHAR(50), IN Edad_param INT, IN Direccion_param VARCHAR(50), IN Num_Telf_param INT)
+CREATE PROCEDURE InsertarAlumno(IN Nombre_param VARCHAR(20), IN Apellidos_param1 VARCHAR(50), IN Apellidos_param2 VARCHAR(50), IN Edad_param INT)
 BEGIN
     DECLARE last_id INT;
 
     -- Inserción en la tabla USUARIOS
-    INSERT INTO USUARIOS (DNI_Usuario, Tipo_usuario)
-    VALUES (DNI_param, 'Alumno');
+    INSERT INTO USUARIOS (Tipo_usuario)
+    VALUES ('Alumno');
 
-    SELECT ID INTO last_id FROM USUARIOS WHERE DNI_Usuario = DNI_param;
+    -- Obtener el ID del último registro insertado
+    SET last_id = LAST_INSERT_ID();
 
     -- Inserción en la tabla ALUMNOS
-    INSERT INTO ALUMNOS (DNI, ID_alumno, Nombre, Apellidos, Edad, Direccion, Num_telf)
-    VALUES (DNI_param, last_id, Nombre_param, Apellidos_param, Edad_param, Direccion_param, Num_Telf_param);
+    INSERT INTO ALUMNOS (ID_alumno, Nombre, Apellidos, NickName, Edad)
+    VALUES (last_id, Nombre_param, Apellidos_param1, Apellidos_param2, CONCAT(Nombre_param, SUBSTRING(Apellidos_param1, 1, 1), SUBSTRING(Apellidos_param2, 1, 1)), Edad_param);
 END //
 
 DELIMITER ;

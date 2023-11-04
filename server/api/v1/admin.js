@@ -16,7 +16,7 @@ const secret_admin = process.env.JWT_SECRET_ADMIN;
 routerAdmin.post('/insertProf', async (req, res) => {
     try {
         // Coge el token enviado en el header de la solicitud
-        const token = req.headers.authorization.split(' ')[1];    
+        const token = req.headers.authorization.split(' ')[1];
          
         // Verifica si el token ha sido encryptado con el secret_admin
         const payload = jwt.verify(token, secret_admin);
@@ -26,10 +26,10 @@ routerAdmin.post('/insertProf', async (req, res) => {
         }
 
         // Obtener datos del cuerpo de la solicitud
-        const { DNI, NOMBRE, APELLIDOS, PASSWORD, AULA, DIRECCION, TELEFONO } = req.body;
+        const { DNI, NOMBRE, APELLIDOS, PASSWORD, AULA} = req.body;
 
         // Verificar si todos los campos necesarios están presentes
-        if (!DNI || !NOMBRE || !APELLIDOS || !PASSWORD || !DIRECCION || !TELEFONO) {
+        if (!DNI || !NOMBRE || !APELLIDOS || !PASSWORD) {
             return res.status(400).json({ error: 'Todos los campos son obligatorios' });
         }
 
@@ -37,7 +37,7 @@ routerAdmin.post('/insertProf', async (req, res) => {
         const passwordHash = await encrypt (PASSWORD);
 
         // Insertar profesor
-        const resultado = await database.InsertarProfesor(DNI, NOMBRE, APELLIDOS, passwordHash, DIRECCION, TELEFONO);
+        const resultado = await database.InsertarProfesor(DNI, NOMBRE, APELLIDOS, passwordHash);
 
         if (AULA) {
             // Actualizar aula del profesor
@@ -61,15 +61,15 @@ routerAdmin.post('/insertAlum', async (req, res) => {
 
 
         // Obtener datos del cuerpo de la solicitud
-        const { DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, DIRECCION, TELEFONO } = req.body;
+        const { DNI, NOMBRE, APELLIDOS, EDAD, TUTOR } = req.body;
         
         // Verificar si todos los campos necesarios están presentes
-        if (!DNI || !NOMBRE || !APELLIDOS || !EDAD || !DIRECCION || !TELEFONO) {
+        if (!DNI || !NOMBRE || !APELLIDOS || !EDAD) {
             return res.status(400).json({ error: 'Todos los campos son obligatorios' });
         }
 
         // Insertar alumno
-        const resultado = await database.InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, DIRECCION, TELEFONO);
+        const resultado = await database.InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR);
 
         // Enviar respuesta al cliente
         res.json(resultado);
@@ -110,17 +110,17 @@ routerAdmin.post('/sesionAdmin/', async (req, res) => {
 routerAdmin.post('/registAdmin/', async (req, res) => {
     try {
         // Obtener datos del cuerpo de la solicitud
-        const { DNI, NOMBRE, APELLIDOS, PASSWORD, DIRECCION, TELEFONO } = req.body;
+        const { DNI, NOMBRE, APELLIDOS, PASSWORD } = req.body;
 
         // Verificar si todos los campos necesarios están presentes
-        if (!DNI || !NOMBRE || !APELLIDOS || !PASSWORD || !DIRECCION || !TELEFONO) {
+        if (!DNI || !NOMBRE || !APELLIDOS || !PASSWORD) {
             return res.status(400).json({ error: 'Todos los campos son obligatorios' });
         }
 
         const passwordHash = await encrypt (PASSWORD);
 
         // Insertar profesor
-        const resultado = await database.InsertarAdmin(DNI, NOMBRE, APELLIDOS, passwordHash, DIRECCION, TELEFONO);
+        const resultado = await database.InsertarAdmin(DNI, NOMBRE, APELLIDOS, passwordHash);
 
         // Enviar respuesta al cliente
         res.json(resultado);

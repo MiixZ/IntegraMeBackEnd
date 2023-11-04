@@ -4,10 +4,10 @@ const baseDatos = require('./general.js');
 
 const connection = baseDatos.connection;
 
-async function InsertarProfesor(DNI, NOMBRE, APELLIDOS, PASSWORD, DIRECCION, TELEFONO) {
+async function InsertarProfesor(DNI, NOMBRE, APELLIDOS, PASSWORD) {
   return new Promise((resolve, reject) => {
-    connection.query('CALL InsertarProfesor(?, ?, ?, ?, ?, ?)',
-                    [DNI, NOMBRE, APELLIDOS, PASSWORD, DIRECCION, TELEFONO], (error, results, fields) => {
+    connection.query('CALL InsertarProfesor(?, ?, ?, ?)',
+                    [DNI, NOMBRE, APELLIDOS, PASSWORD], (error, results, fields) => {
       if (error) {
         console.error('Error insertando profesor', error);
         reject(error);
@@ -32,10 +32,10 @@ async function ActualizarAulaProfesor(DNI, AULA) {
   });
 }
 
-async function InsertarAdmin(DNI, NOMBRE, APELLIDOS, PASSWORD, DIRECCION, TELEFONO) {
+async function InsertarAdmin(DNI, NOMBRE, APELLIDOS, PASSWORD) {
   return new Promise((resolve, reject) => {
     connection.query('CALL InsertarAdministrador(?, ?, ?, ?, ?, ?)',
-                    [DNI, NOMBRE, APELLIDOS, PASSWORD, DIRECCION, TELEFONO], (error, results, fields) => {
+                    [DNI, NOMBRE, APELLIDOS, PASSWORD], (error, results, fields) => {
       if (error) {
         console.error('Error insertando admin', error);
         reject(error);
@@ -46,7 +46,7 @@ async function InsertarAdmin(DNI, NOMBRE, APELLIDOS, PASSWORD, DIRECCION, TELEFO
   });
 }
 
-async function InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, DIRECCION, TELEFONO) {
+async function InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR) {
   const result = await new Promise((resolve, reject) => {
     connection.query('SELECT Aula_asignada FROM PROFESORES WHERE ID_profesor = ?',
                     [TUTOR], (error, results, fields) => {
@@ -60,8 +60,8 @@ async function InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR, DIRECCION, TE
   });
 
   const insertarAlumno = await new Promise((resolve, reject) => {
-    connection.query('CALL InsertarAlumno(?, ?, ?, ?, ?, ?)',
-                    [DNI, NOMBRE, APELLIDOS, EDAD, DIRECCION, TELEFONO], (error, results, fields) => {
+    connection.query('CALL InsertarAlumno(?, ?, ?, ?)',
+                    [DNI, NOMBRE, APELLIDOS, EDAD], (error, results, fields) => {
       if (error) {
         console.error('Error insertando alumno', error);
         reject(error);
