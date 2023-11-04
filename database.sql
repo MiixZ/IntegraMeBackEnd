@@ -107,7 +107,7 @@ BEGIN
     SET last_id = LAST_INSERT_ID();
 
     -- Inserción en la tabla ALUMNOS
-    INSERT INTO ALUMNOS (ID_alumno, Nombre, Apellidos, NickName, Edad)
+    INSERT INTO ALUMNOS (ID_alumno, Nombre, Apellido1, Apellido2, NickName, Edad)
     VALUES (last_id, Nombre_param, Apellidos_param1, Apellidos_param2, CONCAT(Nombre_param, SUBSTRING(Apellidos_param1, 1, 1), SUBSTRING(Apellidos_param2, 1, 1)), Edad_param);
 END //
 
@@ -116,7 +116,7 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE InsertarProfesor(IN DNI_param VARCHAR(9), IN Nombre_param VARCHAR(20), IN Apellidos_param VARCHAR(50), IN Password_param VARCHAR(255), IN Direccion_param VARCHAR(50), IN Num_Telf_param INT)
+CREATE PROCEDURE InsertarProfesor(IN DNI_param VARCHAR(9), IN Nombre_param VARCHAR(20), IN Apellidos_param1 VARCHAR(50), IN Apellidos_param2 VARCHAR(50), IN Password_param VARCHAR(255), IN Direccion_param VARCHAR(50), IN Num_Telf_param INT)
 BEGIN
     DECLARE last_id INT;
 
@@ -127,15 +127,15 @@ BEGIN
     SELECT ID INTO last_id FROM USUARIOS WHERE DNI_Usuario = DNI_param;
 
     -- Inserción en la tabla PROFESORES
-    INSERT INTO PROFESORES (DNI, ID_profesor, Nombre, Apellidos, Password_hash, Direccion, Num_telf)
-    VALUES (DNI_param, last_id, Nombre_param, Apellidos_param, Password_param, Direccion_param, Num_Telf_param);
+    INSERT INTO PROFESORES (DNI, ID_profesor, Nombre, Apellido1, Apellido2, Password_hash, Direccion, Num_telf)
+    VALUES (DNI_param, last_id, Nombre_param, Apellidos_param1, Apellidos_param2, Password_param, Direccion_param, Num_Telf_param);
 END //
 
 DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE InsertarAdministrador(IN DNI_param VARCHAR(9), IN Nombre_param VARCHAR(20), IN Apellidos_param VARCHAR(50), IN Password_param VARCHAR(255), IN Direccion_param VARCHAR(50), IN Num_Telf_param INT)
+CREATE PROCEDURE InsertarAdministrador(IN DNI_param VARCHAR(9), IN Nombre_param VARCHAR(20), IN Apellidos_param1 VARCHAR(50), IN Apellidos_param2 VARCHAR(50), IN Password_param VARCHAR(255), IN Direccion_param VARCHAR(50), IN Num_Telf_param INT)
 BEGIN
     DECLARE last_id INT;
 
@@ -146,8 +146,8 @@ BEGIN
     SELECT ID INTO last_id FROM USUARIOS WHERE DNI_Usuario = DNI_param;
 
     -- Inserción en la tabla ADMINISTRADORES
-    INSERT INTO ADMINISTRADORES (DNI, ID_admin, Nombre, Apellidos, Password_hash, Direccion, Num_telf)
-    VALUES (DNI_param, last_id, Nombre_param, Apellidos_param, Password_param, Direccion_param, Num_Telf_param);
+    INSERT INTO ADMINISTRADORES (DNI, ID_admin, Nombre, Apellido1, Apellido2, Password_hash, Direccion, Num_telf)
+    VALUES (DNI_param, last_id, Nombre_param, Apellidos_param1, Apellidos_param2, Password_param, Direccion_param, Num_Telf_param);
 END //
 
 DELIMITER ;

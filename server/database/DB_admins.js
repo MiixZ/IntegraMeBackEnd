@@ -4,10 +4,10 @@ const baseDatos = require('./general.js');
 
 const connection = baseDatos.connection;
 
-async function InsertarProfesor(DNI, NOMBRE, APELLIDOS, PASSWORD) {
+async function InsertarProfesor(DNI, NOMBRE, APELLIDO1, APELLIDO2, PASSWORD) {
   return new Promise((resolve, reject) => {
-    connection.query('CALL InsertarProfesor(?, ?, ?, ?)',
-                    [DNI, NOMBRE, APELLIDOS, PASSWORD], (error, results, fields) => {
+    connection.query('CALL InsertarProfesor(?, ?, ?, ?, ?)',
+                    [DNI, NOMBRE, APELLIDO1, APELLIDO2, PASSWORD], (error, results, fields) => {
       if (error) {
         console.error('Error insertando profesor', error);
         reject(error);
@@ -32,10 +32,10 @@ async function ActualizarAulaProfesor(DNI, AULA) {
   });
 }
 
-async function InsertarAdmin(DNI, NOMBRE, APELLIDOS, PASSWORD) {
+async function InsertarAdmin(DNI, NOMBRE, APELLIDO1, APELLIDO2, PASSWORD) {
   return new Promise((resolve, reject) => {
-    connection.query('CALL InsertarAdministrador(?, ?, ?, ?, ?, ?)',
-                    [DNI, NOMBRE, APELLIDOS, PASSWORD], (error, results, fields) => {
+    connection.query('CALL InsertarAdministrador(?, ?, ?, ?, ?)',
+                    [DNI, NOMBRE, APELLIDO1, APELLIDO2, PASSWORD], (error, results, fields) => {
       if (error) {
         console.error('Error insertando admin', error);
         reject(error);
@@ -46,7 +46,7 @@ async function InsertarAdmin(DNI, NOMBRE, APELLIDOS, PASSWORD) {
   });
 }
 
-async function InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR) {
+async function InsertarAlumno(DNI, NOMBRE, APELLIDO1, APELLIDO2, EDAD, TUTOR) {
   const result = await new Promise((resolve, reject) => {
     connection.query('SELECT Aula_asignada FROM PROFESORES WHERE ID_profesor = ?',
                     [TUTOR], (error, results, fields) => {
@@ -60,8 +60,8 @@ async function InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR) {
   });
 
   const insertarAlumno = await new Promise((resolve, reject) => {
-    connection.query('CALL InsertarAlumno(?, ?, ?, ?)',
-                    [DNI, NOMBRE, APELLIDOS, EDAD], (error, results, fields) => {
+    connection.query('CALL InsertarAlumno(?, ?, ?, ?, ?)',
+                    [DNI, NOMBRE, APELLIDO1, APELLIDO2, EDAD], (error, results, fields) => {
       if (error) {
         console.error('Error insertando alumno', error);
         reject(error);
@@ -97,7 +97,7 @@ async function ActualizarAlumno(DNI, ID_tutor, Aula_asignada) {
 
 async function DatosAdmin(DNI) {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT Id_admin, Nombre, Apellidos FROM ADMINISTRADORES WHERE DNI = ?',
+    connection.query('SELECT Id_admin, Nombre, Apellido1, Apellido2 FROM ADMINISTRADORES WHERE DNI = ?',
                 [DNI] , (error, results, fields) => {
         if (error) {
             console.error('Error guardando token', error);

@@ -26,10 +26,10 @@ routerAdmin.post('/insertProf', async (req, res) => {
         }
 
         // Obtener datos del cuerpo de la solicitud
-        const { DNI, NOMBRE, APELLIDOS, PASSWORD, AULA} = req.body;
+        const { DNI, NOMBRE, APELLIDO1, APELLIDO2, PASSWORD, AULA} = req.body;
 
         // Verificar si todos los campos necesarios están presentes
-        if (!DNI || !NOMBRE || !APELLIDOS || !PASSWORD) {
+        if (!DNI || !NOMBRE || !APELLIDO1 || !APELLIDO2 || !PASSWORD) {
             return res.status(400).json({ error: 'Todos los campos son obligatorios' });
         }
 
@@ -37,7 +37,7 @@ routerAdmin.post('/insertProf', async (req, res) => {
         const passwordHash = await encrypt (PASSWORD);
 
         // Insertar profesor
-        const resultado = await database.InsertarProfesor(DNI, NOMBRE, APELLIDOS, passwordHash);
+        const resultado = await database.InsertarProfesor(DNI, NOMBRE, APELLIDO1, APELLIDO2, passwordHash);
 
         if (AULA) {
             // Actualizar aula del profesor
@@ -59,17 +59,16 @@ routerAdmin.post('/insertAlum', async (req, res) => {
         // Verifica si el token ha sido encryptado con el secret_admin
         const payload = jwt.verify(token, secret_admin);
 
-
         // Obtener datos del cuerpo de la solicitud
-        const { DNI, NOMBRE, APELLIDOS, EDAD, TUTOR } = req.body;
+        const { DNI, NOMBRE, APELLIDO1, APELLIDO2, TUTOR } = req.body;
         
         // Verificar si todos los campos necesarios están presentes
-        if (!DNI || !NOMBRE || !APELLIDOS || !EDAD) {
+        if (!DNI || !NOMBRE || !APELLIDO1 || !APELLIDO2 || !EDAD) {
             return res.status(400).json({ error: 'Todos los campos son obligatorios' });
         }
 
         // Insertar alumno
-        const resultado = await database.InsertarAlumno(DNI, NOMBRE, APELLIDOS, EDAD, TUTOR);
+        const resultado = await database.InsertarAlumno(DNI, NOMBRE, APELLIDO1, APELLIDO2, EDAD, TUTOR);
 
         // Enviar respuesta al cliente
         res.json(resultado);
@@ -91,7 +90,7 @@ routerAdmin.post('/sesionAdmin/', async (req, res) => {
 
         if (await compare(PASSWORD, hash[0].Password_hash)) {
             const FECHA = new Date(Date.now() + 24 * 60 * 60 * 1000);
-            const token = jwt.sign({ ID_ADMIN: admin_data[0].Id_admin , DNI, NOMBRE: admin_data[0].Nombre, APELLIDOS: admin_data[0].Apellidos, EXP: FECHA}, 
+            const token = jwt.sign({ ID_ADMIN: admin_data[0].Id_admin , DNI, NOMBRE: admin_data[0].Nombre, APELLIDO1: admin_data[0].Apellido1, APELLIDO2: admin_data[0].Apellido2, EXP: FECHA}, 
                 secret_admin); //{ expiresIn: '1h' });
             // Creamos una fecha de expiración del token (24 horas más al día actual)
             const resultado = await database.InsertarToken(admin_data[0].Id_admin, token, FECHA);
@@ -110,17 +109,17 @@ routerAdmin.post('/sesionAdmin/', async (req, res) => {
 routerAdmin.post('/registAdmin/', async (req, res) => {
     try {
         // Obtener datos del cuerpo de la solicitud
-        const { DNI, NOMBRE, APELLIDOS, PASSWORD } = req.body;
+        const { DNI, NOMBRE, APELLIDO1, APELLIDO2, PASSWORD } = req.body;
 
         // Verificar si todos los campos necesarios están presentes
-        if (!DNI || !NOMBRE || !APELLIDOS || !PASSWORD) {
+        if (!DNI || !NOMBRE || !APELLIDO1 || !APELLIDO2 || !PASSWORD) {
             return res.status(400).json({ error: 'Todos los campos son obligatorios' });
         }
 
         const passwordHash = await encrypt (PASSWORD);
 
         // Insertar profesor
-        const resultado = await database.InsertarAdmin(DNI, NOMBRE, APELLIDOS, passwordHash);
+        const resultado = await database.InsertarAdmin(DNI, NOMBRE, APELLIDO1, APELLIDO2, passwordHash);
 
         // Enviar respuesta al cliente
         res.json(resultado);
