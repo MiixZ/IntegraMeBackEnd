@@ -12,6 +12,7 @@ CREATE TABLE PROFESORES (
     Password_hash VARCHAR(255) NOT NULL,
     Aula_asignada INT DEFAULT NULL,
     FOREIGN KEY (Aula_asignada) REFERENCES AULAS(Num_Aula) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (ID_profesor) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE,
 );
 
 CREATE TABLE ALUMNOS (
@@ -25,6 +26,7 @@ CREATE TABLE ALUMNOS (
     Aula_asignada INT DEFAULT NULL,
     FOREIGN KEY (Aula_asignada) REFERENCES AULAS(Num_Aula) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_tutor) REFERENCES PROFESORES(ID_profesor) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (ID_alumno) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE,
 );
 
 CREATE TABLE ADMINISTRADORES (
@@ -33,6 +35,7 @@ CREATE TABLE ADMINISTRADORES (
     Apellido1 VARCHAR(50) NOT NULL,
     Apellido2 VARCHAR(50) NOT NULL,
     Password_hash VARCHAR(255) NOT NULL,
+    FOREIGN KEY (ID_admin) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE,
 );
 
 CREATE TABLE USUARIOS (
@@ -109,6 +112,8 @@ BEGIN
     -- Inserción en la tabla ALUMNOS
     INSERT INTO ALUMNOS (ID_alumno, Nombre, Apellido1, Apellido2, NickName, Edad)
     VALUES (last_id, Nombre_param, Apellidos_param1, Apellidos_param2, CONCAT(Nombre_param, SUBSTRING(Apellidos_param1, 1, 1), SUBSTRING(Apellidos_param2, 1, 1)), Edad_param);
+
+    RETURN last_id;
 END //
 
 DELIMITER ;
@@ -129,6 +134,8 @@ BEGIN
     -- Inserción en la tabla PROFESORES
     INSERT INTO PROFESORES (DNI, ID_profesor, Nombre, Apellido1, Apellido2, Password_hash, Direccion, Num_telf)
     VALUES (DNI_param, last_id, Nombre_param, Apellidos_param1, Apellidos_param2, Password_param, Direccion_param, Num_Telf_param);
+
+    RETURN last_id;
 END //
 
 DELIMITER ;
@@ -148,6 +155,8 @@ BEGIN
     -- Inserción en la tabla ADMINISTRADORES
     INSERT INTO ADMINISTRADORES (DNI, ID_admin, Nombre, Apellido1, Apellido2, Password_hash, Direccion, Num_telf)
     VALUES (DNI_param, last_id, Nombre_param, Apellidos_param1, Apellidos_param2, Password_param, Direccion_param, Num_Telf_param);
+
+    RETURN last_id;
 END //
 
 DELIMITER ;

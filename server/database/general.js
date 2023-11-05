@@ -33,8 +33,8 @@ const compare = async (password, hash) => {
     return await bcrypt.compare(password, hash);
 }
 
-
-const job = schedule.scheduleJob('0 * * * *', async function() {
+// Define la función de limpieza de tokens
+async function cleanUpTokens() {
     const currentDate = new Date();
     return new Promise((resolve, reject) => {
         // La fecha de expiración (un día después de la fecha en la que se creó el token)
@@ -49,13 +49,16 @@ const job = schedule.scheduleJob('0 * * * *', async function() {
                 resolve(results);
             }
         );
-    })
-});
+    });
+}
+
+const job = schedule.scheduleJob('0 * * * *', cleanUpTokens);
 
 module.exports = {
     conectarBD,
     desconectarBD,
     connection,
     encrypt,
-    compare
+    compare,
+    cleanUpTokens
 };
