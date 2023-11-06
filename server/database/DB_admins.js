@@ -4,7 +4,6 @@ const baseDatos = require('./general.js');
 
 const connection = baseDatos.connection;
 
-
 async function InsertarProfesor(nombre, apellido1, apellido2, nickname, password){
   return new Promise((resolve, reject) => {
     const lastId = connection.query('CALL InsertarProfesor(?, ?, ?, ?, ?)',
@@ -47,16 +46,20 @@ async function InsertarAdmin(nombre, apellido1, apellido2, nickname, password) {
   });
 }
 
-async function InsertarAlumno(nombre, apellido1, apellido2, curso, tutor) {
-  const insertarAlumno = await new Promise((resolve, reject) => {
-    connection.query('CALL InsertarAlumno(?, ?, ?, ?)',
-                    [nombre, apellido1, apellido2, curso], (error, results, fields) => {
+async function InsertarAlumno(name, lastname1, lastname2, grade, tutor) {
+  const sql = "CALL InsertarAlumno(?, ?, ?, ?, @idAlum); SELECT @idAlum;";
+  const values = [name, lastname1, lastname2, grade];
+
+  const insertarAlumno = new Promise((resolve, reject) => {
+    connection.query(sql, values, (error, results, fields) => {
       if (error) {
         console.error('Error insertando alumno', error);
         reject(error);
         return;
       }
-      resolve(results);
+      const idAlum = results[1][0]['@idAlum']; // get the returned value of idAlum
+      console.log('idAlum: ', idAlum);
+      resolve(idAlum);
     });
   });
 
@@ -75,7 +78,7 @@ async function InsertarAlumno(nombre, apellido1, apellido2, curso, tutor) {
     });
 
     if (result.length > 0 && result[0].Aula_asignada != null) {
-      ActualizarAlumno(tutor, result[0].Aula_asignada);
+      ActualizarAlumno(idAlum, tutor, result[0].Aula_asignada);
     }
   }
 
@@ -110,7 +113,7 @@ async function ActualizarAlumno(id, idTutor, aulaAsignada) {
   });
 }
 
-async function DatosAdmin(nickname) {
+async function AdminData(nickname) {
   return new Promise((resolve, reject) => {
     connection.query('SELECT Id_admin, Nombre, Apellido1, Apellido2 FROM ADMINISTRADORES WHERE NICKNAME = ?',
                 [nickname] , (error, results, fields) => {
@@ -129,7 +132,7 @@ async function GetPassword(nickname) {
     connection.query('Select Password_hash from ADMINISTRADORES where NICKNAME = ? limit 1',
                 [nickname] , (error, results, fields) => {
         if (error) {
-            console.error('Error guardando token', error);
+            console.error('Error getting password', error);
             reject(error);
             return;
         }
@@ -152,32 +155,13 @@ async function InsertarToken(id, token, fecha) {
   });
 }
 
-async function VerificarToken(token) {
-  return new Promise((resolve, reject) => {
-    connection.query('SELECT Token FROM TOKENS WHERE Token = ?',
-                [token], (error, results, fields) => {
-        if (error) {
-            console.error('Token does not exist', error);
-            reject(error);
-            return;
-        }
-        if (results.length === 0) {
-            resolve(false);
-        } else {
-            resolve(true);
-        }
-    });
-  });
-}
-
 module.exports = {
-    InsertarAlumno,
-    InsertarProfesor,
-    InsertarToken,
-    GetPassword,
-    DatosAdmin,
-    InsertarAdmin,
-    ActualizarAulaProfesor,
-    InsertarAula,
-    VerificarToken
+  InsertarAlumno,
+  InsertarProfesor,
+  InsertarToken,
+  GetPassword,
+  AdminData,
+  InsertarAdmin,
+  ActualizarAulaProfesor,
+  InsertarAula
 };

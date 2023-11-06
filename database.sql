@@ -11,8 +11,8 @@ CREATE TABLE PROFESORES (
     NickName VARCHAR(20) NOT NULL UNIQUE,
     Password_hash VARCHAR(255) NOT NULL,
     Aula_asignada INT DEFAULT NULL,
-    FOREIGN KEY (Aula_asignada) REFERENCES AULAS(Num_Aula) ON DELETE CASCADE ON UPDATE CASCADE
-    FOREIGN KEY (ID_profesor) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Aula_asignada) REFERENCES AULAS(Num_Aula) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_profesor) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE ALUMNOS (
@@ -25,8 +25,8 @@ CREATE TABLE ALUMNOS (
     ID_tutor INT DEFAULT NULL,
     Aula_asignada INT DEFAULT NULL,
     FOREIGN KEY (Aula_asignada) REFERENCES AULAS(Num_Aula) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (ID_tutor) REFERENCES PROFESORES(ID_profesor) ON DELETE CASCADE ON UPDATE CASCADE
-    FOREIGN KEY (ID_alumno) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_tutor) REFERENCES PROFESORES(ID_profesor) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_alumno) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE ADMINISTRADORES (
@@ -34,17 +34,14 @@ CREATE TABLE ADMINISTRADORES (
     Nombre VARCHAR(20) NOT NULL,
     Apellido1 VARCHAR(50) NOT NULL,
     Apellido2 VARCHAR(50) NOT NULL,
+    NickName VARCHAR(20) NOT NULL UNIQUE,
     Password_hash VARCHAR(255) NOT NULL,
-    FOREIGN KEY (ID_admin) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_admin) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE USUARIOS (
     ID INT AUTO_INCREMENT PRIMARY KEY,
-    DNI_Usuario VARCHAR(9) NOT NULL UNIQUE,
     Tipo_usuario ENUM('Alumno', 'Profesor', 'Administrador') NOT NULL
-    --FOREIGN KEY (DNI_usuario) REFERENCES PROFESORES(DNI) ON DELETE CASCADE ON UPDATE CASCADE,
-    --FOREIGN KEY (DNI_usuario) REFERENCES ADMINISTRADORES(DNI) ON DELETE CASCADE ON UPDATE CASCADE,
-    --FOREIGN KEY (DNI_usuario) REFERENCES ALUMNOS(DNI) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE PLANTILLATAREA (
@@ -98,22 +95,18 @@ DELIMITER;
 
 DELIMITER //
 
-CREATE PROCEDURE InsertarAlumno(IN Nombre_param VARCHAR(20), IN Apellidos_param1 VARCHAR(50), IN Apellidos_param2 VARCHAR(50), IN Edad_param INT)
+CREATE PROCEDURE InsertarAlumno(IN Nombre_param VARCHAR(20), IN Apellidos_param1 VARCHAR(50), IN Apellidos_param2 VARCHAR(50), IN Curso_param INT, OUT last_id_param INT)
 BEGIN
-    DECLARE last_id INT;
-
     -- Inserción en la tabla USUARIOS
     INSERT INTO USUARIOS (Tipo_usuario)
     VALUES ('Alumno');
 
     -- Obtener el ID del último registro insertado
-    SET last_id = LAST_INSERT_ID();
+    SET last_id_param = LAST_INSERT_ID();
 
     -- Inserción en la tabla ALUMNOS
-    INSERT INTO ALUMNOS (ID_alumno, Nombre, Apellido1, Apellido2, NickName, Edad)
-    VALUES (last_id, Nombre_param, Apellidos_param1, Apellidos_param2, CONCAT(Nombre_param, SUBSTRING(Apellidos_param1, 1, 1), SUBSTRING(Apellidos_param2, 1, 1)), Edad_param);
-
-    RETURN last_id;
+    INSERT INTO ALUMNOS (ID_alumno, Nombre, Apellido1, Apellido2, NickName, Curso)
+    VALUES (last_id_param, Nombre_param, Apellidos_param1, Apellidos_param2, CONCAT(Nombre_param, SUBSTRING(Apellidos_param1, 1, 1), SUBSTRING(Apellidos_param2, 1, 1)), Curso_param);
 END //
 
 DELIMITER ;
@@ -121,19 +114,19 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE InsertarProfesor(IN DNI_param VARCHAR(9), IN Nombre_param VARCHAR(20), IN Apellidos_param1 VARCHAR(50), IN Apellidos_param2 VARCHAR(50), IN Password_param VARCHAR(255), IN Direccion_param VARCHAR(50), IN Num_Telf_param INT)
+CREATE PROCEDURE InsertarProfesor(IN Nombre_param VARCHAR(20), IN Apellidos_param1 VARCHAR(50), IN Apellidos_param2 VARCHAR(50), IN Nickname VARCHAR(20), IN Password_param VARCHAR(255))
 BEGIN
     DECLARE last_id INT;
 
     -- Inserción en la tabla USUARIOS
-    INSERT INTO USUARIOS (DNI_Usuario, Tipo_usuario)
-    VALUES (DNI_param, 'Profesor');
+    INSERT INTO USUARIOS (Tipo_usuario)
+    VALUES ('Profesor');
 
-    SELECT ID INTO last_id FROM USUARIOS WHERE DNI_Usuario = DNI_param;
+    SET last_id = LAST_INSERT_ID();
 
     -- Inserción en la tabla PROFESORES
-    INSERT INTO PROFESORES (DNI, ID_profesor, Nombre, Apellido1, Apellido2, Password_hash, Direccion, Num_telf)
-    VALUES (DNI_param, last_id, Nombre_param, Apellidos_param1, Apellidos_param2, Password_param, Direccion_param, Num_Telf_param);
+    INSERT INTO PROFESORES (ID_profesor, Nombre, Apellido1, Apellido2, NickName, Password_hash)
+    VALUES (last_id, Nombre_param, Apellidos_param1, Apellidos_param2, Nickname, Password_param);
 
     RETURN last_id;
 END //
@@ -142,21 +135,20 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE InsertarAdministrador(IN DNI_param VARCHAR(9), IN Nombre_param VARCHAR(20), IN Apellidos_param1 VARCHAR(50), IN Apellidos_param2 VARCHAR(50), IN Password_param VARCHAR(255), IN Direccion_param VARCHAR(50), IN Num_Telf_param INT)
+CREATE PROCEDURE InsertarAdministrador(IN Nombre_param VARCHAR(20), IN Apellidos_param1 VARCHAR(50), IN Apellidos_param2 VARCHAR(50), IN Nickname VARCHAR(20), IN Password_param VARCHAR(255))
 BEGIN
     DECLARE last_id INT;
 
     -- Inserción en la tabla USUARIOS
-    INSERT INTO USUARIOS (DNI_Usuario, Tipo_usuario)
-    VALUES (DNI_param, 'Administrador');
+    INSERT INTO USUARIOS (Tipo_usuario)
+    VALUES ('Administrador');
 
-    SELECT ID INTO last_id FROM USUARIOS WHERE DNI_Usuario = DNI_param;
+    SET last_id = LAST_INSERT_ID();
 
     -- Inserción en la tabla ADMINISTRADORES
-    INSERT INTO ADMINISTRADORES (DNI, ID_admin, Nombre, Apellido1, Apellido2, Password_hash, Direccion, Num_telf)
-    VALUES (DNI_param, last_id, Nombre_param, Apellidos_param1, Apellidos_param2, Password_param, Direccion_param, Num_Telf_param);
+    INSERT INTO ADMINISTRADORES (ID_admin, Nombre, Apellido1, Apellido2, NickName, Password_hash)
+    VALUES (last_id, Nombre_param, Apellidos_param1, Apellidos_param2, Nickname, Password_param);
 
-    RETURN last_id;
 END //
 
 DELIMITER ;

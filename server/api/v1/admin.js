@@ -9,29 +9,10 @@ const bodyParser = require('body-parser');
 const routerAdmin = express.Router();
 
 const database = require('../../database/DB_admins.js');
-const { encrypt, compare } = require('../../database/general.js');
+const { encrypt, compare, checkearToken } = require('../../database/general.js');
 
 const jwt = require('jsonwebtoken');
 const secret_admin = process.env.JWT_SECRET_ADMIN;
-
-async function checkearToken(token) {
-    database.VerificarToken(token).then(existe => {
-        if (existe) {
-            return new Promise((resolve, reject) => {
-                jwt.verify(token, secret_admin, (error, decoded) => {
-                    if (error || Date.now() > decoded.EXP) {
-                        reject(error);
-                    }
-                    resolve(decoded);
-                });
-            });
-        } else {
-            return res.status(400).json('Token not found in the database');
-        }
-    }).catch(error => {
-        console.error('An error has ocurred in VerificarToken call', error);
-    });
-}
 
 // TODO: Probar método rehecho para que funcione con el nuevo sistema de tokens.
 /**
@@ -52,7 +33,7 @@ routerAdmin.post('/insertTeacher', async (req, res) => {
 
     const token = req.headers.authorization.split(' ')[1];
 
-    await checkearToken(token).then(decoded => {
+    await checkearToken(token, secret_admin).then(decoded => {
         // Obtener datos del cuerpo de la solicitud.
         const { nombre, apellido1, apellido2, password, nickname, aula } = req.body;
 
@@ -97,17 +78,17 @@ routerAdmin.post('/insertStudent', async (req, res) => {
 
     const token = req.headers.authorization.split(' ')[1];
 
-    await checkearToken(token).then(decoded => { 
+    checkearToken(token, secret_admin).then(decoded => { 
         // Obtener datos del cuerpo de la solicitud
-        const { nombre, apellido1, apellido2, curso, tutor } = req.body;
+        const { name, lastname1, lastname2, grade, tutor } = req.body;
         
         // Verificar si todos los campos necesarios están presentes
-        if (!nombre || !apellido1 || !apellido2 || !curso || !tutor) {
+        if (!name || !lastname1 || !lastname2 || !grade) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
         // Insertar alumno
-        const resultado = database.InsertarAlumno(nombre, apellido1, apellido2, curso, tutor);
+        const resultado = database.InsertarAlumno(name, lastname1, lastname2, grade, tutor);
 
         // Enviar respuesta al cliente
         res.json(resultado);
@@ -116,17 +97,6 @@ routerAdmin.post('/insertStudent', async (req, res) => {
         res.status(500).json({ error: 'Error in the request' });
     });
 });
-
-
-
-routerAdmin.post('/students/:userId/authMethod', (req, res) => {
-    const userId = req.params.userId;
-    // Aquí puedes hacer lo que necesites con el userId, como almacenarlo en una variable o en la base de datos.
-    console.log(`User ID ${userId} received`);
-    res.send(`User ID ${userId} received`);
-});
-
-module.exports = routerAdmin;
 
 // FUNCIONA CORRECTAMENTE. TODO: Cambiar lógica de los get.
 /**
@@ -138,33 +108,27 @@ module.exports = routerAdmin;
  * @apiError {String} Credenciales incorrectas.
  * @apiError {String} Error en la solicitud.
  */
-routerAdmin.post('/sessionAdmin/', async (req, res) => {
-    // Coge el token enviado en el header de la solicitud.
-    if (!req.headers.authorization) {
-        return res.status(401).json({ error: 'Token not sent' });
+routerAdmin.post('/login/', async (req, res) => {
+    // Obtener datos del cuerpo de la solicitud.
+    const { nickname, password } = req.body;
+
+    // Verificar si todos los campos necesarios están presentes
+    if (!nickname || !password) {
+        return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const token = req.headers.authorization.split(' ')[1];
+    const hash = await database.GetPassword(nickname);
+    const adminData = await database.AdminData(nickname);
 
-    await checkearToken(token).then(decoded => {
-        // Obtener datos del cuerpo de la solicitud.
-        const { nickname, password } = req.body;
+    if (hash.length > 0 && await compare(password, hash[0].Password_hash)) {
+        const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
+        const token = jwt.sign({ idAdmin: adminData[0].Id_admin, nickname, EXP: fecha}, secret_admin); //{ expiresIn: '1h' });
 
-        const hash = database.GetPassword(nickname);
-
-        if (hash.length > 0 && compare(password, hash[0].Password_hash)) {
-            const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
-            const token = jwt.sign({ idAdmin: adminData[0].Id_admin, nickname, EXP: fecha}, secret_admin); //{ expiresIn: '1h' });
-
-            const resultado = database.InsertarToken(admin_data[0].Id_admin, token, fecha);
-            res.status(200).json({ token });
-        } else {
-            res.status(401).json({ error: 'Incorrect Credentials.' });
-        }
-    }).catch(error => {
-        console.error('Error in the request:', error);
-        res.status(500).json({ error: 'Token has expired or you are not identified.' });
-    });
+        const resultado = await database.InsertarToken(adminData[0].Id_admin, token, fecha);
+        res.status(200).json({ token });
+    } else {
+        res.status(401).json({ error: 'Incorrect Credentials.' });
+    }
 });
 
 // MÉTODO PARA REGISTRAR UN ADMINISTRADOR, NO FORMARÁ PARTE DE LA APLICACIÓN. FUNCIONA CORRECTAMENTE
@@ -179,33 +143,21 @@ routerAdmin.post('/sessionAdmin/', async (req, res) => {
  * @apiError {String} Token expirado.
  */
 routerAdmin.post('/registAdmin/', async (req, res) => {
-    // Coge el token enviado en el header de la solicitud.
-    if (!req.headers.authorization) {
-        return res.status(401).json({ error: 'Token not sent' });
+    // Obtener datos del cuerpo de la solicitud
+    const {name, lastname1, lastname2, nickname, password } = req.body;
+
+    // Verificar si todos los campos necesarios están presentes
+    if (!name || !lastname1 || !lastname2 || !password || !nickname) {
+        return res.status(400).json({error: 'All fields are necessary.'});
     }
 
-    const token = req.headers.authorization.split(' ')[1];
+    const passwordHash = await encrypt (password);
 
-    await checkearToken(token).then(decoded => {
-        // Obtener datos del cuerpo de la solicitud
-        const { DNI, NAME, APELLIDO1, APELLIDO2, PASSWORD } = req.body;
+    // Insertar profesor
+    const resultado = database.InsertarAdmin(name, lastname1, lastname2, nickname, passwordHash);
 
-        // Verificar si todos los campos necesarios están presentes
-        if (!DNI || !NAME || !APELLIDO1 || !APELLIDO2 || !PASSWORD) {
-            return res.status(400).json({error: 'All fields are necessary.'});
-        }
-
-        const passwordHash = encrypt (PASSWORD);
-
-        // Insertar profesor
-        const resultado = database.InsertarAdmin(DNI, NAME, APELLIDO1, APELLIDO2, passwordHash);
-
-        // Enviar respuesta al cliente
-        res.json(resultado);
-    }).catch(error => {
-        console.error('Error in the request:', error);
-        res.status(500).json({ error: 'Token has expired or you are not identified.' });
-    });
+    // Enviar respuesta al cliente
+    res.json(resultado);
 });
 
 // FUNCIONA CORRECTAMENTE.
@@ -226,7 +178,7 @@ routerAdmin.post('/registClass/', async (req, res) => {
 
     const token = req.headers.authorization.split(' ')[1];
 
-    await checkearToken(token).then(decoded => {
+    await checkearToken(token, secret_admin).then(decoded => {
         // Obtener datos del cuerpo de la solicitud
         const { NUMERO, CAPACIDAD } = req.body;
 
@@ -263,12 +215,12 @@ routerAdmin.post('/updateClassTeacher', async (req, res) => {
 
     const token = req.headers.authorization.split(' ')[1];
 
-    await checkearToken(token).then(decoded => {
+    await checkearToken(token, secret_admin).then(decoded => {
         // Obtener datos del cuerpo de la solicitud
-        const { Nickname, Aula } = req.body;
+        const { nickname, aula } = req.body;
 
         // Verificar si todos los campos necesarios están presentes
-        if (!Nickname) {
+        if (!nickname) {
             return res.status(400).json({ error: 'Nickname is required.' });
         }
 
@@ -281,45 +233,6 @@ routerAdmin.post('/updateClassTeacher', async (req, res) => {
         console.error('Error in the request:', error);
         res.status(500).json({ error: 'Token has expired or you are not identified.' });
     });
-});
-
-// TODO: Probar método. Puede que sobre.
-/**
- * @api {post} /CheckToken Comprueba si el token es válido.
- * @apiName CheckToken
- * @apiGroup admin
- * 
- * @apiSuccess {String} Token correcto.
- * @apiError {String} Error en la solicitud.
- * @apiError {String} Token expirado.
- */
-routerAdmin.post('/CheckToken', async (req, res) => {
-    try {
-        // Coge el token enviado en el header de la solicitud. Si no existe, devuelve un error.
-        const token = req.headers.authorization.split(' ')[1];
-        const payload = jwt.verify(token, secret_admin);
-
-        // Verifica si el token ha sido encryptado con el secret_admin. Si no, devuelve un error.
-        database.VerificarToken(token).then(existe => {
-            if (existe) {
-                if (Date.now() > payload.EXP) {
-                    cleanUpTokens();
-                    return res.json({   validation: false,
-                                        message: 'Token expired' });
-                } else {
-                    return res.json({   validation: true,
-                                        message: 'Token correct' });
-                }
-            } else {
-              res.status(400).json('Token not found in the database');
-            }
-          }).catch(error => {
-            console.error('An error has ocurred in VerificarToken call', error);
-        });
-    } catch (error) {
-        console.error('Token not sent or', error);
-        res.status(500).json({ error: 'Error in the request' });
-    }
 });
 
 module.exports = routerAdmin;
