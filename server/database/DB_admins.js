@@ -75,7 +75,7 @@ async function InsertarAlumno(nombre, apellido1, apellido2, curso, tutor) {
     });
 
     if (result.length > 0 && result[0].Aula_asignada != null) {
-      actualizarAlumno(tutor, result[0].Aula_asignada);
+      ActualizarAlumno(tutor, result[0].Aula_asignada);
     }
   }
 
@@ -113,7 +113,7 @@ async function ActualizarAlumno(id, idTutor, aulaAsignada) {
 async function DatosAdmin(nickname) {
   return new Promise((resolve, reject) => {
     connection.query('SELECT Id_admin, Nombre, Apellido1, Apellido2 FROM ADMINISTRADORES WHERE NICKNAME = ?',
-                [NICKNAME] , (error, results, fields) => {
+                [nickname] , (error, results, fields) => {
         if (error) {
             console.error('Error guardando token', error);
             reject(error);
@@ -124,10 +124,10 @@ async function DatosAdmin(nickname) {
   });
 }
 
-async function GetPassword(Nickname) {
+async function GetPassword(nickname) {
   return new Promise((resolve, reject) => {
     connection.query('Select Password_hash from ADMINISTRADORES where NICKNAME = ? limit 1',
-                [Nickname] , (error, results, fields) => {
+                [nickname] , (error, results, fields) => {
         if (error) {
             console.error('Error guardando token', error);
             reject(error);
