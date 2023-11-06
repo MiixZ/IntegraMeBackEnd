@@ -15,13 +15,21 @@ const jwt = require('jsonwebtoken');
 const secret_admin = process.env.JWT_SECRET_ADMIN;
 
 async function checkearToken(token) {
-    return new Promise((resolve, reject) => {
-        jwt.verify(token, secret_admin, (error, decoded) => {
-            if (error || Date.now() > decoded.EXP) {
-                reject(error);
-            }
-            resolve(decoded);
-        });
+    database.VerificarToken(token).then(existe => {
+        if (existe) {
+            return new Promise((resolve, reject) => {
+                jwt.verify(token, secret_admin, (error, decoded) => {
+                    if (error || Date.now() > decoded.EXP) {
+                        reject(error);
+                    }
+                    resolve(decoded);
+                });
+            });
+        } else {
+            return res.status(400).json('Token not found in the database');
+        }
+    }).catch(error => {
+        console.error('An error has ocurred in VerificarToken call', error);
     });
 }
 
@@ -109,6 +117,17 @@ routerAdmin.post('/insertStudent', async (req, res) => {
     });
 });
 
+
+
+routerAdmin.post('/students/:userId/authMethod', (req, res) => {
+    const userId = req.params.userId;
+    // Aquí puedes hacer lo que necesites con el userId, como almacenarlo en una variable o en la base de datos.
+    console.log(`User ID ${userId} received`);
+    res.send(`User ID ${userId} received`);
+});
+
+module.exports = routerAdmin;
+
 // FUNCIONA CORRECTAMENTE. TODO: Cambiar lógica de los get.
 /**
  * @api {post} /sessionAdmin Inicia sesión como administrador y genera su token.
@@ -120,26 +139,32 @@ routerAdmin.post('/insertStudent', async (req, res) => {
  * @apiError {String} Error en la solicitud.
  */
 routerAdmin.post('/sessionAdmin/', async (req, res) => {
-    try {
+    // Coge el token enviado en el header de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    await checkearToken(token).then(decoded => {
         // Obtener datos del cuerpo de la solicitud.
         const { nickname, password } = req.body;
 
-        const hash = await database.GetPassword(nickname);
-        const admin_data = await database.DatosAdmin(nickname);
+        const hash = database.GetPassword(nickname);
 
-        if (hash.length > 0 && await compare(password, hash[0].Password_hash)) {
+        if (hash.length > 0 && compare(password, hash[0].Password_hash)) {
             const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
             const token = jwt.sign({ idAdmin: adminData[0].Id_admin, nickname, EXP: fecha}, secret_admin); //{ expiresIn: '1h' });
 
-            const resultado = await database.InsertarToken(admin_data[0].Id_admin, token, fecha);
+            const resultado = database.InsertarToken(admin_data[0].Id_admin, token, fecha);
             res.status(200).json({ token });
         } else {
             res.status(401).json({ error: 'Incorrect Credentials.' });
         }
-    } catch(error) {
+    }).catch(error => {
         console.error('Error in the request:', error);
-        res.status(500).json({ error: 'Error in the request.' });
-    }
+        res.status(500).json({ error: 'Token has expired or you are not identified.' });
+    });
 });
 
 // MÉTODO PARA REGISTRAR UN ADMINISTRADOR, NO FORMARÁ PARTE DE LA APLICACIÓN. FUNCIONA CORRECTAMENTE
@@ -154,7 +179,14 @@ routerAdmin.post('/sessionAdmin/', async (req, res) => {
  * @apiError {String} Token expirado.
  */
 routerAdmin.post('/registAdmin/', async (req, res) => {
-    try {
+    // Coge el token enviado en el header de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    await checkearToken(token).then(decoded => {
         // Obtener datos del cuerpo de la solicitud
         const { DNI, NAME, APELLIDO1, APELLIDO2, PASSWORD } = req.body;
 
@@ -163,17 +195,17 @@ routerAdmin.post('/registAdmin/', async (req, res) => {
             return res.status(400).json({error: 'All fields are necessary.'});
         }
 
-        const passwordHash = await encrypt (PASSWORD);
+        const passwordHash = encrypt (PASSWORD);
 
         // Insertar profesor
-        const resultado = await database.InsertarAdmin(DNI, NAME, APELLIDO1, APELLIDO2, passwordHash);
+        const resultado = database.InsertarAdmin(DNI, NAME, APELLIDO1, APELLIDO2, passwordHash);
 
         // Enviar respuesta al cliente
         res.json(resultado);
-    } catch (error) {
+    }).catch(error => {
         console.error('Error in the request:', error);
-        res.status(500).json({ error: 'Error in the request' });
-    }
+        res.status(500).json({ error: 'Token has expired or you are not identified.' });
+    });
 });
 
 // FUNCIONA CORRECTAMENTE.
@@ -187,24 +219,31 @@ routerAdmin.post('/registAdmin/', async (req, res) => {
  * @apiError {String} Error en la solicitud.
  */
 routerAdmin.post('/registClass/', async (req, res) => {
-    try {
+    // Coge el token enviado en el header de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    await checkearToken(token).then(decoded => {
         // Obtener datos del cuerpo de la solicitud
         const { NUMERO, CAPACIDAD } = req.body;
 
         // Verificar si todos los campos necesarios están presentes
         if (!NUMERO || !CAPACIDAD) {
-            return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+            return res.status(400).json({ error: 'All fields are necessary.' });
         }
 
         // Insertar profesor
-        const resultado = await database.InsertarAula(NUMERO, CAPACIDAD);
+        const resultado = database.InsertarAula(NUMERO, CAPACIDAD);
 
         // Enviar respuesta al cliente
         res.json(resultado);
-    } catch (error) {
+    }).catch(error => {
         console.error('Error in the request:', error);
-        res.status(500).json({ error: 'Error in the request' });
-    }
+        res.status(500).json({ error: 'Token has expired or you are not identified.' });
+    });
 });
 
 /**
@@ -217,21 +256,31 @@ routerAdmin.post('/registClass/', async (req, res) => {
  * @apiError {String} Error en la solicitud.
  */
 routerAdmin.post('/updateClassTeacher', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { Nickname } = req.body;
+    // Coge el token enviado en el header de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
 
+    const token = req.headers.authorization.split(' ')[1];
+
+    await checkearToken(token).then(decoded => {
+        // Obtener datos del cuerpo de la solicitud
+        const { Nickname, Aula } = req.body;
+
+        // Verificar si todos los campos necesarios están presentes
         if (!Nickname) {
-            return res.status(400).json({ error: 'Nickname is ' });
+            return res.status(400).json({ error: 'Nickname is required.' });
         }
 
-        const resultado = await database.ActualizarAulaProfesor(id, DNI_PROFESOR);
+        // Actualizar aula del profesor
+        const resultado = database.ActualizarAulaProfesor(Nickname, Aula);
 
+        // Enviar respuesta al cliente
         res.json(resultado);
-    } catch (error) {
+    }).catch(error => {
         console.error('Error in the request:', error);
-        res.status(500).json({ error: 'Error in the request' });
-    }
+        res.status(500).json({ error: 'Token has expired or you are not identified.' });
+    });
 });
 
 // TODO: Probar método. Puede que sobre.
