@@ -63,7 +63,7 @@ StudentRouter.post('/:idStudent/identityCards' , async (req, res) => {
                 userId: identityCard[0].ID_alumno,
                 nickname: identityCard[0].NickName,
                 avatar: {   // Por ahora devolvemos imagen random. En el futuro, se devolverá la imagen del alumno.
-                    imageUrl: "https://th.bing.com/th/id/OIP.ulJ20hvU5dpSoLpAmZvkeAHaHa?pid=ImgDet&rs=1",
+                    imageUrl: "0",
                     altDescription: "A Bob Esponja icon."
                 }
             });
