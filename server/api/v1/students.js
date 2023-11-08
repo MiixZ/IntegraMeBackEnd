@@ -9,14 +9,14 @@ const secret = process.env.JWT_SECRET_STUDENT;
 
 // FUNCIONA CORRECTAMENTE
 /**
- * @api {post} /identityCards Devuelve las tarjetas de identidad de los alumnos.
+ * @api {get} /identityCards Devuelve las tarjetas de identidad de los alumnos.
  * @apiName identityCards
  * @apiGroup Students
  * 
  * @apiSuccess {json} Tarjeta identidad de todos los alumnos.
  * @apiError {String} Error en la solicitud.
  */
-StudentRouter.post('/identityCards' , async (req, res) => {
+StudentRouter.get('/identityCards' , async (req, res) => {
     try {
         // Obtener tarjetas de identidad del alumno.
         const identityCards = await database.getIdentityCards();
@@ -50,7 +50,7 @@ StudentRouter.post('/identityCards' , async (req, res) => {
  * @apiError {String} No se ha encontrado el alumno.
  * @apiError {String} Error en la solicitud.
  */
-StudentRouter.post('/:idStudent/identityCards' , async (req, res) => {
+StudentRouter.get('/:idStudent/identityCard' , async (req, res) => {
     try {
         // Obtener datos del cuerpo de la solicitud.
         const idStudent = req.params.idStudent;
@@ -63,7 +63,7 @@ StudentRouter.post('/:idStudent/identityCards' , async (req, res) => {
                 userId: identityCard[0].ID_alumno,
                 nickname: identityCard[0].NickName,
                 avatar: {   // Por ahora devolvemos imagen random. En el futuro, se devolverá la imagen del alumno.
-                    imageUrl: "0",
+                    id: "0",
                     altDescription: "A Bob Esponja icon."
                 }
             });
@@ -76,10 +76,9 @@ StudentRouter.post('/:idStudent/identityCards' , async (req, res) => {
     }
 });
 
-
 // FUNCIONA CORRECTAMENTE
 /**
- * @api {post} /:userID/authMethod Devuelve el método de autenticación del alumno.
+ * @api {get} /:userID/authMethod Devuelve el método de autenticación del alumno.
  * @apiName authMethod
  * @apiGroup Students
  * 
@@ -87,7 +86,7 @@ StudentRouter.post('/:idStudent/identityCards' , async (req, res) => {
  * @apiError {String} No se ha encontrado el alumno.
  * @apiError {String} Error en la solicitud.
  */
-StudentRouter.post('/:userID/authMethod' , async (req, res) => {
+StudentRouter.get('/:userID/authMethod' , async (req, res) => {
     try {
         // Obtener datos del cuerpo de la solicitud.
         const userID = req.params.userID;
@@ -139,7 +138,7 @@ StudentRouter.post('/:userID/authMethod' , async (req, res) => {
 
 // FUNCIONA CORRECTAMENTE
 /**
- * @api {post} /:userID/contentProfile Devuelve el contenido del perfil del alumno.
+ * @api {get} /:userID/contentProfile Devuelve el contenido del perfil del alumno.
  * @apiName ProfileContent
  * @apiGroup Students
  * 
@@ -147,7 +146,7 @@ StudentRouter.post('/:userID/authMethod' , async (req, res) => {
  * @apiError {String} No se ha encontrado el alumno.
  * @apiError {String} Error en la solicitud.
  */
-StudentRouter.post('/:userID/contentProfile' , async (req, res) => {
+StudentRouter.get('/:userID/contentProfile' , async (req, res) => {
     try {
         // Obtener datos del cuerpo de la solicitud.
         const userID = req.params.userID;
