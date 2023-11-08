@@ -33,20 +33,33 @@ CREATE TABLE PERFIL_ALUMNOS (
     ID_alumno INT PRIMARY KEY,
     FormatoPassword ENUM('TextAuth', 'ImageAuth') NOT NULL,
     Password_hash VARCHAR(255) NOT NULL,
-    Metodos_iteracion_alumno 
-    FOREIGN KEY (ID_admin) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (ID_alumno) REFERENCES ALUMNOS(ID_alumno) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE ITERACCION_ALUMNOS (
-    
+    ID_alumno INT NOT NULL,
+    Nom_interaccion VARCHAR(20) NOT NULL,
+    PRIMARY KEY (ID_alumno, Nom_interaccion),
+    FOREIGN KEY (ID_alumno) REFERENCES ALUMNOS(ID_alumno) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Nom_interaccion) REFERENCES METODOS_INTERACCION(Tipo_interaccion) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE FORMATOS_ALUMNOS (
+    ID_alumno INT NOT NULL,
+    Nom_formato VARCHAR(20) NOT NULL,
+    PRIMARY KEY (ID_alumno, Nom_formato),
+    FOREIGN KEY (ID_alumno) REFERENCES ALUMNOS(ID_alumno) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Nom_formato) REFERENCES FORMATOS(Tipo_formato) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE FORMATOS (
-    Tipo_formato VARCHAR(20) PRIMARY KEY;
+    Tipo_formato VARCHAR(20) PRIMARY KEY,
+    Descripcion VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE METODOS_INTERACCION(
-
+    Tipo_interaccion VARCHAR(20) PRIMARY KEY,
+    Descripcion VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE ADMINISTRADORES (
@@ -76,6 +89,12 @@ CREATE TABLE TOKENS (
     Token VARCHAR(512) PRIMARY KEY NOT NULL,
     Expiration_date TIMESTAMP,
     FOREIGN KEY (ID_usuario) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IMAGENES (
+    ID_imagen INT AUTO_INCREMENT PRIMARY KEY,
+    Descripcion VARCHAR(100) NOT NULL,
+    Img_path VARCHAR(255) NOT NULL
 );
 
 -- Crear un disparador para insertar automáticamente en la tabla usuarios cuando se añade un profesor
@@ -202,3 +221,8 @@ DELIMITER ;
 INSERT INTO ALUMNOS (DNI, Nombre, Apellidos, Edad, Aula_asignada, Direccion, Num_Telf)
 VALUES
 ('98765432D', 'Maria', 'López García', 18, 1, 'Calle Secundaria 456', 123456789);
+
+INSERT INTO FORMATOS_ALUMNOS(ID_alumno, Nom_formato)
+VALUES 
+(6, 'Text'),
+(6, 'Image');

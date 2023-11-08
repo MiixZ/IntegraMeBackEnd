@@ -90,7 +90,23 @@ async function VerificarToken(token) {
           }
       });
     });
-  }
+}
+
+async function getImage(idImage) {
+    return new Promise ((resolve, reject) => {
+        connection.query(
+            'SELECT Img_path FROM IMAGENES WHERE ID_imagen = ?',
+            [idImage], (error, results, fields) => {
+                if (error) {
+                    console.error('Error obteniendo tarjetas de identidad', error);
+                    reject(error);
+                    return;
+                }
+                resolve(results);
+            }
+        );
+    });
+}
 
 const job = schedule.scheduleJob('0 * * * *', cleanUpTokens);
 
@@ -101,5 +117,6 @@ module.exports = {
     encrypt,
     compare,
     cleanUpTokens,
+    getImage,
     checkearToken: CheckearToken
 };

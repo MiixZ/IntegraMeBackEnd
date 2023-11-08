@@ -152,32 +152,42 @@ StudentRouter.get('/:userID/contentProfile' , async (req, res) => {
         const userID = req.params.userID;
 
         // Obtener contenido del perfil del alumno.
-        /**
-        * el json a devolver debería tener este formato:
-        * {
-        *      "contentAdaptationFormats": ["...", ...],
-        *      "interactionMethods": ["...", "...", ...]
-        * }
-        */
+        const arrayFormatos = [];
+        const arrayIteraciones = [];
+        const formatos = await database.getFormatos(userID);
+        const iteraciones = await database.getIteraciones(userID);
 
-        // Aquí iría la query.
-        // const contentProfile = await database.getContentProfile(userID);
-
-        // if (contentProfile.length >= 1) {
-            // Enviar respuesta al cliente. Por ahora, devolvemos un json random. En el futuro, se devolverá el contenido del perfil del alumno.
-            res.json({
-                contentAdaptationFormats: ["Image", "Video"],
-                interactionMethods: ["Sequential", "Narrated", "Simplified"]
-            });
-        /*
-        } else {
-            res.status(404).json({ error: 'No se ha encontrado el alumno.' });
+        for (let i = 0; i < formatos.length; i++){
+           arrayFormatos.push(formatos[i].Nom_formato);
         }
-        */
+
+        for (let i = 0; i < iteraciones.length; i++){
+            arrayIteraciones.push(iteraciones[i].Nom_interaccion);
+        }
+
+
+        if (arrayIteraciones.length >= 1 && arrayFormatos.length >= 1) {
+            // Enviar respuesta al cliente.
+            res.json({
+                contentAdaptationFormats: arrayFormatos,
+                interactionMethods: arrayIteraciones
+            });
+        } else {
+            res.status(404).json({ error: 'No se ha encontrado el alumno o no tiene información' });
+        }
     } catch (error) {
         console.error('Error en la solicitud:', error);
         res.status(500).json({ error: 'Error en la solicitud' });
     }
+});
+
+StudentRouter.get('/:idImage/image', (req, res) => {
+    const idImage = req.params.idImage;
+
+    // Supongamos que el nombre de la imagen es el ID del estudiante
+    const imagePath = `/images/${idImage}.jpg`;
+
+    res.sendFile(imagePath);
 });
 
 module.exports = StudentRouter;

@@ -36,7 +36,41 @@ async function getIdentityCard(idStudent) {
     });
 }
 
+async function getFormatos(idStudent) {
+    return new Promise ((resolve, reject) => {
+        connection.query(
+            'SELECT Nom_formato FROM FORMATOS_ALUMNOS WHERE ID_alumno = ?',
+            [idStudent], (error, results, fields) => {
+                if (error) {
+                    console.error('Error obteniendo tarjetas de identidad', error);
+                    reject(error);
+                    return;
+                }
+                resolve(results);
+            }
+        );
+    });
+}
+
+async function getIteraciones(idStudent) {
+    return new Promise ((resolve, reject) => {
+        connection.query(
+            'SELECT Nom_interaccion FROM ITERACCION_ALUMNOS WHERE ID_alumno = ?',
+            [idStudent], (error, results, fields) => {
+                if (error) {
+                    console.error('Error obteniendo tarjetas de identidad', error);
+                    reject(error);
+                    return;
+                }
+                resolve(results);
+            }
+        );
+    });
+}
+
 module.exports = {
     getIdentityCard,
-    getIdentityCards
+    getIdentityCards,
+    getFormatos,
+    getIteraciones
 };
