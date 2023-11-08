@@ -76,4 +76,109 @@ StudentRouter.post('/:idStudent/identityCards' , async (req, res) => {
     }
 });
 
+
+// FUNCIONA CORRECTAMENTE
+/**
+ * @api {post} /:userID/authMethod Devuelve el método de autenticación del alumno.
+ * @apiName authMethod
+ * @apiGroup Students
+ * 
+ * @apiSuccess {json} Métodos de autenticación.
+ * @apiError {String} No se ha encontrado el alumno.
+ * @apiError {String} Error en la solicitud.
+ */
+StudentRouter.post('/:userID/authMethod' , async (req, res) => {
+    try {
+        // Obtener datos del cuerpo de la solicitud.
+        const userID = req.params.userID;
+
+        // Obtener método de autenticación del alumno.
+        /**
+         * el json a devolver debería tener este formato:
+         * {
+         *      "type": "TextAuth" o "ImageAuth"
+         *      (si es ImageAuth) "images": [{"id": X, "altDescription": "..."}, ...] # Lista de imágenes
+         *      (si es ImageAuth) "steps": X
+         * }
+         */
+
+        // Aquí iría la query.
+        // const authMethod = await database.getAuthMethod(userID);
+        // if (authMethod.length >= 1) {
+            // Estos datos deberían estar en PerfilAlumno (?)
+            // Enviar respuesta al cliente. Por ahora, devolvemos un json random. En el futuro, se devolverá el método de autenticación del alumno.
+            res.json({
+                type: "ImageAuth", // authMethod[0].Tipo,
+                images:
+                [
+                    {
+                        id: 0,
+                        altDescription: "A Bob Esponja icon."
+                    },
+                    {
+                        id: 1,
+                        altDescription: "A Patrick icon."
+                    },
+                    {
+                        id: 2,
+                        altDescription: "A Gary icon."
+                    }
+                ], // await database.getImages(userID),
+                steps: 2 // authMethod[0].Pasos
+            });
+        /*
+        } else {
+            res.status(404).json({ error: 'No se ha encontrado el alumno.' });
+        }
+        */
+    } catch (error) {
+        console.error('Error en la solicitud:', error);
+        res.status(500).json({ error: 'Error en la solicitud' });
+    }
+});
+
+// FUNCIONA CORRECTAMENTE
+/**
+ * @api {post} /:userID/contentProfile Devuelve el contenido del perfil del alumno.
+ * @apiName ProfileContent
+ * @apiGroup Students
+ * 
+ * @apiSuccess {json} Contenido del perfil del alumno.
+ * @apiError {String} No se ha encontrado el alumno.
+ * @apiError {String} Error en la solicitud.
+ */
+StudentRouter.post('/:userID/contentProfile' , async (req, res) => {
+    try {
+        // Obtener datos del cuerpo de la solicitud.
+        const userID = req.params.userID;
+
+        // Obtener contenido del perfil del alumno.
+        /**
+        * el json a devolver debería tener este formato:
+        * {
+        *      "contentAdaptationFormats": ["...", ...],
+        *      "interactionMethods": ["...", "...", ...]
+        * }
+        */
+
+        // Aquí iría la query.
+        // const contentProfile = await database.getContentProfile(userID);
+
+        // if (contentProfile.length >= 1) {
+            // Enviar respuesta al cliente. Por ahora, devolvemos un json random. En el futuro, se devolverá el contenido del perfil del alumno.
+            res.json({
+                contentAdaptationFormats: ["Image", "Video"],
+                interactionMethods: ["Sequential", "Narrated", "Simplified"]
+            });
+        /*
+        } else {
+            res.status(404).json({ error: 'No se ha encontrado el alumno.' });
+        }
+        */
+    } catch (error) {
+        console.error('Error en la solicitud:', error);
+        res.status(500).json({ error: 'Error en la solicitud' });
+    }
+});
+
 module.exports = StudentRouter;
