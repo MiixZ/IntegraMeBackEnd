@@ -185,7 +185,7 @@ StudentRouter.get('/:idImage/image', (req, res) => {
     const idImage = req.params.idImage;
 
     // Supongamos que el nombre de la imagen es el ID del estudiante
-    const imagePath = `/images/${idImage}.png`;
+    const imagePath = `../../images/${idImage}.png`;
 
     res.sendFile(imagePath);
 });
