@@ -6,6 +6,7 @@ const database = require('../../database/DB_alumnos.js');
 
 const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET_STUDENT;
+const imageRoute = process.env.IMAGES_PATH;
 
 // FUNCIONA CORRECTAMENTE
 /**
@@ -185,7 +186,7 @@ StudentRouter.get('/:idImage/image', (req, res) => {
     const idImage = req.params.idImage;
 
     // Supongamos que el nombre de la imagen es el ID del estudiante
-    const imagePath = `../../images/${idImage}.png`;
+    const imagePath = `${imageRoute}/${idImage}.png`;
 
     res.sendFile(imagePath);
 });

@@ -20,7 +20,7 @@ routerProfesores.get('/get', async (req, res) => {
     }
 });
 
-routerAdmin.post('/login/', async (req, res) => {
+routerProfesores.post('/login/', async (req, res) => {
     // Obtener datos del cuerpo de la solicitud.
     const { nickname, password } = req.body;
 
