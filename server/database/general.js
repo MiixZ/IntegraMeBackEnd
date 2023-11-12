@@ -55,8 +55,9 @@ async function cleanUpTokens() {
     });
 }
 
+//Checker comportamiento de esta función con los errores
 async function CheckearToken(token, typeSecret) {
-    VerificarToken(token).then(existe => {
+    return VerificarToken(token).then(existe => {
         if (existe) {
             return new Promise((resolve, reject) => {
                 jwt.verify(token, typeSecret, (error, decoded) => {
@@ -67,10 +68,8 @@ async function CheckearToken(token, typeSecret) {
                 });
             });
         } else {
-            return res.status(400).json('Token not found in the database');
+            throw new Error('Token not found in the database');
         }
-    }).catch(error => {
-        console.error('An error has ocurred in VerificarToken call', error);
     });
 }
 

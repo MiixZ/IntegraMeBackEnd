@@ -52,10 +52,42 @@ async function getFormatos(idStudent) {
     });
 }
 
-async function getIteraciones(idStudent) {
+async function getInteraciones(idStudent) {
     return new Promise ((resolve, reject) => {
         connection.query(
-            'SELECT Nom_interaccion FROM ITERACCION_ALUMNOS WHERE ID_alumno = ?',
+            'SELECT Nom_interaccion FROM INTERACCION_ALUMNOS WHERE ID_alumno = ?',
+            [idStudent], (error, results, fields) => {
+                if (error) {
+                    console.error('Error obteniendo tarjetas de identidad', error);
+                    reject(error);
+                    return;
+                }
+                resolve(results);
+            }
+        );
+    });
+}
+
+async function getData(idStudent) {
+    return new Promise ((resolve, reject) => {
+        connection.query(
+            'SELECT Nombre, Apellido1, Apellido2, NickName FROM ALUMNOS WHERE ID_alumno = ?',
+            [idStudent], (error, results, fields) => {
+                if (error) {
+                    console.error('Error obteniendo tarjetas de identidad', error);
+                    reject(error);
+                    return;
+                }
+                resolve(results);
+            }
+        );
+    });
+}
+
+async function getPerfil(idStudent) {
+    return new Promise ((resolve, reject) => {
+        connection.query(
+            'SELECT Avatar_id FROM PERFIL_ALUMNOS WHERE ID_alumno = ?',
             [idStudent], (error, results, fields) => {
                 if (error) {
                     console.error('Error obteniendo tarjetas de identidad', error);
@@ -72,5 +104,7 @@ module.exports = {
     getIdentityCard,
     getIdentityCards,
     getFormatos,
-    getIteraciones
+    getInteraciones,
+    getData,
+    getPerfil
 };
