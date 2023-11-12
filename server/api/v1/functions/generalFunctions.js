@@ -1,4 +1,6 @@
 const general = require('../../../database/general.js');
+const { encrypt, compare, checkearToken } = require('../../../database/general.js');
+
 
 async function checkToken(req, res) {
     try {
@@ -47,7 +49,21 @@ async function getImage(req, res) {
     }
 }
 
+async function generateHash(req, res){
+    const { id, password } = req.body;
+
+    // Verificar si todos los campos necesarios están presentes
+    if (!id || !password) {
+        return res.status(400).json({ error: 'All fields are necessary.' });
+    }
+
+    const passwordHash = await encrypt(password);
+
+    res.json(passwordHash);
+}
+
 module.exports = {
     checkToken,
-    getImage
+    getImage,
+    generateHash
   };

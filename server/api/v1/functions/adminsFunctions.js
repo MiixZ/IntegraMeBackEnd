@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 // TODO: Hay que verificar el token en todas las funciones de inserción.
 
 const database = require('../../../database/DB_admins.js');
+const general = require('../../../database/general.js');
 const { encrypt, compare, checkearToken } = require('../../../database/general.js');
 
 const jwt = require('jsonwebtoken');
@@ -104,7 +105,7 @@ async function loginAdmin(req, res) {
         const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
         const token = jwt.sign({ idAdmin: adminData[0].Id_admin, nickname, EXP: fecha}, secret_admin); //{ expiresIn: '1h' });
 
-        const resultado = await database.InsertarToken(adminData[0].Id_admin, token, fecha);
+        const resultado = await general.insertarToken(adminData[0].Id_admin, token, fecha);
         res.status(200).json({ token });
     } else {
         res.status(401).json({ error: 'Incorrect Credentials.' });
@@ -205,6 +206,7 @@ async function updateClassTeacher(req, res) {
         res.status(500).json({ error: 'Token has expired or you are not identified.' });
     }
 }
+
 
 module.exports = {
     insertTeacher,

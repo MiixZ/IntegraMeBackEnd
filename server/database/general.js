@@ -56,7 +56,7 @@ async function cleanUpTokens() {
 }
 
 //Checker comportamiento de esta función con los errores
-async function CheckearToken(token, typeSecret) {
+async function checkearToken(token, typeSecret) {
     return VerificarToken(token).then(existe => {
         if (existe) {
             return new Promise((resolve, reject) => {
@@ -107,6 +107,20 @@ async function getImage(idImage) {
     });
 }
 
+async function insertarToken(id, token, fecha) {
+    return new Promise((resolve, reject) => {
+      connection.query('INSERT INTO TOKENS (ID_usuario, Token, Expiration_date) VALUES (?,?,?)',
+                  [id, token, fecha] , (error, results, fields) => {
+          if (error) {
+              console.error('Error guardando token', error);
+              reject(error);
+              return;
+          }
+          resolve(results);
+      });
+    });
+}
+
 const job = schedule.scheduleJob('0 * * * *', cleanUpTokens);
 
 module.exports = {
@@ -117,5 +131,7 @@ module.exports = {
     compare,
     cleanUpTokens,
     getImage,
-    checkearToken: CheckearToken
+    checkearToken,
+    VerificarToken,
+    insertarToken
 };

@@ -1,5 +1,6 @@
 const general = require('../../../database/general.js');
 const database = require('../../../database/DB_alumnos.js');
+const { encrypt, compare, checkearToken } = require('../../../database/general.js');
 
 const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET_STUDENT;
@@ -141,6 +142,13 @@ async function getProfileContent(req, res) {
 
 async function getProfile(req, res) {
     try {
+        // Coge el token enviado en el header de la solicitud.
+        if (!req.headers.authorization) {
+            return res.status(401).json({ error: 'Token not sent' });
+        }
+
+        const token = req.headers.authorization.split(' ')[1];
+
         // Obtener datos del cuerpo de la solicitud.
         const userID = req.params.userID;
 
@@ -160,6 +168,16 @@ async function getProfile(req, res) {
             arrayIteraciones.push(iteraciones[i].Nom_interaccion);
         }
 
+        //Verificamos token y lo decodificamos
+
+        try {
+            const decodedToken = await checkearToken(token, secret);
+            if (decodedToken.idStudent != userID) {
+                return res.status(401).json({ error: 'Invalid token' });
+            }
+        } catch (error) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
 
         res.json({
             type: "StudentProfile",
@@ -183,6 +201,30 @@ async function getProfile(req, res) {
     }
 }
 
+// VERSION DE PRUEBA
+async function loginStudent(req, res) {
+    // Obtener datos del cuerpo de la solicitud.
+    const { idStudent, password } = req.body;
+
+    // Verificar si todos los campos necesarios están presentes
+    if (!idStudent || !password) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const hash = await database.getPassword(idStudent);
+    const studentData = await database.studentData(idStudent);
+
+    if (hash.length > 0 && await compare(password, hash[0].Password_hash)) {
+        const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
+        const token = jwt.sign({ idStudent, nickname: studentData[0].NickName, EXP: fecha}, secret); //{ expiresIn: '1h' });
+
+        await general.insertarToken(idStudent, token, fecha);
+        res.status(200).json({ token });
+    } else {
+        res.status(401).json({ error: 'Incorrect Credentials.' });
+    }
+}
+
 
 
 module.exports = {
@@ -190,5 +232,6 @@ module.exports = {
     getIdentityCard,
     getAuthMethod,
     getProfileContent,
-    getProfile
+    getProfile,
+    loginStudent
 };

@@ -100,11 +100,41 @@ async function getPerfil(idStudent) {
     });
 }
 
+async function getPassword(id) {
+    return new Promise((resolve, reject) => {
+        connection.query('Select Password_hash from PERFIL_ALUMNOS where ID_alumno = ? limit 1',
+                    [id] , (error, results, fields) => {
+            if (error) {
+                console.error('Error getting password', error);
+                reject(error);
+                return;
+            }
+            resolve(results);
+        });
+    });
+}
+
+async function studentData(id) {
+    return new Promise((resolve, reject) => {
+      connection.query('SELECT NickName FROM ALUMNOS WHERE ID_alumno = ?',
+                  [id] , (error, results, fields) => {
+          if (error) {
+              console.error('Error guardando token', error);
+              reject(error);
+              return;
+          }
+          resolve(results);
+      });
+    });
+}
+
 module.exports = {
     getIdentityCard,
     getIdentityCards,
     getFormatos,
     getInteraciones,
     getData,
-    getPerfil
+    getPerfil,
+    getPassword,
+    studentData
 };

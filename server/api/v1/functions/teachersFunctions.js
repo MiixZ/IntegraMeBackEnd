@@ -1,4 +1,5 @@
 const database = require('../../../database/DB_profesores.js');
+const general = require('../../../database/general.js');
 
 const jwt = require('jsonwebtoken');
 const secret_teacher = process.env.JWT_SECRET_TEACHER;
@@ -34,7 +35,7 @@ async function login(req, res) {
             const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
             const token = jwt.sign({ idTeacher: teacherData[0].ID_profesor, nickname, EXP: fecha}, secret_teacher);
             try{
-                const resultado = await database.InsertarToken(teacherData[0].ID_profesor, token, fecha);
+                const resultado = await general.insertarToken(teacherData[0].ID_profesor, token, fecha);
                 res.status(200).json({ token });
             }catch{
                 console.error('Error guardando token', error);

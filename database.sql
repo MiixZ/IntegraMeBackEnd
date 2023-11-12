@@ -250,3 +250,6 @@ INSERT INTO FORMATOS_ALUMNOS(ID_alumno, Nom_formato)
 VALUES 
 (6, 'Text'),
 (6, 'Image');
+
+INSERT INTO PERFIL_ALUMNOS (ID_alumno, Avatar_id, FormatoPassword, Password_hash)
+VALUES (6, 1, 'TextAuth', '$2b$10$tiSJ79Iy/Moga5gsTQFmcuuHdky8RB5.5Uk75aeb5rQvcQs5Xdd5e');

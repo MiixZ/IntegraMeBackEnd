@@ -4,6 +4,7 @@ const routerv1 = express.Router();
 const generalFN = require('./functions/generalFunctions.js');
 const studentsFN = require('./functions/studentsFunctions.js');
 const teachersFN = require('./functions/teachersFunctions.js');
+//const path = require('path'); PARA LO DE LAS IMAGENES
 
 const AuthRouter = require('./auth/auth.js');
 
@@ -12,6 +13,26 @@ routerv1.get('/', (req, res) => {
 });
 
 routerv1.use('/auth', AuthRouter);
+
+/*
+PARA LO DE LAS IMAGENES, NO LO ENTIENDO MUCHO
+
+routerv1.use('/images', express.static('images'));
+
+app.get('/images/:imageName', (req, res) => {
+    const imageName = req.params.imageName;
+    const imagePath = path.join(__dirname, 'images', imageName);
+  
+    // Verifica si el archivo existe
+    if (fs.existsSync(imagePath)) {
+      res.sendFile(imagePath);
+    } else {
+      res.status(404).send('Imagen no encontrada');
+    }
+  });
+  
+// Middleware para servir archivos estáticos (por ejemplo, CSS, JavaScript)
+app.use('/static', express.static('public'));*/
 
 // ENDPOINTS NO AUTH
 // FUNCIONA CORRECTAMENTE. TODO: Cambiar lógica de los get.
@@ -80,6 +101,8 @@ routerv1.get('/teachers/get', teachersFN.getTeachers);
 
 routerv1.post('/teachers/login/',teachersFN.login);
 
-routerv1.get('/students/:userID/profile', studentsFN.getProfile);
+routerv1.post('/generateHash/',generalFN.generateHash);
+
+routerv1.post('/students/login/',studentsFN.loginStudent);
 
 module.exports = routerv1;

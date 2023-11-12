@@ -141,24 +141,10 @@ async function GetPassword(nickname) {
   });
 }
 
-async function InsertarToken(id, token, fecha) {
-  return new Promise((resolve, reject) => {
-    connection.query('INSERT INTO TOKENS (ID_usuario, Token, Expiration_date) VALUES (?,?,?)',
-                [id, token, fecha] , (error, results, fields) => {
-        if (error) {
-            console.error('Error guardando token', error);
-            reject(error);
-            return;
-        }
-        resolve(results);
-    });
-  });
-}
 
 module.exports = {
   InsertarAlumno,
   InsertarProfesor,
-  InsertarToken,
   GetPassword,
   AdminData,
   InsertarAdmin,
