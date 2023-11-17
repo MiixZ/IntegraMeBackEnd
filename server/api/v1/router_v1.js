@@ -17,8 +17,8 @@ routerv1.use('/auth', AuthRouter);
 
 
 // Con esta secuencia conseguimos enviar una imagen que esté en la carpeta /images directamente con la url.
-// Por ejemplo, a una imagen nuestra imagen.png se puede acceder con la url http://34.175.9.11/api/v1/images/imagen.png
-routerv1.use('/images', express.static('images'));
+// Por ejemplo, a una imagen nuestra imagen.png se puede acceder con la url http://34.175.9.11:30000/api/v1/images/imagen.png
+routerv1.use('/images', express.static('images', { extensions : ['png', 'jpg', 'jpeg', 'gif'] }));
 
 /*
 // Este método no sería necesario con el middleware anterior.
