@@ -4,6 +4,8 @@ const routerv1 = express.Router();
 const generalFN = require('./functions/generalFunctions.js');
 const studentsFN = require('./functions/studentsFunctions.js');
 const teachersFN = require('./functions/teachersFunctions.js');
+
+const imageExtensions = ['png', 'jpg', 'jpeg', 'gif'];
 //const path = require('path'); PARA LO DE LAS IMAGENES
 
 const AuthRouter = require('./auth/auth.js');
@@ -14,28 +16,11 @@ routerv1.get('/', (req, res) => {
 
 routerv1.use('/auth', AuthRouter);
 
-
-
 // Con esta secuencia conseguimos enviar una imagen que esté en la carpeta /images directamente con la url.
 // Por ejemplo, a una imagen nuestra imagen.png se puede acceder con la url http://34.175.9.11:30000/api/v1/images/imagen.png
-routerv1.use('/images', express.static('images', { extensions : ['png', 'jpg', 'jpeg', 'gif'] }));
+routerv1.use('/images', express.static('images', { extensions : imageExtensions }));
 
-/*
-// Este método no sería necesario con el middleware anterior.
-app.get('/images/:imageName', (req, res) => {
-    const imageName = req.params.imageName;
-    const imagePath = path.join(__dirname, 'images', imageName);
-  
-    // Verifica si el archivo existe
-    if (fs.existsSync(imagePath)) {
-      res.sendFile(imagePath);
-    } else {
-      res.status(404).send('Imagen no encontrada');
-    }
-  });
-*/
-
-// Middleware para servir archivos estáticos (por ejemplo, CSS, JavaScript). Por ahora no los devolvemos. (?)
+// Middleware para servir archivos estáticos (por ejemplo, CSS, JavaScript). Por ahora no los devolvemos, tiene que ver con la web.
 // app.use('/static', express.static('public'));
 
 // ENDPOINTS NO AUTH
