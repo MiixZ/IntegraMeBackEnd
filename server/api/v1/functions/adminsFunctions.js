@@ -197,7 +197,7 @@ async function updateClassTeacher(req, res) {
         }
 
         // Actualizar aula del profesor
-        const resultado = database.ActualizarAulaProfesor(Nickname, Aula);
+        const resultado = database.ActualizarAulaProfesor(nickname, aula);
 
         // Enviar respuesta al cliente
         res.json(resultado);

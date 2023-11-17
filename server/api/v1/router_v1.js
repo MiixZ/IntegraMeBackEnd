@@ -14,11 +14,14 @@ routerv1.get('/', (req, res) => {
 
 routerv1.use('/auth', AuthRouter);
 
-/*
-PARA LO DE LAS IMAGENES, NO LO ENTIENDO MUCHO
 
+
+// Con esta secuencia conseguimos enviar una imagen que esté en la carpeta /images directamente con la url.
+// Por ejemplo, a una imagen nuestra imagen.png se puede acceder con la url http://34.175.9.11/api/v1/images/imagen.png
 routerv1.use('/images', express.static('images'));
 
+/*
+// Este método no sería necesario con el middleware anterior.
 app.get('/images/:imageName', (req, res) => {
     const imageName = req.params.imageName;
     const imagePath = path.join(__dirname, 'images', imageName);
@@ -30,9 +33,10 @@ app.get('/images/:imageName', (req, res) => {
       res.status(404).send('Imagen no encontrada');
     }
   });
-  
-// Middleware para servir archivos estáticos (por ejemplo, CSS, JavaScript)
-app.use('/static', express.static('public'));*/
+*/
+
+// Middleware para servir archivos estáticos (por ejemplo, CSS, JavaScript). Por ahora no los devolvemos. (?)
+// app.use('/static', express.static('public'));
 
 // ENDPOINTS NO AUTH
 // FUNCIONA CORRECTAMENTE. TODO: Cambiar lógica de los get.
