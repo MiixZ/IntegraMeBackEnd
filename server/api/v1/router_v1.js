@@ -4,6 +4,7 @@ const routerv1 = express.Router();
 const generalFN = require('./functions/generalFunctions.js');
 const studentsFN = require('./functions/studentsFunctions.js');
 const teachersFN = require('./functions/teachersFunctions.js');
+const adminFN = require('./functions/adminsFunctions.js');
 
 const imageExtensions = ['png', 'jpg', 'jpeg', 'gif'];
 //const path = require('path'); PARA LO DE LAS IMAGENES
@@ -88,10 +89,15 @@ routerv1.get('/:idImage/image', generalFN.getImage);
 
 routerv1.get('/teachers/get', teachersFN.getTeachers);
 
-routerv1.post('/teachers/login/',teachersFN.login);
+routerv1.post('/teachers/login/', teachersFN.login);
 
-routerv1.post('/generateHash/',generalFN.generateHash);
+routerv1.post('/generateHash/', generalFN.generateHash);
 
-routerv1.post('/students/login/',studentsFN.loginStudent);
+routerv1.post('/students/login/', studentsFN.loginStudent);
+
+
+// ADMINS, POR AHORA SÓLO NOSOTROS PODEMOS ENVIAR.
+
+routerv1.post('/admins/regist/', adminFN.registAdmin);
 
 module.exports = routerv1;

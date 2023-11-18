@@ -243,8 +243,7 @@ DELIMITER ;
 */
 
 INSERT INTO ALUMNOS (DNI, Nombre, Apellidos, Edad, Aula_asignada, Direccion, Num_Telf)
-VALUES
-('98765432D', 'Maria', 'López García', 18, 1, 'Calle Secundaria 456', 123456789);
+VALUES ('98765432D', 'Maria', 'López García', 18, 1, 'Calle Secundaria 456', 123456789);
 
 INSERT INTO FORMATOS_ALUMNOS(ID_alumno, Nom_formato)
 VALUES 

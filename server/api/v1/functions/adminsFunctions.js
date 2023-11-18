@@ -88,7 +88,6 @@ async function insertStudent(req, res) {
         });
 }
 
-
 async function loginAdmin(req, res) {
     // Obtener datos del cuerpo de la solicitud.
     const { nickname, password } = req.body;
@@ -135,7 +134,7 @@ async function registAdmin(req, res) {
 
         const passwordHash = await encrypt(password);
 
-        // Insertar profesor
+        // Insertar administrador
         const resultado = database.InsertarAdmin(name, lastname1, lastname2, nickname, passwordHash);
 
         // Enviar respuesta al cliente
