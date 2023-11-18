@@ -34,20 +34,6 @@ async function checkToken(req, res) {
         res.status(401).json({ error: 'Error in the request' });
     }
 }
-// CAMBIAR EL IMG PATH
-async function getImage(req, res) {
-    try {
-        const idImage = req.params.idImage;
-
-        // Supongamos que el nombre de la imagen es el ID del estudiante
-        const imagePath = `${imageRoute}/${idImage}.png`;
-
-        res.sendFile(imagePath);
-    } catch (error) {
-        console.error('Error en la solicitud:', error);
-        res.status(500).json({ error: 'Error en la solicitud' });
-    }
-}
 
 async function generateHash(req, res){
     const { id, password } = req.body;
@@ -64,6 +50,5 @@ async function generateHash(req, res){
 
 module.exports = {
     checkToken,
-    getImage,
     generateHash
   };

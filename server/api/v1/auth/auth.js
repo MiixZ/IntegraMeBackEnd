@@ -36,7 +36,7 @@ AuthRouter.post('/login/admin', adminsFN.loginAdmin);
 
 // FUNCIONA CORRECTAMENTE.
 /**
- * @api {get} /registClass Registra una clase en la base de datos.
+ * @api {post} /registClass Registra una clase en la base de datos.
  * @apiName registClass
  * @apiGroup admin
  * 
@@ -45,6 +45,18 @@ AuthRouter.post('/login/admin', adminsFN.loginAdmin);
  * @apiError {String} Error en la solicitud.
  */
 AuthRouter.post('/registClass/', adminsFN.insertClass);
+
+// FUNCIONA CORRECTAMENTE.
+/**
+ * @api {post} /insertStudent Registra un alumno en la base de datos.
+ * @apiName insert Student
+ * @apiGroup admin
+ * 
+ * @apiSuccess {String} Inserción exitosa.
+ * @apiError {String} Todos los campos son obligatorios.
+ * @apiError {String} Error en la solicitud.
+ */
+AuthRouter.post('/admins/insertStudent/', adminsFN.insertStudent);
 
 
 /**

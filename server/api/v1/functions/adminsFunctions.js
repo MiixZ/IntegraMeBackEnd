@@ -134,7 +134,7 @@ async function registAdmin(req, res) {
 
         const passwordHash = await encrypt(password);
 
-        // Insertar administrador
+        // Insertar administrador.
         const resultado = database.InsertarAdmin(name, lastname1, lastname2, nickname, passwordHash);
 
         // Enviar respuesta al cliente
@@ -158,15 +158,15 @@ async function insertClass(req, res) {
         await checkearToken(token, secret_admin);
 
         // Obtener datos del cuerpo de la solicitud
-        const { NUMERO, CAPACIDAD } = req.body;
+        const { NUMBER, CAPACITY } = req.body;
 
         // Verificar si todos los campos necesarios están presentes
-        if (!NUMERO || !CAPACIDAD) {
+        if (!NUMBER || !CAPACITY) {
             return res.status(400).json({ error: 'All fields are necessary.' });
         }
 
         // Insertar profesor
-        const resultado = await database.InsertarAula(NUMERO, CAPACIDAD);
+        const resultado = await database.InsertarAula(NUMBER, CAPACITY);
 
         // Enviar respuesta al cliente
         res.json(resultado);

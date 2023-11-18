@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const mysql = require('mysql2');
 const baseDatos = require('./general.js');
@@ -42,7 +41,7 @@ async function getFormatos(idStudent) {
             'SELECT Nom_formato FROM FORMATOS_ALUMNOS WHERE ID_alumno = ?',
             [idStudent], (error, results, fields) => {
                 if (error) {
-                    console.error('Error obteniendo tarjetas de identidad', error);
+                    console.error('Error getting identity cards.', error);
                     reject(error);
                     return;
                 }
@@ -58,7 +57,7 @@ async function getInteraciones(idStudent) {
             'SELECT Nom_interaccion FROM INTERACCION_ALUMNOS WHERE ID_alumno = ?',
             [idStudent], (error, results, fields) => {
                 if (error) {
-                    console.error('Error obteniendo tarjetas de identidad', error);
+                    console.error('Error getting identity card.', error);
                     reject(error);
                     return;
                 }
@@ -74,7 +73,7 @@ async function getData(idStudent) {
             'SELECT Nombre, Apellido1, Apellido2, NickName FROM ALUMNOS WHERE ID_alumno = ?',
             [idStudent], (error, results, fields) => {
                 if (error) {
-                    console.error('Error obteniendo tarjetas de identidad', error);
+                    console.error('Error getting identity card.', error);
                     reject(error);
                     return;
                 }
@@ -90,7 +89,7 @@ async function getPerfil(idStudent) {
             'SELECT Avatar_id FROM PERFIL_ALUMNOS WHERE ID_alumno = ?',
             [idStudent], (error, results, fields) => {
                 if (error) {
-                    console.error('Error obteniendo tarjetas de identidad', error);
+                    console.error('Error getting identity card.', error);
                     reject(error);
                     return;
                 }
