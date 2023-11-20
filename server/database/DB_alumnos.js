@@ -35,6 +35,25 @@ async function getIdentityCard(idStudent) {
     });
 }
 
+async function getAvatar(idStudent) {
+    return new Promise ((resolve, reject) => {
+        connection.query(
+            'SELECT PA.Avatar_id, I.Descripcion ' +
+            'FROM PERFIL_ALUMNOS AS PA ' +
+            'INNER JOIN IMAGENES AS I ON PA.Avatar_id = I.ID_imagen ' +
+            'WHERE PA.ID_alumno = ?',
+            [idStudent], (error, results, fields) => {
+                if (error) {
+                    console.error('Error getting avatar.', error);
+                    reject(error);
+                    return;
+                }
+                resolve(results);
+            }
+        );
+    });
+}
+
 async function getImagesAndSteps(idSet) {
     return new Promise ((resolve, reject) => {
         connection.query(
@@ -168,6 +187,7 @@ module.exports = {
     getIdentityCard,
     getIdentityCards,
     getImagesAndSteps,
+    getAvatar,
     getFormatos,
     getInteraciones,
     getData,

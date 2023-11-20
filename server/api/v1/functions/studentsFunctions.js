@@ -15,38 +15,45 @@ async function getIdentityCardsAll(req, res) {
          * El json tendría que tener este formato:
          * Se devuelve una lista []:{"userId": 2,"nickname": "asd","avatar": {"id": id_imagen,"altDescription": "descripción textual"}
         */
-        res.json(identityCards.map(identityCard => ({
-            userId: identityCard.ID_alumno,
-            nickname: identityCard.NickName,
-            avatar: {   // Por ahora devolvemos imagen random. En el futuro, se devolverá la imagen del alumno.
-                id: "0",
-                altDescription: "A Bob Esponja icon."
-            }
-        })));
+        const response = [];
+        for (let i = 0; i < identityCards.length; i++) {
+            const identityCard = identityCards[i];
+            const avatar = await database.getAvatar(identityCard.ID_alumno);
+            response.push({
+                userId: identityCard.ID_alumno,
+                nickname: identityCard.NickName,
+                avatar: {
+                    id: avatar[0].id,
+                    altDescription: avatar[0].altDescription
+                }
+            });
+        }
+        res.json(response);
     } catch (error) {
         res.status(500).json({ error: 'Request error' });
     }
 }
 
-async function getIdentityCard(req, res) {              // A CAMBIAR AVATAR.
+async function getIdentityCard(req, res) {
     try {
         // Obtener datos del cuerpo de la solicitud.
         const idStudent = req.params.idStudent;
 
         // Obtener tarjetas de identidad del alumno.
         const identityCard = await database.getIdentityCard(idStudent);
-        if (identityCard.length >= 1) {
+        const avatar = await database.getAvatar(idStudent);
+        if (identityCard.length >= 1 && avatar.length >= 1) {
             // Enviar respuesta al cliente
             res.json({
                 userId: identityCard[0].ID_alumno,
                 nickname: identityCard[0].NickName,
-                avatar: {   // Por ahora devolvemos imagen random. En el futuro, se devolverá la imagen del alumno.
-                    id: "0",
-                    altDescription: "A Bob Esponja icon."
+                avatar: {
+                    id: avatar[0].id,
+                    altDescription: avatar[0].altDescription
                 }
             });
         } else {
-            res.status(404).json({ error: 'Could not find student' });
+            res.status(404).json({ error: 'Could not find student or avatar.' });
         }
     } catch (error) {
         res.status(500).json({ error: 'Request error' });
