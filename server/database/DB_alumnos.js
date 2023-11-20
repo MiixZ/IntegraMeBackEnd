@@ -38,7 +38,11 @@ async function getIdentityCard(idStudent) {
 async function getImagesAndSteps(idSet) {
     return new Promise ((resolve, reject) => {
         connection.query(
-            'SELECT C.Steps, IS.ID_imagen, I.Descripcion FROM CONJUNTOS AS C INNER JOIN IMAGENES_SET AS IS ON C.ID_set = IS.ID_set INNER JOIN IMAGENES AS I ON IS.ID_imagen = I.ID_imagen WHERE C.ID_set = ?',
+            'SELECT C.Steps, IS.ID_imagen, I.Descripcion ' +
+            'FROM CONJUNTOS AS C ' +
+            'INNER JOIN IMAGENES_SET AS IS ON C.ID_set = IS.ID_set ' +
+            'INNER JOIN IMAGENES AS I ON IS.ID_imagen = I.ID_imagen ' +
+            'WHERE C.ID_set = ?',
             [idSet], (error, results, fields) => {
                 if (error) {
                     console.error('Error getting images and steps.', error);
