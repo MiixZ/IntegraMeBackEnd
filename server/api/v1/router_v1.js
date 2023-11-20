@@ -50,21 +50,25 @@ routerv1.get('/students/identityCards', studentsFN.getIdentityCardsAll);
 
 // FUNCIONA CORRECTAMENTE
 /**
- * @api {post} /:idStudent/identityCard Devuelve la tarjeta de identidad del alumno.
+ * @api {post} /:userID/identityCard Devuelve la tarjeta de identidad del alumno.
  * @apiName identityCard
  * @apiGroup Students
+ * 
+ * @apiParam {Number} userID Identificador del alumno.
  * 
  * @apiSuccess {json} Tarjeta identidad del alumno.
  * @apiError {String} No se ha encontrado el alumno.
  * @apiError {String} Error en la solicitud.
  */
-routerv1.get('/students/:idStudent/identityCard', studentsFN.getIdentityCard);
+routerv1.get('/students/:userID/identityCard', studentsFN.getIdentityCard);
 
 // FUNCIONA CORRECTAMENTE
 /**
  * @api {get} /:userID/authMethod Devuelve el método de autenticación del alumno.
  * @apiName authMethod
  * @apiGroup Students
+ * 
+ * @apiParam {Number} userID Identificador del alumno.
  * 
  * @apiSuccess {json} Métodos de autenticación.
  * @apiError {String} No se ha encontrado el alumno.
@@ -78,18 +82,44 @@ routerv1.get('/students/:userID/authMethod', studentsFN.getAuthMethod);
  * @apiName ProfileContent
  * @apiGroup Students
  * 
+ * @apiParam {Number} userID Identificador del alumno.
+ * 
  * @apiSuccess {json} Contenido del perfil del alumno.
  * @apiError {String} No se ha encontrado el alumno.
  * @apiError {String} Error en la solicitud.
  */
 routerv1.get('/students/:userID/contentProfile', studentsFN.getProfileContent);
 
+/** 
+ *  ?????
+ */
 routerv1.get('/teachers/get', teachersFN.getTeachers);
 
-routerv1.post('/teachers/login/', teachersFN.login);
+/**
+ * @api {post} /teachers/signIn Logea al profesor.
+ * @apiName Inicio Sesión Profesor
+ * @apiGroup Teachers
+ * 
+ * @apiSuccess {json} Token de inicio de sesión del profesor.
+ * @apiError {String} No se ha encontrado el profesor.
+ * @apiError {String} Error en la solicitud.
+ */
+routerv1.post('/teachers/signin/', teachersFN.login);
 
+/** 
+ *  ?????
+ */
 routerv1.post('/generateHash/', generalFN.generateHash);
 
+/**
+ * @api {post} /students/signIn Logea al alumno.
+ * @apiName Inicio Sesión Alumno
+ * @apiGroup Students
+ * 
+ * @apiSuccess {json} Token de inicio de sesión del alumno.
+ * @apiError {String} No se ha encontrado el alumno.
+ * @apiError {String} Error en la solicitud.
+ */
 routerv1.post('/students/login/', studentsFN.loginStudent);
 
 
