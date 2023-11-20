@@ -9,7 +9,7 @@ async function InsertarProfesor(nombre, apellido1, apellido2, nickname, password
     const lastId = connection.query('CALL InsertarProfesor(?, ?, ?, ?, ?)',
                     [nombre, apellido1, apellido2, nickname, password], (error, results, fields) => {
       if (error) {
-        console.error('Error insertando profesor', error);
+        console.error('Error inserting teacher.', error);
         reject(error);
         return;
       }
@@ -23,7 +23,7 @@ async function ActualizarAulaProfesor(nickname, aula) {
     connection.query('UPDATE PROFESORES SET Aula_asignada = ? WHERE NICKNAME = ?',
                     [aula, nickname], (error, results, fields) => {
       if (error) {
-        console.error('Error actualizando aula del profesor', error);
+        console.error('Error updating teacher class.', error);
         reject(error);
         return;
       }
@@ -37,7 +37,7 @@ async function InsertarAdmin(nombre, apellido1, apellido2, nickname, password) {
     connection.query('CALL InsertarAdministrador(?, ?, ?, ?, ?)',
                     [nombre, apellido1, apellido2, nickname, password], (error, results, fields) => {
       if (error) {
-        console.error('Error insertando admin', error);
+        console.error('Error inserting admin.', error);
         reject(error);
         return;
       }
@@ -53,7 +53,7 @@ async function InsertarAlumno(name, lastname1, lastname2, grade, tutor) {
   const insertarAlumno = new Promise((resolve, reject) => {
     connection.query(sql, values, (error, results, fields) => {
       if (error) {
-        console.error('Error insertando alumno', error);
+        console.error('Error insertando student.', error);
         reject(error);
         return;
       }
@@ -90,7 +90,7 @@ async function InsertarAula(numeroAula, capacidad) {
     connection.query('INSERT INTO AULAS (Num_aula, Capacidad) VALUES (?, ?)',
                     [numeroAula, capacidad], (error, results, fields) => {
       if (error) {
-        console.error('Error insertando aula', error);
+        console.error('Error inserting class.', error);
         reject(error);
         return;
       }
@@ -104,7 +104,7 @@ async function ActualizarAlumno(id, idTutor, aulaAsignada) {
     connection.query('UPDATE ALUMNOS SET ID_tutor = ?, Aula_asignada = ? WHERE ID = ?',
                     [idTutor, aulaAsignada, id], (error, results, fields) => {
       if (error) {
-        console.error('Error actualizando alumno', error);
+        console.error('Error updating student.', error);
         reject(error);
         return;
       }
@@ -118,7 +118,7 @@ async function AdminData(nickname) {
     connection.query('SELECT Id_admin, Nombre, Apellido1, Apellido2 FROM ADMINISTRADORES WHERE NICKNAME = ?',
                 [nickname] , (error, results, fields) => {
         if (error) {
-            console.error('Error guardando token', error);
+            console.error('Error saving token.', error);
             reject(error);
             return;
         }

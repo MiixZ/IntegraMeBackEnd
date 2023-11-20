@@ -36,7 +36,7 @@ async function obtenerProfesores() {
   return new Promise((resolve, reject) => {
       connection.query('SELECT * FROM PROFESORES', (error, results, fields) => {
           if (error) {
-              console.error('Error obteniendo profesores', error);
+              console.error('Error getting teachers.', error);
               reject(error);
               return;
           }
