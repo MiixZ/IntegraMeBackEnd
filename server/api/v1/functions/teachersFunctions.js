@@ -13,8 +13,7 @@ async function getTeachers(req, res) {
         // Enviar respuesta al cliente
         res.json(profesores);
     } catch (error) {
-        console.error('Error en la solicitud:', error);
-        res.status(500).json({ error: 'Error en la solicitud' });
+        res.status(500).json({ error: 'Request error' });
     }
 }
 
@@ -34,11 +33,10 @@ async function login(req, res) {
         if (hash.length > 0 && await compare(password, hash[0].Password_hash)) {
             const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
             const token = jwt.sign({ idTeacher: teacherData[0].ID_profesor, nickname, EXP: fecha}, secret_teacher);
-            try{
-                const resultado = await general.insertarToken(teacherData[0].ID_profesor, token, fecha);
+            try {
+                await general.insertarToken(teacherData[0].ID_profesor, token, fecha);
                 res.status(200).json({ token });
-            }catch{
-                console.error('Error guardando token', error);
+            } catch {
                 reject(error);
                 return;
             }
@@ -46,8 +44,7 @@ async function login(req, res) {
             res.status(401).json({ error: 'Incorrect Credentials.' });
         }
     } catch (error) {
-        console.error('Error en la solicitud:', error);
-        res.status(500).json({ error: 'Error en la solicitud' });
+        res.status(500).json({ error: 'Request error' });
     }
 }
 
