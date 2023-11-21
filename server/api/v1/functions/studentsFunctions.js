@@ -119,6 +119,8 @@ async function getProfileContent(req, res) {
         const formatos = await database.getFormatos(userID);
         const arrayFormatos = formatos.map(formato => formato.Nom_formato);
 
+        console.log(arrayFormatos);
+
         const iteraciones = await database.getInteraciones(userID);
         const arrayIteraciones = iteraciones.map(iteracion => iteracion.Nom_interaccion);
 

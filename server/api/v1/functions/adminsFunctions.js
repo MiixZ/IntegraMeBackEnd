@@ -30,7 +30,7 @@ async function insertTeacher(req, res) {
             }
 
             // Encriptar contraseña.
-            const passwordHash = encrypt(password);
+            const passwordHash = await encrypt(password);
 
             // Insertar profesor.
             const resultado = await database.InsertarProfesor(name, lastname1, lastname2, nickname, passwordHash);
@@ -120,7 +120,6 @@ async function registAdmin(req, res) {
         res.status(500).json({ error: 'Token has expired or you are not identified.' });
     }
 }
-
 
 async function insertClass(req, res) {
     try {

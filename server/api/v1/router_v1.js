@@ -108,7 +108,7 @@ routerv1.post('/students/login/', studentsFN.loginStudent);
 // ------------------------- FUNCIONES DE PROFESORES -------------------------------------
 
 /** 
- * @api {get} /teachers/get Devuelve un array con los profesores.       A PROBAR
+ * @api {get} /teachers/get Devuelve un array con los profesores.
  * @apiName GetTeachers
  * @apiGroup Teachers
  * 
@@ -119,7 +119,7 @@ routerv1.post('/students/login/', studentsFN.loginStudent);
 routerv1.get('/teachers/get', teachersFN.getTeachers);
 
 /**
- * @api {post} /teachers/signIn Logea al profesor.      A PROBAR
+ * @api {post} /teachers/signIn Logea al profesor.
  * @apiName Inicio Sesión Profesor
  * @apiGroup Teachers
  * 

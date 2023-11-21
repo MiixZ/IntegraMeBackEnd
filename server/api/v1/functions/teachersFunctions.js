@@ -30,7 +30,7 @@ async function login(req, res) {
         const hash = await database.GetPassword(nickname);
         const teacherData = await database.TeacherData(nickname);
 
-        if (hash.length > 0 && await compare(password, hash[0].Password_hash)) {
+        if (hash.length > 0 && await general.compare(password, hash[0].Password_hash)) {
             const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
             const token = jwt.sign({ idTeacher: teacherData[0].ID_profesor, nickname, EXP: fecha}, secret_teacher);
             try {

@@ -4,10 +4,10 @@ const baseDatos = require('./general.js');
 
 const connection = baseDatos.connection;
 
-async function InsertarProfesor(nombre, apellido1, apellido2, nickname, password){
+async function InsertarProfesor(name, lastname1, lastname2, nickname, password) {
   return new Promise((resolve, reject) => {
     const lastId = connection.query('CALL InsertarProfesor(?, ?, ?, ?, ?)',
-                    [nombre, apellido1, apellido2, nickname, password], (error, results, fields) => {
+                    [name, lastname1, lastname2, nickname, password], (error, results, fields) => {
       if (error) {
         console.error('Error inserting teacher.', error);
         reject(error);
@@ -49,17 +49,17 @@ async function InsertarAdmin(nombre, apellido1, apellido2, nickname, password) {
 async function InsertarAlumno(name, lastname1, lastname2, grade, tutor) {
   const sql = "CALL InsertarAlumno(?, ?, ?, ?, @idAlum); SELECT @idAlum;";
   const values = [name, lastname1, lastname2, grade];
+  let idAlum = null;
 
   const insertarAlumno = new Promise((resolve, reject) => {
     connection.query(sql, values, (error, results, fields) => {
       if (error) {
-        console.error('Error insertando student.', error);
+        console.error('Error inserting student.', error);
         reject(error);
         return;
       }
-      const idAlum = results[1][0]['@idAlum']; // get the returned value of idAlum
-      console.log('idAlum: ', idAlum);
-      resolve(idAlum);
+      idAlum = results[1][0]['@idAlum']; // It is scary but it works
+      resolve({ results, idAlum });
     });
   });
 
@@ -78,11 +78,19 @@ async function InsertarAlumno(name, lastname1, lastname2, grade, tutor) {
     });
 
     if (result.length > 0 && result[0].Aula_asignada != null) {
-      ActualizarAlumno(idAlum, tutor, result[0].Aula_asignada);
+      new Promise((resolve, reject) => {
+        connection.query('UPDATE ALUMNOS SET ID_tutor = ?, Aula_asignada = ? WHERE ID_alumno = ?',
+                        [tutor, result[0].Aula_asignada, idAlum], (error, results, fields) => {
+          if (error) {
+            console.log('Error updating student.', error);
+            reject(error);
+            return;
+          }
+          resolve(results);
+        });
+      });
     }
   }
-
-  return insertarAlumno;
 }
 
 async function InsertarAula(numeroAula, capacidad) {
@@ -91,20 +99,6 @@ async function InsertarAula(numeroAula, capacidad) {
                     [numeroAula, capacidad], (error, results, fields) => {
       if (error) {
         console.error('Error inserting class.', error);
-        reject(error);
-        return;
-      }
-      resolve(results);
-    });
-  });
-}
-
-async function ActualizarAlumno(id, idTutor, aulaAsignada) {
-  return new Promise((resolve, reject) => {
-    connection.query('UPDATE ALUMNOS SET ID_tutor = ?, Aula_asignada = ? WHERE ID = ?',
-                    [idTutor, aulaAsignada, id], (error, results, fields) => {
-      if (error) {
-        console.error('Error updating student.', error);
         reject(error);
         return;
       }

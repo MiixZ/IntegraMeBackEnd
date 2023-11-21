@@ -191,7 +191,6 @@ BEGIN
     INSERT INTO PROFESORES (ID_profesor, Nombre, Apellido1, Apellido2, NickName, Password_hash)
     VALUES (last_id, Nombre_param, Apellidos_param1, Apellidos_param2, Nickname, Password_param);
 
-    RETURN last_id;
 END //
 
 DELIMITER ;

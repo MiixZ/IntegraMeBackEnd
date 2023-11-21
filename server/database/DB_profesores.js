@@ -6,7 +6,7 @@ const connection = baseDatos.connection;
 
 async function TeacherData(nickname) {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT ID_profesor, Nombre, Apellido1, Apellido2, Aula_asiganada FROM PROFESORES WHERE NickName = ?',
+    connection.query('SELECT ID_profesor, Nombre, Apellido1, Apellido2, Aula_asignada FROM PROFESORES WHERE NickName = ?',
                 [nickname] , (error, results, fields) => {
         if (error) {
             console.error('Error searching teacher data', error);
