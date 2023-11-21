@@ -20,7 +20,7 @@ routerv1.get('/', (req, res) => {
 routerv1.use('/auth', AuthRouter);
 
 // Con esta secuencia conseguimos enviar una imagen que esté en la carpeta /images directamente con la url.
-// Por ejemplo, a una imagen nuestra imagen.png se puede acceder con la url http://35.210.189.6:6969/api/v1/images/<idImagen>
+// Por ejemplo, a una imagen nuestra imagen.png se puede acceder con la url http://34.175.9.11:6969/api/v1/images/<idImagen>
 routerv1.use('/images', express.static('images', { extensions : imageExtensions }));
 
 // Middleware para servir archivos estáticos (por ejemplo, CSS, JavaScript). Por ahora no los devolvemos, tiene que ver con la web.
