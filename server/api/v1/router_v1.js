@@ -68,7 +68,7 @@ routerv1.get('/students/:userID/identityCard', studentsFN.getIdentityCard);
 
 // FUNCIONA CORRECTAMENTE
 /**
- * @api {get} /:userID/authMethod Devuelve el método de autenticación del alumno.   A PROBAR
+ * @api {get} /:userID/authMethod Devuelve el método de autenticación del alumno.   Probado por Guille.
  * @apiName authMethod
  * @apiGroup Students
  * 
@@ -82,7 +82,7 @@ routerv1.get('/students/:userID/authMethod', studentsFN.getAuthMethod);
 
 // FUNCIONA CORRECTAMENTE
 /**
- * @api {get} /:userID/contentProfile Devuelve el contenido del perfil del alumno.      A PROBAR
+ * @api {get} /:userID/contentProfile Devuelve el contenido del perfil del alumno.      Probado por Guille.
  * @apiName ProfileContent
  * @apiGroup Students
  * 
@@ -95,7 +95,7 @@ routerv1.get('/students/:userID/authMethod', studentsFN.getAuthMethod);
 routerv1.get('/students/:userID/contentProfile', studentsFN.getProfileContent);
 
 /**
- * @api {post} /students/signIn Logea al alumno.            A PROBAR
+ * @api {post} /students/signIn Logea al alumno.            Probado por Guille.
  * @apiName Inicio Sesión Alumno
  * @apiGroup Students
  * 
@@ -103,7 +103,7 @@ routerv1.get('/students/:userID/contentProfile', studentsFN.getProfileContent);
  * @apiError {String} No se ha encontrado el alumno.
  * @apiError {String} Error en la solicitud.
  */
-routerv1.post('/students/login/', studentsFN.loginStudent);
+routerv1.post('/students/signin/', studentsFN.loginStudent);
 
 // ------------------------- FUNCIONES DE PROFESORES -------------------------------------
 

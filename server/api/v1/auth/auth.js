@@ -82,7 +82,7 @@ AuthRouter.post('/updateClassTeacher', adminsFN.updateClassTeacher);
  */
 AuthRouter.post('/CheckToken', generalFN.checkToken);
 
-AuthRouter.get('/students/:userID/profile', studentsFN.getProfileContent);
+AuthRouter.get('/students/:userID/profile', studentsFN.getProfile);
 
  /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {

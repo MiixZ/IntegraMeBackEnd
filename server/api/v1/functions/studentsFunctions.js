@@ -4,6 +4,7 @@ const { encrypt, compare, checkearToken } = require('../../../database/general.j
 
 const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET_STUDENT;
+const secret_teacher = process.env.JWT_SECRET_TEACHER;
 
 async function getIdentityCardsAll(req, res) {
     try {
@@ -117,11 +118,9 @@ async function getProfileContent(req, res) {
 
         // Obtener contenido del perfil del alumno.
         const formatos = await database.getFormatos(userID);
-        const arrayFormatos = formatos.map(formato => formato.Nom_formato);
-
-        console.log(arrayFormatos);
-
         const iteraciones = await database.getInteraciones(userID);
+
+        const arrayFormatos = formatos.map(formato => formato.Nom_formato);
         const arrayIteraciones = iteraciones.map(iteracion => iteracion.Nom_interaccion);
 
         if (arrayIteraciones.length >= 1 && arrayFormatos.length >= 1) {
@@ -131,14 +130,96 @@ async function getProfileContent(req, res) {
                 interactionMethods: arrayIteraciones
             });
         } else {
-            res.status(404).json({ error: 'Could not get student or there is no information.' });
+            res.status(404).json({ error: 'No se ha encontrado el alumno o no tiene información' });
         }
     } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+        console.error('Error en la solicitud:', error);
+        res.status(500).json({ error: 'Error en la solicitud' });
     }
 }
 
-/*      MISMA QUE ARRIBA???
+/*async function getProfileContent(req, res) {
+    try {
+        // Obtener datos del cuerpo de la solicitud.
+        const userID = req.params.userID;
+        is_teacher = false;
+
+        if (!req.headers.authorization) {
+            return res.status(401).json({ error: 'Token not sent' });
+        }
+
+        const token = req.headers.authorization.split(' ')[1];
+        decoded_token = null;
+
+        try {
+            decoded_token = await checkearToken(token, secret_teacher);
+            is_teacher = true;
+            console.log("Es profesor.");
+        } catch (error) {
+            console.log("No es profesor.");     // TODO: Probar con token de alumno.
+            decoded_token = await checkearToken(token, secret);
+        }
+
+        if (is_teacher || decoded_token.idStudent == userID) {
+            // Obtener contenido del perfil del alumno.
+            const formatos = await database.getFormatos(userID);
+            const arrayFormatos = formatos.map(formato => formato.Nom_formato);
+
+            const iteraciones = await database.getInteraciones(userID);
+            const arrayIteraciones = iteraciones.map(iteracion => iteracion.Nom_interaccion);
+
+            if (arrayIteraciones.length >= 1 && arrayFormatos.length >= 1) {
+                // Enviar respuesta al cliente.
+                res.json({
+                    contentAdaptationFormats: arrayFormatos,
+                    interactionMethods: arrayIteraciones
+                });
+            } else {
+                res.status(404).json({ error: 'Could not get student or there is no information.' });
+            }
+        } else {
+            res.status(401).json({ error: 'The user do not have permissions'});
+        }
+    } catch {
+        res.status(500).json({ error: 'Error in the request' });
+    }
+}*/
+
+/**
+ *     try {
+        // Obtener datos del cuerpo de la solicitud.
+        const userID = req.params.userID;
+        is_teacher = false;
+
+        const token = req.headers.authorization.split(' ')[1];
+
+        await checkearToken(token, secret)
+        .then(async (decoded) => {
+            // Obtener contenido del perfil del alumno.
+            const formatos = await database.getFormatos(userID);
+            const arrayFormatos = formatos.map(formato => formato.Nom_formato);
+
+            const iteraciones = await database.getInteraciones(userID);
+            const arrayIteraciones = iteraciones.map(iteracion => iteracion.Nom_interaccion);
+
+            if (arrayIteraciones.length >= 1 && arrayFormatos.length >= 1) {
+                // Enviar respuesta al cliente.
+                res.json({
+                    contentAdaptationFormats: arrayFormatos,
+                    interactionMethods: arrayIteraciones
+                });
+            } else {
+                res.status(404).json({ error: 'Could not get student or there is no information.' });
+            }
+        }).catch((error) => {
+            res.status(401).json({ error: 'Token has expired.' });
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Error in the request' });
+    }
+ */
+
+
 async function getProfile(req, res) {
     try {
         // Coge el token enviado en el header de la solicitud.
@@ -198,7 +279,7 @@ async function getProfile(req, res) {
         res.status(500).json({ error: 'Request error' });
     }
 }
-*/
+
 
 async function loginStudent(req, res) {
     try {
@@ -231,11 +312,12 @@ async function loginStudent(req, res) {
     }
 }
 
+
 module.exports = {
     getIdentityCardsAll,
     getIdentityCard,
     getAuthMethod,
     getProfileContent,
-    //getProfile,
+    getProfile,
     loginStudent
 };

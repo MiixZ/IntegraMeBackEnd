@@ -48,6 +48,10 @@ async function login(req, res) {
     }
 }
 
+async function registPerfilStudent(req, res) {
+    const { idStudent, avatarId, idSet, PasswordFormat, Password } = req.body;
+}
+
 module.exports = {
     getTeachers,
     login
