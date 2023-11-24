@@ -1,27 +1,31 @@
-require('dotenv').config();
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 const schedule = require('node-schedule');
 
 const jwt = require('jsonwebtoken');
 
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    multipleStatements: true
-});
+let connection;
 
 async function conectarBD() {
-    connection.connect((err) => {
-        if(err) {
-            console.error('Error conectando a la base de datos', err);
-            return;
+    if (!connection) {
+        try {
+            connection = await mysql.createConnection({
+                host: process.env.DB_HOST,
+                port: process.env.DB_PORT,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_DATABASE,
+                multipleStatements: true
+            });
+            console.log('Connected to the database');
+        } catch (error) {
+            console.error('Error connecting to the database', error);
+            throw error;
         }
-        console.log('Conectado a la base de datos');
-    });
+    }
+
+    console.log('Returning connection');
+    return connection;
 }
 
 async function desconectarBD() {

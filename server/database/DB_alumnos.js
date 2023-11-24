@@ -1,8 +1,9 @@
 require('dotenv').config();
-const mysql = require('mysql2');
 const baseDatos = require('./general.js');
 
-const connection = baseDatos.connection;
+async function conectar() {
+    return await baseDatos.conectarBD();
+}
 
 async function getIdentityCards() {
     return new Promise ((resolve, reject) => {
@@ -75,52 +76,53 @@ async function getImagesAndSteps(idSet) {
 }
 
 async function getAuthMethod(idStudent) {
-    return new Promise ((resolve, reject) => {
-        connection.query(
-            'SELECT FormatoPassword, ID_set FROM PERFIL_ALUMNOS WHERE ID_alumno = ?',
-            [idStudent], (error, results, fields) => {
-                if (error) {
-                    console.error('Error getting authentication method.', error);
-                    reject(error);
-                    return;
-                }
-                resolve(results);
-            }
-        );
-    });
-}
+    const connection = await conectar();
 
+    const [rows, fields] = await connection.execute(
+        'SELECT FormatoPassword, ID_set FROM PERFIL_ALUMNOS WHERE ID_alumno = ?',
+        [idStudent], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting authentication method.', error);
+            }
+        }
+    );
+
+    const authMethod = rows[0].FormatoPassword;
+    const idSet = rows[0].ID_set;
+    
+    return [authMethod, idSet];
+}
 
 async function getFormatos(idStudent) {
-    return new Promise ((resolve, reject) => {
-        connection.query(
-            'SELECT Nom_formato FROM FORMATOS_ALUMNOS WHERE ID_alumno = ?',
-            [idStudent], (error, results, fields) => {
-                if (error) {
-                    console.error('Error getting format.', error);
-                    reject(error);
-                    return;
-                }
-                resolve(results);
+    const connection = await conectar();
+    
+    const [rows, fields] = await connection.execute(
+        'SELECT Nom_formato FROM FORMATOS_ALUMNOS WHERE ID_alumno = ?',
+        [idStudent], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting format.', error);
             }
-        );
-    });
+        }
+    );
+
+    const formatos = rows.map(result => result.Nom_formato);
+    return formatos;
 }
 
-async function getInteraciones(idStudent) {
-    return new Promise ((resolve, reject) => {
-        connection.query(
-            'SELECT Nom_interaccion FROM INTERACCION_ALUMNOS WHERE ID_alumno = ?',
-            [idStudent], (error, results, fields) => {
-                if (error) {
-                    console.error('Error getting interaction.', error);
-                    reject(error);
-                    return;
-                }
-                resolve(results);
+async function getInteracciones(idStudent) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT Nom_interaccion FROM INTERACCION_ALUMNOS WHERE ID_alumno = ?',
+        [idStudent], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting interaction.', error);
             }
-        );
-    });
+        }
+    );
+
+    const interacciones = rows.map(result => result.Nom_interaccion);
+    return interacciones;
 }
 
 async function getData(idStudent) {
@@ -189,7 +191,7 @@ module.exports = {
     getImagesAndSteps,
     getAvatar,
     getFormatos,
-    getInteraciones,
+    getInteracciones,
     getData,
     getPerfil,
     getPassword,

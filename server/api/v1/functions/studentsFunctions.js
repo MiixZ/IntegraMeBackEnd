@@ -72,27 +72,24 @@ async function getAuthMethod(req, res) {
      * }
      */
 
-    // Estos datos deberían estar en PerfilAlumno
     // Enviar respuesta al cliente.
     try {
         // Obtener datos del cuerpo de la solicitud.
         const userID = req.params.userID;
 
         // Obtener método de autenticación del alumno.
-        const authMethod = await database.getAuthMethod(userID);
-        if (authMethod.length >= 1) {
-            // Obtener todas las imágenes
-            const tipo_autenticacion = authMethod[0].FormatoPassword;
-            
-            if (tipo_autenticacion == "TextAuth" ) {
+        const [formatoPassword, ID_set] = await database.getAuthMethod(userID);
+
+        if (formatoPassword) {
+            if (formatoPassword === "TextAuth") {
                 res.json({
-                    type: authMethod[0].FormatoPassword
+                    type: formatoPassword
                 });
-            } else if (tipo_autenticacion == "ImageAuth" && authMethod[0].ID_set != null) {
-                const images = await database.getImagesAndSteps(authMethod[0].ID_set);
+            } else if (formatoPassword === "ImageAuth" && ID_set) {     // Segunda parte.
+                const images = await database.getImagesAndSteps(ID_set);
                 const steps = images.length > 0 ? images[0].Steps : 0;
                 res.json({
-                    type: authMethod[0].FormatoPassword,
+                    type: formatoPassword,
                     images: images.map(image => ({
                         id: image.ID_imagen,
                         altDescription: image.Descripcion
@@ -118,23 +115,19 @@ async function getProfileContent(req, res) {
 
         // Obtener contenido del perfil del alumno.
         const formatos = await database.getFormatos(userID);
-        const iteraciones = await database.getInteraciones(userID);
+        const iteraciones = await database.getInteracciones(userID);
 
-        const arrayFormatos = formatos.map(formato => formato.Nom_formato);
-        const arrayIteraciones = iteraciones.map(iteracion => iteracion.Nom_interaccion);
-
-        if (arrayIteraciones.length >= 1 && arrayFormatos.length >= 1) {
+        if (formatos.length >= 1 && iteraciones.length >= 1) {
             // Enviar respuesta al cliente.
             res.json({
-                contentAdaptationFormats: arrayFormatos,
-                interactionMethods: arrayIteraciones
+                contentAdaptationFormats: formatos,
+                interactionMethods: iteraciones
             });
         } else {
-            res.status(404).json({ error: 'No se ha encontrado el alumno o no tiene información' });
+            res.status(404).json({ error: 'There is not information of this student.' });
         }
     } catch (error) {
-        console.error('Error en la solicitud:', error);
-        res.status(500).json({ error: 'Error en la solicitud' });
+        res.status(500).json({ error: 'Error on request.' });
     }
 }
 
