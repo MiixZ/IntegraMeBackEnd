@@ -55,23 +55,27 @@ async function cleanUpTokens() {
     });
 }
 
-//Checker comportamiento de esta función con los errores
+// Checker comportamiento de esta función con los errores. 
 async function checkearToken(token, typeSecret) {
-    return VerificarToken(token).then(existe => {
-        if (existe) {
-            return new Promise((resolve, reject) => {
-                jwt.verify(token, typeSecret, (error, decoded) => {
-                    if (error || Date.now() > decoded.EXP) {
-                        reject(error);
-                    }
-                    resolve(decoded);
-                });
+    existe =  await VerificarToken(token);
+    if (existe) {
+        console.log('Token exists in ex database');
+        return new Promise((resolve, reject) => {
+            jwt.verify(token, typeSecret, (error, decoded) => {
+                if (error || Date.now() > decoded.EXP) {
+                    console.log('fercha');
+                    reject(error);
+                }
+                console.log('Token is valid, sending...');
+                resolve(decoded);
             });
-        } else {
-            throw new Error('Token not found in the database');
-        }
-    });
-}
+        });
+    } else {
+        console.log('Token does not exist in the database');
+        throw new Error('Token not found in the database');
+    }
+};
+
 
 async function VerificarToken(token) {
     return new Promise((resolve, reject) => {

@@ -191,7 +191,6 @@ BEGIN
     INSERT INTO PROFESORES (ID_profesor, Nombre, Apellido1, Apellido2, NickName, Password_hash)
     VALUES (last_id, Nombre_param, Apellidos_param1, Apellidos_param2, Nickname, Password_param);
 
-    RETURN last_id;
 END //
 
 DELIMITER ;
@@ -252,3 +251,4 @@ VALUES
 
 INSERT INTO PERFIL_ALUMNOS (ID_alumno, Avatar_id, FormatoPassword, Password_hash)
 VALUES (6, 1, 'TextAuth', '$2b$10$tiSJ79Iy/Moga5gsTQFmcuuHdky8RB5.5Uk75aeb5rQvcQs5Xdd5e');
+

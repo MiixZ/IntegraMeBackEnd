@@ -1,7 +1,6 @@
 const general = require('../../../database/general.js');
 const { encrypt, compare, checkearToken } = require('../../../database/general.js');
 
-
 async function checkToken(req, res) {
     try {
         // Coge el token enviado en el header de la solicitud.
