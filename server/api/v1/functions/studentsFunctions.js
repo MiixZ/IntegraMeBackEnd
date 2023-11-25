@@ -3,63 +3,78 @@ const database = require('../../../database/DB_alumnos.js');
 const { encrypt, compare, checkearToken } = require('../../../database/general.js');
 
 const jwt = require('jsonwebtoken');
-const { format } = require('mysql2');
 const secret = process.env.JWT_SECRET_STUDENT;
-const secret_teacher = process.env.JWT_SECRET_TEACHER;
 
-async function getIdentityCardsAll(req, res) {
+async function getIdentityCardsAll(req, res) {          // Probar.
+    // Obtener tarjetas de identidad del alumno.
+    let ids = [];
+    let nicknames = [];
+
     try {
-        // Obtener tarjetas de identidad del alumno.
-        const identityCards = await database.getIdentityCards();
-
-        // Enviar respuesta al cliente
-        /**
-         * El json tendría que tener este formato:
-         * Se devuelve una lista []:{"userId": 2,"nickname": "asd","avatar": {"id": id_imagen,"altDescription": "descripción textual"}
-        */
-        const response = [];
-        for (let i = 0; i < identityCards.length; i++) {
-            const identityCard = identityCards[i];
-            const avatar = await database.getAvatar(identityCard.ID_alumno);
-            response.push({
-                userId: identityCard.ID_alumno,
-                nickname: identityCard.NickName,
-                avatar: {
-                    id: avatar[0].id,
-                    altDescription: avatar[0].altDescription
-                }
-            });
-        }
-        res.json(response);
+        [ids, nicknames] = await database.getIdentityCards();
     } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+        return res.status(500).json({ error: 'Error getting identity cards.' });
     }
+
+    // Enviar respuesta al cliente
+    /**
+     * El json tendría que tener este formato:
+     * Se devuelve una lista []:{"userId": 2,"nickname": "asd","avatar": {"id": id_imagen,"altDescription": "descripción textual"}
+    */
+    const response = [];
+
+    for (let i = 0; i < ids.length; i++) {
+        let avatar_id = -1;
+        let avatar_description = "";
+
+        try {
+            [avatar_id, avatar_description] = await database.getAvatar(ids[i]);     // [0] es el id del alumno. [1] es el nickname.
+        } catch (error) {
+            return res.status(500).json({ error: 'Error getting ' + nicknames[i] + ' avatar.' });
+        }
+
+        response.push({
+            userId: ids[i],
+            nickname: nicknames[i],
+            avatar: {
+                id: avatar_id,     // Puede ser avatar.avatarId y avatar.altDescription.
+                altDescription: avatar_description
+            }
+        });
+    }
+
+    res.json(response);
 }
 
-async function getIdentityCard(req, res) {
-    try {
-        // Obtener datos del cuerpo de la solicitud.
-        const idStudent = req.params.idStudent;
+async function getIdentityCard(req, res) {          // Probar.
+    // Obtener datos del cuerpo de la solicitud.
+    const idStudent = req.params.idStudent;
+    let id_Student = -1;
+    let nickname = "";
 
-        // Obtener tarjetas de identidad del alumno.
-        const identityCard = await database.getIdentityCard(idStudent);
-        const avatar = await database.getAvatar(idStudent);
-        if (identityCard.length >= 1 && avatar.length >= 1) {
-            // Enviar respuesta al cliente
-            res.json({
-                userId: identityCard[0].ID_alumno,
-                nickname: identityCard[0].NickName,
-                avatar: {
-                    id: avatar[0].id,
-                    altDescription: avatar[0].altDescription
-                }
-            });
-        } else {
-            res.status(404).json({ error: 'Could not find student or avatar.' });
-        }
+    let avatar_id = -1;
+    let avatar_description = "";
+
+    // Obtener tarjetas de identidad del alumno.
+    try {
+        [id_Student, nickname] = await database.getIdentityCard(idStudent);       // [id, nickname]
+        [avatar_id, avatar_description] = await database.getAvatar(idStudent);                   // [avatarId, altDescription]
     } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+        res.status(500).json({ error: 'Error getting identity card or avatar.' });
+        return;
     }
+
+    // Enviar respuesta al cliente
+    const response = {
+        userId: id_Student,        // Puede ser identityCard.id e identityCard.nickname.
+        nickname: nickname,
+        avatar: {
+            id: avatar_id,              // Puede ser avatar.avatarId y avatar.altDescription.
+            altDescription: avatar_description
+        }
+    };
+
+    res.json(response);
 }
 
 // TODO: Probar.
@@ -75,15 +90,15 @@ async function getAuthMethod(req, res) {
 
     // Obtener datos del cuerpo de la solicitud.
     const userID = req.params.userID;
+    let formatoPassword = "";
+    let ID_set = -1;
 
     // Obtener método de autenticación del alumno.
     try {
-        const [formatoPassword, ID_set] = await database.getAuthMethod(userID);
+        [formatoPassword, ID_set] = await database.getAuthMethod(userID);
     } catch (error) {
-        res.status(404).json({ error: 'Error getting AuthMethod.' });
-        return;
+        return res.status(404).json({ error: 'Error getting AuthMethod.' });
     }
-
 
     if (formatoPassword === "TextAuth") {
         res.json({
@@ -104,36 +119,33 @@ async function getAuthMethod(req, res) {
                 steps: steps
             });
         } catch (error) {
-            res.status(404).json({ error: 'Error getting images and steps.' });
-            return;
+            return res.status(404).json({ error: 'Error getting images and steps.' });
         }
     } else {
-        res.status(404).json({ error: 'Auth is not Text or Image or authMethod' +
-        ' has no set assigned.' });
+        return res.status(404).json({ error: 'Auth is not Text or Image or authMethod' +
+                                             ' has no set assigned.' });
     }
 }
 
-async function getProfileContent(req, res) {
+async function getProfileContent(req, res) {        // Probar.
+    // Obtener datos del cuerpo de la solicitud.
+    const userID = req.params.userID;
+    let formats = [];
+    let interactions = [];
+
+    // Obtener contenido del perfil del alumno.
     try {
-        // Obtener datos del cuerpo de la solicitud.
-        const userID = req.params.userID;
-
-        // Obtener contenido del perfil del alumno.
-        const formatos = await database.getFormatos(userID);
-        const iteraciones = await database.getInteracciones(userID);
-
-        if (formatos.length >= 1 && iteraciones.length >= 1) {
-            // Enviar respuesta al cliente.
-            res.json({
-                contentAdaptationFormats: formatos,
-                interactionMethods: iteraciones
-            });
-        } else {
-            res.status(404).json({ error: 'There is not information of this student.' });
-        }
+        formats = await database.getFormatos(userID);
+        interactions = await database.getInteracciones(userID);
     } catch (error) {
-        res.status(500).json({ error: 'Error on request.' });
+        return res.status(500).json({ error: 'Error getting formats or interactions.' });
     }
+
+    // Enviar respuesta al cliente.
+    res.json({
+        contentAdaptationFormats: formats,
+        interactionMethods: interactions
+    });
 }
 
 /*async function getProfileContent(req, res) {
@@ -218,95 +230,100 @@ async function getProfileContent(req, res) {
  */
 
 
-async function getProfile(req, res) {
-    try {
-        // Coge el token enviado en el header de la solicitud.
-        if (!req.headers.authorization) {
-            return res.status(401).json({ error: 'Token not sent' });
-        }
-
-        const token = req.headers.authorization.split(' ')[1];
-
-        // Obtener datos del cuerpo de la solicitud.
-        const userID = req.params.userID;
-
-        const arrayData = await database.getData(userID);
-        //const arrayProfile = await database.getProfile(userID); // para el avatar
-
-        const arrayFormatos = [];
-        const arrayIteraciones = [];
-        const formatos = await database.getFormatos(userID);
-        const iteraciones = await database.getInteraciones(userID);
-
-        for (let i = 0; i < formatos.length; i++) {
-           arrayFormatos.push(formatos[i].Nom_formato);
-        }
-
-        for (let i = 0; i < iteraciones.length; i++) {
-            arrayIteraciones.push(iteraciones[i].Nom_interaccion);
-        }
-
-        //Verificamos token y lo decodificamos
-
-        try {
-            const decodedToken = await checkearToken(token, secret);
-            if (decodedToken.idStudent != userID) {
-                return res.status(401).json({ error: 'Invalid token' });
-            }
-        } catch (error) {
-            return res.status(401).json({ error: 'Invalid token' });
-        }
-
-        res.json({
-            type: "StudentProfile",
-            contentProfile: {
-                contentAdaptationFormats: arrayFormatos,
-                interactionMethods: arrayIteraciones
-            },
-            interactionMethods: arrayIteraciones,
-            name: arrayData[0].Nombre,
-            surnames: arrayData[0].Apellido1 + " " + arrayData[0].Apellido2,
-            nickname: arrayData[0].NickName,
-            avatar: {   // Por ahora devolvemos imagen random. En el futuro, se devolverá la imagen del alumno.
-                id: "1",
-                altDescription: "A Bob Esponja icon."
-            },
-        });
-
-    } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+async function getProfile(req, res) {           // Probar.
+    // Coge el token enviado en el header de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
     }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    // Obtener datos del cuerpo de la solicitud.
+    const userID = req.params.userID;
+    let Name = "";
+    let Lastname1 = "";
+    let Lastname2 = "";
+    let NickName = "";
+
+    let avatarId = -1;
+    let avatarDescription = "";
+
+    try {
+        [Name, Lastname1, Lastname2, NickName] = await database.getData(userID);
+        [avatarId, avatarDescription] = await database.getAvatar(userID);                   // [avatarId, altDescription
+    } catch (error) {
+        return res.status(404).json({ error: 'Could not get student data or avatar.' });
+    }
+    //const arrayProfile = await database.getProfile(userID); // para el avatar
+
+    const formatsArray = [];
+    const interactionsArray = [];
+
+    try {
+        const formatos = await database.getFormatos(userID);
+        const interactions = await database.getInteracciones(userID);
+
+        formatos.forEach(formato => formatsArray.push(formato.Nom_formato));
+        interactions.forEach(iteracion => interactionsArray.push(iteracion.Nom_interaccion));
+    } catch (error) {
+        return res.status(404).json({ error: 'Could not get formats or interactions' });
+    }
+
+    // Verificamos token y lo decodificamos
+    try {
+        const decodedToken = await checkearToken(token, secret);
+
+        if (decodedToken.idStudent != userID) {
+            return res.status(401).json({ error: 'Invalid token for user.' });
+        }
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    res.json({
+        type: "StudentProfile",
+        contentProfile: {
+            contentAdaptationFormats: formatsArray,
+            interactionMethods: interactionsArray
+        },
+        name: Name,
+        surnames: Lastname1 + " " + Lastname2,
+        nickname: NickName,
+        avatar: {
+            id: avatarId,
+            altDescription: avatarDescription
+        },
+    });
 }
 
+async function loginStudent(req, res) {             // Probar.
+    // Obtener datos del cuerpo de la solicitud.
+    let hash = "";
+    let studentData = "";
 
-async function loginStudent(req, res) {
+    // Verificar si todos los campos necesarios están presentes
+    if (!idStudent || !password) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
     try {
-        // Obtener datos del cuerpo de la solicitud.
-        const { idStudent, password } = req.body;
-
-        // Verificar si todos los campos necesarios están presentes
-        if (!idStudent || !password) {
-            return res.status(400).json({ error: 'All fields are required' });
-        }
-
-        const hash = await database.getPassword(idStudent);
-        const studentData = await database.studentData(idStudent);
-
-        if (hash.length > 0 && await compare(password, hash[0].Password_hash)) {
-            const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
-            const token = jwt.sign({ idStudent, nickname: studentData[0].NickName, EXP: fecha}, secret); //{ expiresIn: '1h' });
-            try {
-                await general.insertarToken(idStudent, token, fecha);
-                res.status(200).json({ token });
-            } catch {
-                reject(error);
-                return;
-            }
-        } else {
-            res.status(401).json({ error: 'Incorrect Credentials.' });
-        }
+        hash = await database.getPassword(idStudent);
+        studentData = await database.studentData(idStudent);
     } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+        return res.status(500).json({ error: 'Error getting student or password' });
+    }
+
+    if (await compare(password, hash[0].Password_hash)) {
+        const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
+        const token = jwt.sign({ idStudent, nickname: studentData[0].NickName, EXP: fecha}, secret); //{ expiresIn: '1h' });
+        try {
+            await general.insertarToken(idStudent, token, fecha);
+            res.status(200).json({ token });
+        } catch {
+            return res.status(500).json({ error: 'Error saving token' });
+        }
+    } else {
+        return res.status(401).json({ error: 'Incorrect Credentials.' });
     }
 }
 
