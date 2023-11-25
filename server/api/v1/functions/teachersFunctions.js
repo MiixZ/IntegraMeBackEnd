@@ -4,47 +4,51 @@ const general = require('../../../database/general.js');
 const jwt = require('jsonwebtoken');
 const secret_teacher = process.env.JWT_SECRET_TEACHER;
 
-
 async function getTeachers(req, res) {
-    try {
-        // Obtener profesores
-        const profesores = await database.obtenerProfesores();
+    let profesores = [];
 
-        // Enviar respuesta al cliente
-        res.json(profesores);
+    // Obtener profesores
+    try {
+        profesores = await database.getTeachers();
     } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+        return res.status(500).json({ error: 'Could not get teachers.' });
     }
+
+    // Enviar respuesta al cliente
+    res.json(profesores);
 }
 
-async function login(req, res) {
+async function login(req, res) {                // Probar.
+    // Obtener datos del cuerpo de la solicitud.
+    const { nickname, password } = req.body;
+
+    // Verificar si todos los campos necesarios están presentes
+    if (!nickname || !password) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    let hash = '';
+    let idTeacher = '', Name = '', lastname1 = '', lastname2 = '', classroom = '';
+
     try {
-        // Obtener datos del cuerpo de la solicitud.
-        const { nickname, password } = req.body;
-
-        // Verificar si todos los campos necesarios están presentes
-        if (!nickname || !password) {
-            return res.status(400).json({ error: 'All fields are required' });
-        }
-
-        const hash = await database.GetPassword(nickname);
-        const teacherData = await database.TeacherData(nickname);
-
-        if (hash.length > 0 && await general.compare(password, hash[0].Password_hash)) {
-            const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
-            const token = jwt.sign({ idTeacher: teacherData[0].ID_profesor, nickname, EXP: fecha}, secret_teacher);
-            try {
-                await general.insertarToken(teacherData[0].ID_profesor, token, fecha);
-                res.status(200).json({ token });
-            } catch {
-                reject(error);
-                return;
-            }
-        } else {
-            res.status(401).json({ error: 'Incorrect Credentials.' });
-        }
+        hash = await database.GetPassword(nickname);
+        [idTeacher, Name, lastname1, lastname2, classroom] = await database.TeacherData(nickname);
     } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+        return res.status(500).json({ error: 'Could not get password or teacher data.' });
+    }
+
+    if (await general.compare(password, hash[0].Password_hash)) {
+        const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
+        const token = jwt.sign({ idTeacher: idTeacher, nickname, EXP: fecha}, secret_teacher);
+        try {
+            await general.insertarToken(idTeacher, token, fecha);
+            res.status(200).json({ token });
+        } catch {
+            reject(error);
+            return;
+        }
+    } else {
+        res.status(401).json({ error: 'Incorrect Credentials.' });
     }
 }
 

@@ -1,53 +1,55 @@
 require('dotenv').config();
-const mysql = require('mysql2');
 const baseDatos = require('./general.js');
 
-const connection = baseDatos.connection;
+async function conectar() {
+  return await baseDatos.conectarBD();
+}
 
 async function TeacherData(nickname) {
-  return new Promise((resolve, reject) => {
-    connection.query('SELECT ID_profesor, Nombre, Apellido1, Apellido2, Aula_asignada FROM PROFESORES WHERE NickName = ?',
-                [nickname] , (error, results, fields) => {
-        if (error) {
-            console.error('Error searching teacher data', error);
-            reject(error);
-            return;
-        }
-        resolve(results);
-    });
-  });
+  const connection = await conectar();
+
+  const [rows, fields] = await connection.execute(
+    'SELECT ID_profesor, Nombre, Apellido1, Apellido2, Aula_asignada FROM PROFESORES WHERE NickName = ?',
+    [nickname]
+  );
+
+  const id = rows[0].ID_profesor;
+  const name = rows[0].Nombre;
+  const lastname1 = rows[0].Apellido1;
+  const lastname2 = rows[0].Apellido2;
+  const classroom = rows[0].Aula_asignada;
+
+  return [id, name, lastname1, lastname2, classroom];
 }
 
-async function GetPassword(nickname) {
-  return new Promise((resolve, reject) => {
-    connection.query('Select Password_hash from PROFESORES where NickName = ? limit 1',
-                [nickname] , (error, results, fields) => {
-        if (error) {
-            console.error('Error getting password', error);
-            reject(error);
-            return;
-        }
-        resolve(results);
-    });
-  });
+async function getPassword(nickname) {
+  const connection = await conectar();
+
+  const [rows, fields] = await connection.execute(
+    'SELECT Password_hash FROM PROFESORES WHERE NickName = ? LIMIT 1',
+    [nickname]
+  );
+
+  const password = rows[0].Password_hash;
+
+  return password;
 }
 
-async function obtenerProfesores() {
-  return new Promise((resolve, reject) => {
-      connection.query('SELECT * FROM PROFESORES', (error, results, fields) => {
-          if (error) {
-              console.error('Error getting teachers.', error);
-              reject(error);
-              return;
-          }
-          resolve(results);
-      });
-  });
+async function getTeachers() {
+  const connection = await conectar();
+
+  const [rows, fields] = await connection.execute(
+    'SELECT * FROM PROFESORES'
+  );
+
+  const teachers = rows.map(result => result);
+
+  return teachers;
 }
 
 module.exports = {
     TeacherData,
-    GetPassword,
-    obtenerProfesores
+    getPassword,
+    getTeachers
 };
 
