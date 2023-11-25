@@ -165,7 +165,7 @@ async function getPerfil(idStudent) {
 async function getPassword(id) {
     const connection = await conectar();
 
-    const [rows, fields] = await connection.execute(
+    const [row] = await connection.execute(
         'SELECT Password_hash FROM PERFIL_ALUMNOS WHERE ID_alumno = ? LIMIT 1',
         [id], (error, results, fields) => {
             if (error) {
@@ -174,7 +174,7 @@ async function getPassword(id) {
         }
     );
 
-    const password = rows.map(result => result.Password_hash);
+    const password = row[0].Password_hash;
 
     return password;
 }
@@ -182,8 +182,8 @@ async function getPassword(id) {
 async function studentData(id) {
     const connection = await conectar();
 
-    const [rows, fields] = await connection.execute(
-        'SELECT NickName FROM ALUMNOS WHERE ID_alumno = ?',
+    const [row] = await connection.execute(
+        'SELECT NickName FROM ALUMNOS WHERE ID_alumno = ? LIMIT 1',
         [id], (error, results, fields) => {
             if (error) {
                 throw new Error('Error saving token', error);
@@ -191,7 +191,7 @@ async function studentData(id) {
         }
     );
 
-    const data = rows.map(result => result.NickName);
+    const data = row[0].NickName;
 
     return data;
 }
