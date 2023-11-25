@@ -3,6 +3,7 @@ const database = require('../../../database/DB_alumnos.js');
 const { encrypt, compare, checkearToken } = require('../../../database/general.js');
 
 const jwt = require('jsonwebtoken');
+const { format } = require('mysql2');
 const secret = process.env.JWT_SECRET_STUDENT;
 const secret_teacher = process.env.JWT_SECRET_TEACHER;
 
@@ -72,39 +73,44 @@ async function getAuthMethod(req, res) {
      * }
      */
 
-    // Enviar respuesta al cliente.
+    // Obtener datos del cuerpo de la solicitud.
+    const userID = req.params.userID;
+
+    // Obtener método de autenticación del alumno.
     try {
-        // Obtener datos del cuerpo de la solicitud.
-        const userID = req.params.userID;
-
-        // Obtener método de autenticación del alumno.
         const [formatoPassword, ID_set] = await database.getAuthMethod(userID);
-
-        if (formatoPassword) {
-            if (formatoPassword === "TextAuth") {
-                res.json({
-                    type: formatoPassword
-                });
-            } else if (formatoPassword === "ImageAuth" && ID_set) {     // Segunda parte.
-                const images = await database.getImagesAndSteps(ID_set);
-                const steps = images.length > 0 ? images[0].Steps : 0;
-                res.json({
-                    type: formatoPassword,
-                    images: images.map(image => ({
-                        id: image.ID_imagen,
-                        altDescription: image.Descripcion
-                    })),
-                    steps: steps
-                });
-            } else {
-                res.status(404).json({ error: 'Auth is not Text or Image or authMethod' +
-                ' has no set assigned.' });
-            }
-        } else {
-            res.status(404).json({ error: 'Error getting AuthMethod.' });
-        }
     } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+        res.status(404).json({ error: 'Error getting AuthMethod.' });
+        return;
+    }
+
+    if (formatoPassword) {
+        if (formatoPassword === "TextAuth") {
+            res.json({
+                type: formatoPassword
+            });
+
+            return;
+            
+        } else if (formatoPassword === "ImageAuth" && ID_set) { 
+            const imagesAndSteps = await database.getImagesAndSteps(ID_set);
+            const steps = imagesAndSteps.steps;
+            const images = imagesAndSteps.images.map(image => ({
+                id: image.id,
+                altDescription: image.altDescription
+            }));
+
+            res.json({
+                type: formatoPassword,
+                images: images,
+                steps: steps
+            });
+        } else {
+            res.status(404).json({ error: 'Auth is not Text or Image or authMethod' +
+            ' has no set assigned.' });
+        }
+    } else {
+        res.status(404).json({ error: 'Error getting AuthMethod.' });
     }
 }
 
