@@ -84,15 +84,13 @@ async function getAuthMethod(req, res) {
         return;
     }
 
-    if (formatoPassword) {
-        if (formatoPassword === "TextAuth") {
-            res.json({
-                type: formatoPassword
-            });
 
-            return;
-            
-        } else if (formatoPassword === "ImageAuth" && ID_set) { 
+    if (formatoPassword === "TextAuth") {
+        res.json({
+            type: formatoPassword
+        });
+    } else if (formatoPassword === "ImageAuth" && ID_set) {
+        try { 
             const imagesAndSteps = await database.getImagesAndSteps(ID_set);
             const steps = imagesAndSteps.steps;
             const images = imagesAndSteps.images.map(image => ({
@@ -105,12 +103,13 @@ async function getAuthMethod(req, res) {
                 images: images,
                 steps: steps
             });
-        } else {
-            res.status(404).json({ error: 'Auth is not Text or Image or authMethod' +
-            ' has no set assigned.' });
+        } catch (error) {
+            res.status(404).json({ error: 'Error getting images and steps.' });
+            return;
         }
     } else {
-        res.status(404).json({ error: 'Error getting AuthMethod.' });
+        res.status(404).json({ error: 'Auth is not Text or Image or authMethod' +
+        ' has no set assigned.' });
     }
 }
 
