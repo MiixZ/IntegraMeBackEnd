@@ -301,6 +301,9 @@ async function loginStudent(req, res) {             // Probar.
     let hash = "";
     let studentData = "";
 
+    const idStudent = req.body.idStudent;
+    const password = req.body.password;
+
     // Verificar si todos los campos necesarios están presentes
     if (!idStudent || !password) {
         return res.status(400).json({ error: 'All fields are required' });
@@ -313,9 +316,9 @@ async function loginStudent(req, res) {             // Probar.
         return res.status(500).json({ error: 'Error getting student or password' });
     }
 
-    if (await compare(password, hash[0].Password_hash)) {
+    if (await compare(password, hash)) {
         const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
-        const token = jwt.sign({ idStudent, nickname: studentData[0].NickName, EXP: fecha}, secret); //{ expiresIn: '1h' });
+        const token = jwt.sign({ idStudent, nickname: studentData, EXP: fecha}, secret); //{ expiresIn: '1h' });
         try {
             await general.insertarToken(idStudent, token, fecha);
             res.status(200).json({ token });
