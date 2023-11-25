@@ -44,9 +44,9 @@ async function getAvatar(idStudent) {
     );
 
     const avatarId = rows[0].Avatar_id;
-    const descripcion = rows[0].Descripcion;
+    const altDescription = rows[0].Descripcion;
 
-    return [avatarId, descripcion];
+    return [avatarId, altDescription];
 }
 
 async function getImagesAndSteps(idSet) {
