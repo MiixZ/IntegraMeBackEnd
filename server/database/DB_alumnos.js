@@ -6,53 +6,47 @@ async function conectar() {
 }
 
 async function getIdentityCards() {
-    return new Promise ((resolve, reject) => {
-        connection.query(
-            'SELECT ID_alumno, NickName FROM ALUMNOS', (error, results, fields) => {
-                if (error) {
-                    console.error('Error obteniendo identity cards.', error);
-                    reject(error);
-                    return;
-                }
-                resolve(results);
-            }
-        );
-    });
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT ID_alumno, NickName FROM ALUMNOS'
+    );
+
+    const ids = rows.map(result => result.ID_alumno);
+    const nicknames = rows.map(result => result.NickName);
+
+    return [ids, nicknames];
 }
 
 async function getIdentityCard(idStudent) {
-    return new Promise ((resolve, reject) => {
-        connection.query(
-            'SELECT ID_alumno, NickName FROM ALUMNOS WHERE id_alumno = ?',
-            [idStudent], (error, results, fields) => {
-                if (error) {
-                    console.error('Error getting identity card.', error);
-                    reject(error);
-                    return;
-                }
-                resolve(results);
-            }
-        );
-    });
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT ID_alumno, NickName FROM ALUMNOS WHERE id_alumno = ?',
+        [idStudent]
+    );
+
+    const id = rows[0].ID_alumno;
+    const nickname = rows[0].NickName;
+
+    return [id, nickname];
 }
 
 async function getAvatar(idStudent) {
-    return new Promise ((resolve, reject) => {
-        connection.query(
-            'SELECT PA.Avatar_id, I.Descripcion ' +
-            'FROM PERFIL_ALUMNOS AS PA ' +
-            'INNER JOIN IMAGENES AS I ON PA.Avatar_id = I.ID_imagen ' +
-            'WHERE PA.ID_alumno = ?',
-            [idStudent], (error, results, fields) => {
-                if (error) {
-                    console.error('Error getting avatar.', error);
-                    reject(error);
-                    return;
-                }
-                resolve(results);
-            }
-        );
-    });
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT PA.Avatar_id, I.Descripcion ' +
+        'FROM PERFIL_ALUMNOS AS PA ' +
+        'INNER JOIN IMAGENES AS I ON PA.Avatar_id = I.ID_imagen ' +
+        'WHERE PA.ID_alumno = ?',
+        [idStudent]
+    );
+
+    const avatarId = rows[0].Avatar_id;
+    const descripcion = rows[0].Descripcion;
+
+    return [avatarId, descripcion];
 }
 
 async function getImagesAndSteps(idSet) {
@@ -73,6 +67,7 @@ async function getImagesAndSteps(idSet) {
 
     const steps = rows[0].Steps;
     const images = rows.map(result => [result.ID_imagen, result.Descripcion]);
+    
     return [steps, images];
 }
 
@@ -107,6 +102,7 @@ async function getFormatos(idStudent) {
     );
 
     const formatos = rows.map(result => result.Nom_formato);
+
     return formatos;
 }
 
@@ -123,67 +119,81 @@ async function getInteracciones(idStudent) {
     );
 
     const interacciones = rows.map(result => result.Nom_interaccion);
+
     return interacciones;
 }
 
 async function getData(idStudent) {
-    return new Promise ((resolve, reject) => {
-        connection.query(
-            'SELECT Nombre, Apellido1, Apellido2, NickName FROM ALUMNOS WHERE ID_alumno = ?',
-            [idStudent], (error, results, fields) => {
-                if (error) {
-                    console.error('Error getting data.', error);
-                    reject(error);
-                    return;
-                }
-                resolve(results);
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT Nombre, Apellido1, Apellido2, NickName FROM ALUMNOS WHERE ID_alumno = ?',
+        [idStudent], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting data.', error);
             }
-        );
-    });
+        }
+    );
+
+    const data = rows.map(result => ({
+        Nombre: result.Nombre,
+        Apellido1: result.Apellido1,
+        Apellido2: result.Apellido2,
+        NickName: result.NickName
+    }));
+
+    return data;
 }
 
 async function getPerfil(idStudent) {
-    return new Promise ((resolve, reject) => {
-        connection.query(
-            'SELECT Avatar_id FROM PERFIL_ALUMNOS WHERE ID_alumno = ?',
-            [idStudent], (error, results, fields) => {
-                if (error) {
-                    console.error('Error getting perfil.', error);
-                    reject(error);
-                    return;
-                }
-                resolve(results);
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT Avatar_id FROM PERFIL_ALUMNOS WHERE ID_alumno = ?',
+        [idStudent], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting perfil.', error);
             }
-        );
-    });
+        }
+    );
+
+    const perfil = rows.map(result => result.Avatar_id);
+
+    return perfil;
 }
 
 async function getPassword(id) {
-    return new Promise((resolve, reject) => {
-        connection.query('Select Password_hash from PERFIL_ALUMNOS where ID_alumno = ? limit 1',
-                    [id] , (error, results, fields) => {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT Password_hash FROM PERFIL_ALUMNOS WHERE ID_alumno = ? LIMIT 1',
+        [id], (error, results, fields) => {
             if (error) {
-                console.error('Error getting password', error);
-                reject(error);
-                return;
+                throw new Error('Error getting password.', error);
             }
-            resolve(results);
-        });
-    });
+        }
+    );
+
+    const password = rows.map(result => result.Password_hash);
+
+    return password;
 }
 
 async function studentData(id) {
-    return new Promise((resolve, reject) => {
-      connection.query('SELECT NickName FROM ALUMNOS WHERE ID_alumno = ?',
-                  [id] , (error, results, fields) => {
-          if (error) {
-              console.error('Error saving token', error);
-              reject(error);
-              return;
-          }
-          resolve(results);
-      });
-    });
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT NickName FROM ALUMNOS WHERE ID_alumno = ?',
+        [id], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error saving token', error);
+            }
+        }
+    );
+
+    const data = rows.map(result => result.NickName);
+
+    return data;
 }
 
 module.exports = {
