@@ -126,7 +126,7 @@ async function getInteracciones(idStudent) {
 async function getData(idStudent) {
     const connection = await conectar();
 
-    const [rows, fields] = await connection.execute(
+    const [row] = await connection.execute(
         'SELECT Nombre, Apellido1, Apellido2, NickName FROM ALUMNOS WHERE ID_alumno = ?',
         [idStudent], (error, results, fields) => {
             if (error) {
@@ -135,12 +135,12 @@ async function getData(idStudent) {
         }
     );
 
-    const data = rows.map(result => ({
-        Nombre: result.Nombre,
-        Apellido1: result.Apellido1,
-        Apellido2: result.Apellido2,
-        NickName: result.NickName
-    }));
+    const data = {
+        Name: row[0].Nombre,
+        Lastname1: row[0].Apellido1,
+        Lastname2: row[0].Apellido2,
+        NickName: row[0].NickName
+    };
 
     return data;
 }
