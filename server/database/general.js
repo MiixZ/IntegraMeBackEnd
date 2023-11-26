@@ -63,7 +63,7 @@ async function cleanUpTokens() {
 async function checkearToken(token, typeSecret) {
     existe =  await VerificarToken(token);
     if (existe) {
-        console.log('Token exists in ex database');
+        console.log('Token exists on database');
         return new Promise((resolve, reject) => {
             jwt.verify(token, typeSecret, (error, decoded) => {
                 if (error || Date.now() > decoded.EXP) {
@@ -75,13 +75,12 @@ async function checkearToken(token, typeSecret) {
             });
         });
     } else {
-        console.log('Token does not exist in the database');
         throw new Error('Token not found in the database');
     }
 };
 
 
-async function VerificarToken(token) {
+async function VerificarToken(token) {              // Cambio en la tabla tokens?
     return new Promise((resolve, reject) => {
       connection.query('SELECT Token FROM TOKENS WHERE Token = ?',
                   [token], (error, results, fields) => {
@@ -129,6 +128,32 @@ async function insertarToken(id, token, fecha) {
     });
 }
 
+async function getSetImages(idSet) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM SET_IMAGENES WHERE ID_set = ?',
+        [idSet]
+    );
+
+    const setImages = rows.map(result => result);
+
+    return setImages;
+}
+
+async function getAvatar(idUser) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM AVATARES WHERE ID_usuario = ? AND Tipo = "AVATAR"',
+        [idUser]
+    );
+
+    const avatar = rows.map(result => result);
+
+    return avatar;
+}
+
 const job = schedule.scheduleJob('0 * * * *', cleanUpTokens);
 
 module.exports = {
@@ -141,5 +166,6 @@ module.exports = {
     getImage,
     checkearToken,
     VerificarToken,
-    insertarToken
+    insertarToken,
+    getSetImages
 };

@@ -47,9 +47,61 @@ async function getTeachers() {
   return teachers;
 }
 
+async function getStudent(idStudent) {
+  const connection = await conectar();
+
+  const [rows, fields] = await connection.execute(
+    'SELECT * FROM ALUMNOS WHERE ID_alumno = ?',
+    [idStudent]
+  );
+
+  const student = rows.map(result => result);
+
+  return student;
+}
+
+async function registPerfilStudent(idStudent, nickname, avatarId, idSet, passwordFormat, password){
+  const connection = await conectar();
+
+  await connection.execute(
+    'INSERT INTO PERFIL_ALUMOS (ID_alumno, NickName, Avatar_id, ID_set, FormatoPassword, Password_hash) VALUES (?, ?, ?, ?, ?, ?)',
+    [idStudent, nickname, avatarId, idSet, passwordFormat, password]
+  );
+}
+
+async function registStudentFormats (idStudent, contentAdaptationFormats) {
+  const connection = await conectar();
+
+  for (let format of contentAdaptationFormats) {
+    await connection.execute(
+      'INSERT INTO FORMATOS_ALUMNOS (ID_alumno, Formato) VALUES (?, ?)',
+      [idStudent, format]
+    );
+  }
+}
+
+async function registStudentInteractions (idStudent, interactionMethods) {
+  const connection = await conectar();
+
+  for (let interaction of interactionMethods) {
+    await connection.execute(
+      'INSERT INTO INTERACCION_ALUMNOS (ID_alumno, Interaccion) VALUES (?, ?)',
+      [idStudent, interaction]
+    );
+  }
+}
+
+async function registContentProfile(idStudent, contentAdaptationFormats, interactionMethods) {
+  await registStudentFormats(idStudent, contentAdaptationFormats);
+  await registStudentInteractions(idStudent, interactionMethods);
+}
+
 module.exports = {
     TeacherData,
     getPassword,
-    getTeachers
+    getTeachers,
+    registPerfilStudent,
+    getStudent,
+    registContentProfile
 };
 
