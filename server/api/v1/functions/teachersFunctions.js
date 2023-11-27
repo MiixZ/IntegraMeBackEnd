@@ -33,13 +33,21 @@ async function login(req, res) {                // Probar.
     let idTeacher = '', Name = '', lastname1 = '', lastname2 = '', classroom = '';
 
     try {
-        hash = await database.GetPassword(nickname);
+        hash = await database.getPassword(nickname);
         [idTeacher, Name, lastname1, lastname2, classroom] = await database.TeacherData(nickname);
     } catch (error) {
         return res.status(500).json({ error: 'Could not get password or teacher data.' });
     }
 
-    if (await general.compare(password, hash[0].Password_hash)) {
+    // Comprobar si la contraseña es correcta
+    let correcta = false;
+    try {
+        correcta = await general.compare(password, hash);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error comparing password.' });
+    }
+
+    if (correcta) {
         const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
         const token = jwt.sign({ idTeacher: idTeacher, nickname, EXP: fecha}, secret_teacher);
         try {

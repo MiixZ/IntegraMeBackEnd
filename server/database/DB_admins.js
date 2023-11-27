@@ -7,31 +7,31 @@ async function conectar() {
 }
 
 async function InsertarProfesor(name, lastname1, lastname2, nickname, password) {
-  return new Promise((resolve, reject) => {
-    const lastId = connection.query('CALL InsertarProfesor(?, ?, ?, ?, ?)',
-                    [name, lastname1, lastname2, nickname, password], (error, results, fields) => {
-      if (error) {
-        console.error('Error inserting teacher.', error);
-        reject(error);
-        return;
-      }
-      resolve(results);
-    });
-  });
+  const connection = await conectar();
+
+  // Primero comprobamos si existe el nickname.
+  const [rows, fields] = await connection.execute('SELECT NickName FROM PROFESORES WHERE NickName = ?',
+                          [nickname]
+  );
+
+  if (rows.length > 0) {
+    throw new Error('Teacher with that nickname already exists');
+  }
+
+  const [results] = await connection.execute('CALL InsertarProfesor(?, ?, ?, ?, ?)',
+                         [name, lastname1, lastname2, nickname, password]
+  );
+
+  return "Teacher inserted";
 }
 
 async function ActualizarAulaProfesor(nickname, aula) {
-  return new Promise((resolve, reject) => {
-    connection.query('UPDATE PROFESORES SET Aula_asignada = ? WHERE NICKNAME = ?',
-                    [aula, nickname], (error, results, fields) => {
-      if (error) {
-        console.error('Error updating teacher class.', error);
-        reject(error);
-        return;
-      }
-      resolve(results);
-    });
-  });
+    const connection = await conectar();
+
+    const results = await connection.execute('UPDATE PROFESORES SET Aula_asignada = ? WHERE NICKNAME = ?',
+                    [aula, nickname]);
+
+    return "Aula updated";
 }
 
 async function InsertarAdmin(nombre, apellido1, apellido2, nickname, password) {
@@ -56,11 +56,13 @@ async function InsertarAdmin(nombre, apellido1, apellido2, nickname, password) {
 async function InsertarAlumno(name, lastname1, lastname2, grade, tutor) {
   const connection = await conectar();
 
-  const [results, fields2] = await connection.execute('CALL InsertarAlumno(?, ?, ?, ?, @idAlum); SELECT @idAlum;',
+  await connection.execute('CALL InsertarAlumno(?, ?, ?, ?, @idAlum);',
                              [name, lastname1, lastname2, grade]
   );
 
-  let idAlum = results[1][0]['@idAlum']; // It is scary but it works
+  const [results] = await connection.execute('SELECT @idAlum;');
+
+  let idAlum = results && results[0] ? results[0]['@idAlum'] : null; // Check if results[0] exists before accessing '@idAlum'
 
   // Cuando no existe el ID del profesor arriba, result[0].Aula_asignada es undefined aunque el alumno se inserta correctamente.
   if (tutor) {
@@ -68,7 +70,9 @@ async function InsertarAlumno(name, lastname1, lastname2, grade, tutor) {
                              [tutor]
     );
 
-    if (result.length > 0 && result[0].Aula_asignada != null) {
+    const aula = result[0].Aula_asignada;
+
+    if (result.length > 0 && aula != null) {
       await connection.execute('UPDATE ALUMNOS SET ID_tutor = ?, Aula_asignada = ? WHERE ID_alumno = ?',
             [tutor, result[0].Aula_asignada, idAlum]
       );

@@ -179,8 +179,8 @@ BEGIN
     SET last_id_param = LAST_INSERT_ID();
 
     -- Inserción en la tabla ALUMNOS
-    INSERT INTO ALUMNOS (ID_alumno, Nombre, Apellido1, Apellido2, NickName, Curso)
-    VALUES (last_id_param, Nombre_param, Apellidos_param1, Apellidos_param2, CONCAT(Nombre_param, SUBSTRING(Apellidos_param1, 1, 1), SUBSTRING(Apellidos_param2, 1, 1)), Curso_param);
+    INSERT INTO ALUMNOS (ID_alumno, Nombre, Apellido1, Apellido2, Curso)
+    VALUES (last_id_param, Nombre_param, Apellidos_param1, Apellidos_param2, Curso_param);
 END //
 
 DELIMITER ;
