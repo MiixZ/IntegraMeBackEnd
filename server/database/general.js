@@ -97,13 +97,17 @@ async function getImage(idImage) {
     const connection = await conectarBD();
 
     const [rows, fields] = await connection.execute(
-        'SELECT Img_path FROM IMAGENES WHERE ID_imagen = ?',
+        'SELECT * FROM IMAGENES WHERE ID_imagen = ?',
         [idImage]
     );
 
-    const image_path = rows[0].Img_path;
+    const data = {
+        id: rows[0].ID_imagen,
+        imgDescription: rows[0].Descripcion,
+        Type: rows[0].Tipo
+    };
 
-    return image_path;
+    return data;
 }
 
 async function insertarToken(id, token, fecha) {

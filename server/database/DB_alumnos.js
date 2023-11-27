@@ -101,9 +101,7 @@ async function getFormatos(idStudent) {
         }
     );
 
-    const formatos = rows.map(result => result.Nom_formato);
-
-    return formatos;
+    return rows;
 }
 
 async function getInteracciones(idStudent) {
@@ -118,16 +116,14 @@ async function getInteracciones(idStudent) {
         }
     );
 
-    const interacciones = rows.map(result => result.Nom_interaccion);
-
-    return interacciones;
+    return rows;
 }
 
 async function getData(idStudent) {
     const connection = await conectar();
 
     const [row] = await connection.execute(
-        'SELECT Nombre, Apellido1, Apellido2, NickName FROM ALUMNOS WHERE ID_alumno = ?',
+        'SELECT Nombre, Apellido1, Apellido2 FROM ALUMNOS WHERE ID_alumno = ?',
         [idStudent], (error, results, fields) => {
             if (error) {
                 throw new Error('Error getting data.', error);
@@ -138,8 +134,7 @@ async function getData(idStudent) {
     const data = {
         Name: row[0].Nombre,
         Lastname1: row[0].Apellido1,
-        Lastname2: row[0].Apellido2,
-        NickName: row[0].NickName
+        Lastname2: row[0].Apellido2
     };
 
     return data;
@@ -179,11 +174,34 @@ async function getPassword(id) {
     return password;
 }
 
+async function getProfileData(id) {
+    const connection = await conectar();
+
+    const [row] = await connection.execute(
+        'SELECT * FROM PERFIL_ALUMNOS WHERE ID_alumno = ? LIMIT 1',
+        [id], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting profile data.', error);
+            }
+        }
+    );
+
+    const data = {
+        Avatar_id: row[0].Avatar_id,
+        ID_set: row[0].ID_set,
+        PasswordFormat: row[0].FormatoPassword,
+        Password: row[0].Password_hash,
+        NickName: row[0].NickName
+    };
+
+    return data;
+}
+
 async function studentData(id) {
     const connection = await conectar();
 
     const [row] = await connection.execute(
-        'SELECT NickName FROM ALUMNOS WHERE ID_alumno = ? LIMIT 1',
+        'SELECT * FROM ALUMNOS WHERE ID_alumno = ? LIMIT 1',
         [id], (error, results, fields) => {
             if (error) {
                 throw new Error('Error saving token', error);
@@ -207,5 +225,6 @@ module.exports = {
     getPerfil,
     getPassword,
     getAuthMethod,
-    studentData
+    studentData,
+    getProfileData
 };
