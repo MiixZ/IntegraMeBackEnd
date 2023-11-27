@@ -43,34 +43,32 @@ const compare = async (password, hash) => {
 // Define la función de limpieza de tokens
 async function cleanUpTokens() {
     const currentDate = new Date();
-    return new Promise((resolve, reject) => {
-        // La fecha de expiración (un día después de la fecha en la que se creó el token)
-        connection.query('DELETE FROM TOKENS WHERE Expiration_date < ?',
-            [currentDate],
-            (error, results, fields) => {
-                if (error) {
-                    console.error('Error eliminado TOKENS', error);
-                    reject(error);
-                    return;
-                }
-                resolve(results);
-            }
+    try {
+        const connection = await conectarBD();
+        const [results, fields] = await connection.execute(
+            'DELETE FROM TOKENS WHERE Expiration_date < ?',
+            [currentDate]
         );
-    });
+        return results;
+    } catch (error) {
+        throw new Error('Error cleaning up tokens');
+    }
 }
 
 // Checker comportamiento de esta función con los errores. 
 async function checkearToken(token, typeSecret) {
-    const existe = await VerificarToken(token);
+    const connection = await conectarBD();
 
-    if (existe) {
-        console.log('Token found in the database');
+    const [rows] = await connection.execute('SELECT Token FROM TOKENS WHERE Token = ?',
+                           [token]
+    );
+
+    if (rows.length > 0) {
         try {
             const decoded = jwt.verify(token, typeSecret);
             if (Date.now() > decoded.EXP) {
                 throw new Error('Token expired');
             }
-            console.log('Token verified');
 
             return decoded;
         } catch (error) {
@@ -92,25 +90,20 @@ async function VerificarToken(token) {              // Cambio en la tabla tokens
         }
     });
 
-    console.log(rows[0].Token);
-
     return rows[0];
 }
 
 async function getImage(idImage) {
-    return new Promise ((resolve, reject) => {
-        connection.query(
-            'SELECT Img_path FROM IMAGENES WHERE ID_imagen = ?',
-            [idImage], (error, results, fields) => {
-                if (error) {
-                    console.error('Error obteniendo tarjetas de identidad', error);
-                    reject(error);
-                    return;
-                }
-                resolve(results);
-            }
-        );
-    });
+    const connection = await conectarBD();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT Img_path FROM IMAGENES WHERE ID_imagen = ?',
+        [idImage]
+    );
+
+    const image_path = rows[0].Img_path;
+
+    return image_path;
 }
 
 async function insertarToken(id, token, fecha) {
@@ -140,7 +133,7 @@ async function getSetImages(idSet) {
 }
 
 async function getAvatar(idUser) {
-    const connection = await conectar();
+    const connection = await conectarBD();
 
     const [rows, fields] = await connection.execute(
         'SELECT * FROM AVATARES WHERE ID_usuario = ? AND Tipo = "AVATAR"',

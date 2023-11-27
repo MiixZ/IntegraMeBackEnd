@@ -162,8 +162,6 @@ async function insertClass(req, res) {
         return res.status(500).json({ error: 'Error checking token.' + " " + error });
     }
 
-    console.log ("token checked");
-
     // Obtener datos del cuerpo de la solicitud
     const { NUMBER, CAPACITY } = req.body;
 
@@ -175,7 +173,6 @@ async function insertClass(req, res) {
     // Insertar profesor
     let resultado = "";
     try {
-        console.log ("inserting class");
         resultado = await database.InsertarAula(NUMBER, CAPACITY);
     } catch (error) {
         return res.status(500).json({ error: 'Error inserting class.', error });
