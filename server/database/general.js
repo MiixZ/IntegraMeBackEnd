@@ -61,41 +61,40 @@ async function cleanUpTokens() {
 
 // Checker comportamiento de esta función con los errores. 
 async function checkearToken(token, typeSecret) {
-    existe =  await VerificarToken(token);
+    const existe = await VerificarToken(token);
+
     if (existe) {
-        console.log('Token exists on database');
-        return new Promise((resolve, reject) => {
-            jwt.verify(token, typeSecret, (error, decoded) => {
-                if (error || Date.now() > decoded.EXP) {
-                    console.log('fercha');
-                    reject(error);
-                }
-                console.log('Token is valid, sending...');
-                resolve(decoded);
-            });
-        });
+        console.log('Token found in the database');
+        try {
+            const decoded = jwt.verify(token, typeSecret);
+            if (Date.now() > decoded.EXP) {
+                throw new Error('Token expired');
+            }
+            console.log('Token verified');
+
+            return decoded;
+        } catch (error) {
+            throw new Error('Error verifying token');
+        }
     } else {
         throw new Error('Token not found in the database');
     }
-};
+}
 
 
 async function VerificarToken(token) {              // Cambio en la tabla tokens?
-    return new Promise((resolve, reject) => {
-      connection.query('SELECT Token FROM TOKENS WHERE Token = ?',
-                  [token], (error, results, fields) => {
-          if (error) {
-              console.error('Token does not exist', error);
-              reject(error);
-              return;
-          }
-          if (results.length === 0) {
-              resolve(false);
-          } else {
-              resolve(true);
-          }
-      });
+    const connection = await conectarBD();
+
+    const [rows, fields] = connection.execute('SELECT Token FROM TOKENS WHERE Token = ?',
+                           [token], (error, results, fields) => {
+        if (error) {
+            throw new Error('Error getting token');
+        }
     });
+
+    console.log(rows[0].Token);
+
+    return rows[0];
 }
 
 async function getImage(idImage) {
@@ -115,21 +114,20 @@ async function getImage(idImage) {
 }
 
 async function insertarToken(id, token, fecha) {
-    return new Promise((resolve, reject) => {
-      connection.query('INSERT INTO TOKENS (ID_usuario, Token, Expiration_date) VALUES (?,?,?)',
-                  [id, token, fecha] , (error, results, fields) => {
-          if (error) {
-              console.error('Error guardando token', error);
-              reject(error);
-              return;
-          }
-          resolve(results);
-      });
-    });
+    const connection = await conectarBD();
+
+    const [rows, fields] = await connection.execute(
+        'INSERT INTO TOKENS (ID_usuario, Token, Expiration_date) VALUES (?,?,?)',
+        [id, token, fecha]
+    );
+
+    const resultado = rows[0];
+
+    return resultado;
 }
 
 async function getSetImages(idSet) {
-    const connection = await conectar();
+    const connection = await conectarBD();
 
     const [rows, fields] = await connection.execute(
         'SELECT * FROM SET_IMAGENES WHERE ID_set = ?',
