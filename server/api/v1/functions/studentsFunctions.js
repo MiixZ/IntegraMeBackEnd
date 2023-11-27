@@ -4,6 +4,7 @@ const { encrypt, compare, checkearToken } = require('../../../database/general.j
 
 const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET_STUDENT;
+const secret_teacher = process.env.JWT_SECRET_TEACHER;
 
 async function getIdentityCardsAll(req, res) {          // Probar.
     // Obtener tarjetas de identidad del alumno.
@@ -238,6 +239,17 @@ async function getProfile(req, res) {           // Probar.
 
     const token = req.headers.authorization.split(' ')[1];
 
+    // Verificamos token y lo decodificamos
+    try {
+        const decodedToken = await checkearToken(token, secret);
+
+        if (decodedToken.idStudent != userID) {
+            return res.status(401).json({ error: 'Invalid token for user.' });
+        }
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
     // Obtener datos del cuerpo de la solicitud.
     const userID = req.params.userID;
     let Name = "";
@@ -269,15 +281,78 @@ async function getProfile(req, res) {           // Probar.
         return res.status(404).json({ error: 'Could not get formats or interactions' });
     }
 
-    // Verificamos token y lo decodificamos
-    try {
-        const decodedToken = await checkearToken(token, secret);
+    res.json({
+        type: "StudentProfile",
+        contentProfile: {
+            contentAdaptationFormats: formatsArray,
+            interactionMethods: interactionsArray
+        },
+        name: Name,
+        surnames: Lastname1 + " " + Lastname2,
+        nickname: NickName,
+        avatar: {
+            id: avatarId,
+            altDescription: avatarDescription
+        },
+    });
+}
 
-        if (decodedToken.idStudent != userID) {
-            return res.status(401).json({ error: 'Invalid token for user.' });
-        }
+async function getProfileDual(req, res) {           // Probar.
+    // Coge el token enviado en el header de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    // Verificamos token y lo decodificamos
+    let decodedToken;
+    let student = false;
+
+    try {
+        decodedToken = await checkearToken(token, secret_teacher);
     } catch (error) {
-        return res.status(401).json({ error: 'Invalid token' });
+        try {
+            decodedToken = await checkearToken(token, secret);
+            student = true;
+        } catch (error) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+    }
+
+    if (student && decodedToken.idStudent != userID) {
+        return res.status(401).json({ error: 'Invalid token for user.' });
+    }
+
+    // Obtener datos del cuerpo de la solicitud.
+    const userID = req.params.userID;
+    let Name = "";
+    let Lastname1 = "";
+    let Lastname2 = "";
+    let NickName = "";
+
+    let avatarId = -1;
+    let avatarDescription = "";
+
+    try {
+        [Name, Lastname1, Lastname2, NickName] = await database.getData(userID);
+        [avatarId, avatarDescription] = await database.getAvatar(userID);                   // [avatarId, altDescription
+    } catch (error) {
+        return res.status(404).json({ error: 'Could not get student data or avatar.' });
+    }
+    //const arrayProfile = await database.getProfile(userID); // para el avatar
+
+    const formatsArray = [];
+    const interactionsArray = [];
+
+    try {
+        const formatos = await database.getFormatos(userID);
+        const interactions = await database.getInteracciones(userID);
+
+        formatos.forEach(formato => formatsArray.push(formato.Nom_formato));
+        interactions.forEach(iteracion => interactionsArray.push(iteracion.Nom_interaccion));
+    } catch (error) {
+        return res.status(404).json({ error: 'Could not get formats or interactions' });
     }
 
     res.json({
@@ -316,7 +391,14 @@ async function loginStudent(req, res) {             // Probar.
         return res.status(500).json({ error: 'Error getting student or password' });
     }
 
-    if (await compare(password, hash)) {
+    let correcta = false;
+    try {
+        correcta = await compare(password, hash);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error comparing password.' });
+    }
+
+    if (correcta) {
         const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
         const token = jwt.sign({ idStudent, nickname: studentData, EXP: fecha}, secret); //{ expiresIn: '1h' });
         try {

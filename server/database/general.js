@@ -136,7 +136,7 @@ async function getAvatar(idUser) {
     const connection = await conectarBD();
 
     const [rows, fields] = await connection.execute(
-        'SELECT * FROM AVATARES WHERE ID_usuario = ? AND Tipo = "AVATAR"',
+        'SELECT * FROM IMAGENES WHERE ID_imagen = ? AND Tipo = "AVATAR"',
         [idUser]
     );
 
@@ -158,5 +158,6 @@ module.exports = {
     checkearToken,
     VerificarToken,
     insertarToken,
-    getSetImages
+    getSetImages,
+    getAvatar
 };

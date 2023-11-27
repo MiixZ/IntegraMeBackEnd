@@ -70,15 +70,19 @@ async function registPerfilStudent(req, res) {
 
     const token = req.headers.authorization.split(' ')[1];
 
+    // Cogemos el id del estudiante del primer parámetro de la ruta.
+    const idStudent = req.params.userID;
+
     try {
         token_decoded = await checkearToken(token, secret_teacher); 
     } catch (error) {
         return res.status(500).json({ error: 'Token has expired or you are not identified.' });
     }
 
-    const { idStudent, nickname, avatarId, idSet = NULL, passwordFormat, password, contentAdaptationFormats,  interactionMethods} = req.body;
+    const { nickname, avatarId, idSet = null, passwordFormat, password, contentAdaptationFormats, interactionMethods} = req.body;
 
-    if (!idStudent || !nickname || !avatarId || !idSet || !passwordFormat || !password) {
+    if (!idStudent || !nickname || !avatarId || !passwordFormat || !password 
+        || !contentAdaptationFormats || !interactionMethods) {
         return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -93,15 +97,17 @@ async function registPerfilStudent(req, res) {
         return res.status(500).json({ error: 'Error while checking student.' });
     }
 
-    try {
-        // Comprobar que el id del setImagenes existe en la base de datos.
-        const setImages = await general.getSetImages(idSet);
+    if (idSet) {
+        try {
+            // Comprobar que el id del setImagenes existe en la base de datos.
+            const setImages = await general.getSetImages(idSet);
 
-        if (setImages.length === 0) {
-            return res.status(400).json({ error: 'Set with that id does not exist' });
+            if (setImages.length === 0) {
+                return res.status(400).json({ error: 'Set with that id does not exist.' });
+            }
+        } catch (error) {
+            return res.status(500).json({ error: 'Error while checking setImages.' });
         }
-    } catch (error) {
-        return res.status(500).json({ error: 'Error while checking setImages.' });
     }
 
     try {
@@ -109,7 +115,7 @@ async function registPerfilStudent(req, res) {
         const avatar = await general.getAvatar(avatarId);
 
         if (avatar.length === 0) {
-            return res.status(400).json({ error: 'Avatar with that id does not exist' });
+            return res.status(400).json({ error: 'Avatar with that id does not exist.' });
         }
     } catch (error) {
         return res.status(500).json({ error: 'Error while checking avatar.' });
@@ -117,13 +123,14 @@ async function registPerfilStudent(req, res) {
 
     // Si la autenticacion es por imagen hace falta el idSet.
     if (passwordFormat == 'ImageAuth' && !idSet) {
-        return res.status(400).json({ error: 'SetId is required with Image Login' });
+        return res.status(400).json({ error: 'SetId is required with Image Login.' });
     }
 
-    const passwordHash = await encrypt(password);
     try {
+        const passwordHash = await encrypt(password);
         await database.registPerfilStudent(idStudent, nickname, avatarId, idSet, passwordFormat, passwordHash);
         await database.registContentProfile(idStudent, contentAdaptationFormats, interactionMethods);
+
         res.status(200).json({ message: 'Student profile registered.' });
     } catch (error) {
         return res.status(500).json({ error: 'Could not regist student profile.' });
