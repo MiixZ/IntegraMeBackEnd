@@ -6,59 +6,76 @@ const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET_STUDENT;
 const secret_teacher = process.env.JWT_SECRET_TEACHER;
 
-async function getIdentityCardsAll(req, res) {
-    try {
-        // Obtener tarjetas de identidad del alumno.
-        const identityCards = await database.getIdentityCards();
+async function getIdentityCardsAll(req, res) {          // Probar.
+    // Obtener tarjetas de identidad del alumno.
+    let ids = [];
+    let nicknames = [];
 
-        // Enviar respuesta al cliente
-        /**
-         * El json tendría que tener este formato:
-         * Se devuelve una lista []:{"userId": 2,"nickname": "asd","avatar": {"id": id_imagen,"altDescription": "descripción textual"}
-        */
-        const response = [];
-        for (let i = 0; i < identityCards.length; i++) {
-            const identityCard = identityCards[i];
-            const avatar = await database.getAvatar(identityCard.ID_alumno);
-            response.push({
-                userId: identityCard.ID_alumno,
-                nickname: identityCard.NickName,
-                avatar: {
-                    id: avatar[0].id,
-                    altDescription: avatar[0].altDescription
-                }
-            });
-        }
-        res.json(response);
+    try {
+        [ids, nicknames] = await database.getIdentityCards();
     } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+        return res.status(500).json({ error: 'Error getting identity cards.' });
     }
+
+    // Enviar respuesta al cliente
+    /**
+     * El json tendría que tener este formato:
+     * Se devuelve una lista []:{"userId": 2,"nickname": "asd","avatar": {"id": id_imagen,"altDescription": "descripción textual"}
+    */
+    const response = [];
+
+    for (let i = 0; i < ids.length; i++) {
+        let avatar_id = -1;
+        let avatar_description = "";
+
+        try {
+            [avatar_id, avatar_description] = await database.getAvatar(ids[i]);     // [0] es el id del alumno. [1] es el nickname.
+        } catch (error) {
+            return res.status(500).json({ error: 'Error getting ' + nicknames[i] + ' avatar.' });
+        }
+
+        response.push({
+            userId: ids[i],
+            nickname: nicknames[i],
+            avatar: {
+                id: avatar_id,     // Puede ser avatar.avatarId y avatar.altDescription.
+                altDescription: avatar_description
+            }
+        });
+    }
+
+    res.json(response);
 }
 
-async function getIdentityCard(req, res) {
-    try {
-        // Obtener datos del cuerpo de la solicitud.
-        const idStudent = req.params.idStudent;
+async function getIdentityCard(req, res) {          // Probar.
+    // Obtener datos del cuerpo de la solicitud.
+    const idStudent = req.params.idStudent;
+    let id_Student = -1;
+    let nickname = "";
 
-        // Obtener tarjetas de identidad del alumno.
-        const identityCard = await database.getIdentityCard(idStudent);
-        const avatar = await database.getAvatar(idStudent);
-        if (identityCard.length >= 1 && avatar.length >= 1) {
-            // Enviar respuesta al cliente
-            res.json({
-                userId: identityCard[0].ID_alumno,
-                nickname: identityCard[0].NickName,
-                avatar: {
-                    id: avatar[0].id,
-                    altDescription: avatar[0].altDescription
-                }
-            });
-        } else {
-            res.status(404).json({ error: 'Could not find student or avatar.' });
-        }
+    let avatar_id = -1;
+    let avatar_description = "";
+
+    // Obtener tarjetas de identidad del alumno.
+    try {
+        [id_Student, nickname] = await database.getIdentityCard(idStudent);       // [id, nickname]
+        [avatar_id, avatar_description] = await database.getAvatar(idStudent);                   // [avatarId, altDescription]
     } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+        res.status(500).json({ error: 'Error getting identity card or avatar.' });
+        return;
     }
+
+    // Enviar respuesta al cliente
+    const response = {
+        userId: id_Student,        // Puede ser identityCard.id e identityCard.nickname.
+        nickname: nickname,
+        avatar: {
+            id: avatar_id,              // Puede ser avatar.avatarId y avatar.altDescription.
+            altDescription: avatar_description
+        }
+    };
+
+    res.json(response);
 }
 
 // TODO: Probar.
@@ -72,69 +89,76 @@ async function getAuthMethod(req, res) {
      * }
      */
 
-    // Estos datos deberían estar en PerfilAlumno
-    // Enviar respuesta al cliente.
-    try {
-        // Obtener datos del cuerpo de la solicitud.
-        const userID = req.params.userID;
+    // Obtener datos del cuerpo de la solicitud.
+    const userID = req.params.userID;
+    let formatoPassword = "";
+    let ID_set = -1;
 
-        // Obtener método de autenticación del alumno.
-        const authMethod = await database.getAuthMethod(userID);
-        if (authMethod.length >= 1) {
-            // Obtener todas las imágenes
-            const tipo_autenticacion = authMethod[0].FormatoPassword;
-            
-            if (tipo_autenticacion == "TextAuth" ) {
-                res.json({
-                    type: authMethod[0].FormatoPassword
-                });
-            } else if (tipo_autenticacion == "ImageAuth" && authMethod[0].ID_set != null) {
-                const images = await database.getImagesAndSteps(authMethod[0].ID_set);
-                const steps = images.length > 0 ? images[0].Steps : 0;
-                res.json({
-                    type: authMethod[0].FormatoPassword,
-                    images: images.map(image => ({
-                        id: image.ID_imagen,
-                        altDescription: image.Descripcion
-                    })),
-                    steps: steps
-                });
-            } else {
-                res.status(404).json({ error: 'Auth is not Text or Image or authMethod' +
-                ' has no set assigned.' });
-            }
-        } else {
-            res.status(404).json({ error: 'Error getting AuthMethod.' });
-        }
+    // Obtener método de autenticación del alumno.
+    try {
+        [formatoPassword, ID_set] = await database.getAuthMethod(userID);
     } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+        return res.status(404).json({ error: 'Error getting AuthMethod.' });
+    }
+
+    if (formatoPassword === "TextAuth") {
+        res.json({
+            type: formatoPassword
+        });
+    } else if (formatoPassword === "ImageAuth" && ID_set) {
+        try { 
+            const imagesAndSteps = await database.getImagesAndSteps(ID_set);
+            const steps = imagesAndSteps.steps;
+            const images = imagesAndSteps.images.map(image => ({
+                id: image.id,
+                altDescription: image.altDescription
+            }));
+
+            res.json({
+                type: formatoPassword,
+                images: images,
+                steps: steps
+            });
+        } catch (error) {
+            return res.status(404).json({ error: 'Error getting images and steps.' });
+        }
+    } else {
+        return res.status(404).json({ error: 'Auth is not Text or Image or authMethod' +
+                                             ' has no set assigned.' });
     }
 }
 
-async function getProfileContent(req, res) {
+async function getProfileContent(req, res) {        // FUNCIONA
+    // Obtener datos del cuerpo de la solicitud.
+    const userID = req.params.userID;
+    let arrayFormats = [];
+    let arrayIteractions = [];
+    let formatos, interacciones;
+
+    // Obtener contenido del perfil del alumno.
     try {
-        // Obtener datos del cuerpo de la solicitud.
-        const userID = req.params.userID;
-
-        // Obtener contenido del perfil del alumno.
-        const formatos = await database.getFormatos(userID);
-        const iteraciones = await database.getInteraciones(userID);
-
-        const arrayFormatos = formatos.map(formato => formato.Nom_formato);
-        const arrayIteraciones = iteraciones.map(iteracion => iteracion.Nom_interaccion);
-
-        if (arrayIteraciones.length >= 1 && arrayFormatos.length >= 1) {
-            // Enviar respuesta al cliente.
-            res.json({
-                contentAdaptationFormats: arrayFormatos,
-                interactionMethods: arrayIteraciones
-            });
-        } else {
-            res.status(404).json({ error: 'No se ha encontrado el alumno o no tiene información' });
-        }
+        formatos = await database.getFormatos(userID);
+        interacciones = await database.getInteracciones(userID);
     } catch (error) {
-        console.error('Error en la solicitud:', error);
-        res.status(500).json({ error: 'Error en la solicitud' });
+        return res.status(500).json({ error: 'Error getting formats or interactions.' });
+    }
+
+    for (let i = 0; i < formatos.length; i++) {
+        arrayFormats.push(formatos[i].Nom_formato);
+    }
+ 
+     for (let i = 0; i < interacciones.length; i++) {
+        arrayIteractions.push(interacciones[i].Nom_interaccion);
+    }
+
+    // Enviar respuesta al cliente.
+    if (arrayIteractions.length >= 1 && arrayFormats.length >= 1) {
+        res.json({
+            contentAdaptationFormats: arrayFormats,
+            interactionMethods: arrayIteractions
+        });
+    } else {
+        res.json({ result: 'This student does not have content associated' });
     }
 }
 
@@ -219,96 +243,116 @@ async function getProfileContent(req, res) {
     }
  */
 
+async function getProfile(req, res) {           // Probar.
+    // Coge el token enviado en el header de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
 
-async function getProfile(req, res) {
+    const token = req.headers.authorization.split(' ')[1];
+
+    const userID = req.params.userID;
+
+    // Verificamos token y lo decodificamos
+    let decodedToken;
+    let student = false;
+
     try {
-        // Coge el token enviado en el header de la solicitud.
-        if (!req.headers.authorization) {
-            return res.status(401).json({ error: 'Token not sent' });
-        }
-
-        const token = req.headers.authorization.split(' ')[1];
-
-        // Obtener datos del cuerpo de la solicitud.
-        const userID = req.params.userID;
-
-        const arrayData = await database.getData(userID);
-        //const arrayProfile = await database.getProfile(userID); // para el avatar
-
-        const arrayFormatos = [];
-        const arrayIteraciones = [];
-        const formatos = await database.getFormatos(userID);
-        const iteraciones = await database.getInteraciones(userID);
-
-        for (let i = 0; i < formatos.length; i++) {
-           arrayFormatos.push(formatos[i].Nom_formato);
-        }
-
-        for (let i = 0; i < iteraciones.length; i++) {
-            arrayIteraciones.push(iteraciones[i].Nom_interaccion);
-        }
-
-        //Verificamos token y lo decodificamos
-
+        decodedToken = await checkearToken(token, secret_teacher);
+    } catch (error) {
         try {
-            const decodedToken = await checkearToken(token, secret);
-            if (decodedToken.idStudent != userID) {
-                return res.status(401).json({ error: 'Invalid token' });
-            }
+            decodedToken = await checkearToken(token, secret);
+            student = true;
         } catch (error) {
             return res.status(401).json({ error: 'Invalid token' });
         }
-
-        res.json({
-            type: "StudentProfile",
-            contentProfile: {
-                contentAdaptationFormats: arrayFormatos,
-                interactionMethods: arrayIteraciones
-            },
-            interactionMethods: arrayIteraciones,
-            name: arrayData[0].Nombre,
-            surnames: arrayData[0].Apellido1 + " " + arrayData[0].Apellido2,
-            nickname: arrayData[0].NickName,
-            avatar: {   // Por ahora devolvemos imagen random. En el futuro, se devolverá la imagen del alumno.
-                id: "1",
-                altDescription: "A Bob Esponja icon."
-            },
-        });
-
-    } catch (error) {
-        res.status(500).json({ error: 'Request error' });
     }
+
+    if (student && decodedToken.idStudent != userID) {
+        return res.status(401).json({ error: 'Invalid token for user.' });
+    }
+
+    // Obtener datos del cuerpo de la solicitud.
+    dataStudent = {};
+    studentProfile = {};
+    imagen = {};
+
+    try {
+        dataStudent = await database.getData(userID);
+        studentProfile = await database.getProfileData(userID);                // [avatarId, altDescription
+        imagen = await general.getImage(studentProfile.Avatar_id);                   // [avatarId, altDescription
+    } catch (error) {
+        return res.status(404).json({ error: 'Could not get student data or avatar.' });
+    }
+    //const arrayProfile = await database.getProfile(userID); // para el avatar
+
+    const arrayFormatos = [];
+    const arrayInteracciones = [];
+    const formatos = await database.getFormatos(userID);
+    const interacciones = await database.getInteracciones(userID);
+    
+    for (let i = 0; i < formatos.length; i++) {
+       arrayFormatos.push(formatos[i].Nom_formato);
+    }
+
+    for (let i = 0; i < interacciones.length; i++) {
+        arrayInteracciones.push(interacciones[i].Nom_interaccion);
+    }
+
+    res.json({
+        type: "StudentProfile",
+        contentProfile: {
+            contentAdaptationFormats: arrayFormatos,
+            interactionMethods: arrayInteracciones 
+        },
+        name: dataStudent.Name,
+        surnames: dataStudent.Lastname1 + " " + dataStudent.Lastname2,
+        nickname: studentProfile.NickName,
+        avatar: {
+            id: studentProfile.Avatar_id,
+            altDescription: imagen.imgDescription
+        },
+    });
 }
 
+async function loginStudent(req, res) {             // Probar.
+    // Obtener datos del cuerpo de la solicitud.
+    let hash = "";
+    let profileData = "";
 
-async function loginStudent(req, res) {
+    const idStudent = req.body.idStudent;
+    const password = req.body.password;
+
+    // Verificar si todos los campos necesarios están presentes
+    if (!idStudent || !password) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
     try {
-        // Obtener datos del cuerpo de la solicitud.
-        const { idStudent, password } = req.body;
-
-        // Verificar si todos los campos necesarios están presentes
-        if (!idStudent || !password) {
-            return res.status(400).json({ error: 'All fields are required' });
-        }
-
-        const hash = await database.getPassword(idStudent);
-        const studentData = await database.studentData(idStudent);
-
-        if (hash.length > 0 && await compare(password, hash[0].Password_hash)) {
-            const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
-            const token = jwt.sign({ idStudent, nickname: studentData[0].NickName, EXP: fecha}, secret); //{ expiresIn: '1h' });
-            try {
-                await general.insertarToken(idStudent, token, fecha);
-                res.status(200).json({ token });
-            } catch {
-                reject(error);
-                return;
-            }
-        } else {
-            res.status(401).json({ error: 'Incorrect Credentials.' });
-        }
+        profileData = await database.getProfileData(idStudent);
+        hash = profileData.Password;
     } catch (error) {
-        res.status(500).json({ error: 'Request error' });
+        return res.status(500).json({ error: 'Error getting student or password' });
+    }
+
+    let correcta = false;
+    try {
+        correcta = await compare(password, hash);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error comparing password.' });
+    }
+
+    if (correcta) {
+        const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
+        const token = jwt.sign({ idStudent, nickname: profileData.NickName, EXP: fecha}, secret); //{ expiresIn: '1h' });
+        try {
+            await general.insertarToken(idStudent, token, fecha);
+            res.status(200).json({ token });
+        } catch {
+            return res.status(500).json({ error: 'Error saving token' });
+        }
+    } else {
+        return res.status(401).json({ error: 'Incorrect Credentials.' });
     }
 }
 
@@ -319,5 +363,6 @@ module.exports = {
     getAuthMethod,
     getProfileContent,
     getProfile,
-    loginStudent
+    loginStudent,
+    getProfile
 };

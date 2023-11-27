@@ -84,6 +84,8 @@ AuthRouter.post('/CheckToken', generalFN.checkToken);
 
 AuthRouter.get('/students/:userID/profile', studentsFN.getProfile);
 
+AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfilStudent);
+
  /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {
     // Coge el token enviado en el header de la solicitud.
