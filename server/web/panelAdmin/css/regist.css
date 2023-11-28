@@ -29,7 +29,7 @@ footer {
     padding: 20px;
     background-color: #fff;
     border-radius: 5px;
-    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0, 0.15);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -38,6 +38,8 @@ footer {
 .regist-form input[type="text"],
 .regist-form input[type="email"],
 .regist-form input[type="password"],
+.regist-form input[type="number"],
+.regist-form input[type="capacity"],
 .regist-form select {
     padding: 10px;
     border: 1px solid #a83b3b;

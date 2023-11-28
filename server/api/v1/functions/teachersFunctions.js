@@ -62,7 +62,7 @@ async function login(req, res) {                // Probar.
     }
 }
 
-async function registPerfilStudent(req, res) {
+async function registPerfilStudent(req, res) {  // SE HA PROBADO SIN IDSET, FALTA PROBAR CON IDSET
     // Coge el token enviado en el header de la solicitud.
     if (!req.headers.authorization) {
         return res.status(401).json({ error: 'Token not sent' });
