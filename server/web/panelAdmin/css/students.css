@@ -1,6 +1,10 @@
-/* students.css */
-
 body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     background-color: #f0f0f0;
 }
 
@@ -11,18 +15,22 @@ body {
     background-color: #fff;
     border-radius: 5px;
     box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .student-form input[type="text"],
 .student-form input[type="email"],
+.student-form input[type="password"],
 .student-form select {
-    width: 100%;
     padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid #a83b3b;
+    border-radius: 5px;
+    width: 70%;
 }
 
-.student-form button {
+.student-form .boton {
     width: 100%;
     padding: 10px;
     background-color: #007BFF;
@@ -30,8 +38,32 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.student-form button:hover {
+.student-form .boton:hover {
     background-color: #0056b3;
+}
+
+.student-form .labels {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 1.2em; /* Aumenta el tamaño de la fuente */
+    color: #000; /* Cambia el color del texto a negro */
+    font-weight: bold; /* Hace el texto en negrita */
+    width: 30%; /* Establece una anchura fija para los label */
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.input-group {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px; /* Añade un espacio entre el label y el input */
 }
