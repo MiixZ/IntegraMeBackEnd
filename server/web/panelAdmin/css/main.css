@@ -3,6 +3,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: #f0f0f0;
+    height: 100vh;
 }
 
 .botones {
@@ -22,7 +23,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Ajusta la altura al 100% de la altura de la ventana */
+    height: 100%; /* Ajusta la altura al 100% de la altura de la ventana */
 }
 
 header {
@@ -33,10 +34,13 @@ header {
 }
 
 footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
     background-color: #333;
     color: white;
-    padding: 10px 0;
     text-align: center;
+    padding: 10px 0;
 }
 
 form {

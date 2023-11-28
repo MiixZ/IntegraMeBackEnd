@@ -2,7 +2,7 @@ body {
     background-color: #f0f0f0;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
     margin: 0;
     font-family: 'Arial', sans-serif;
 }
@@ -16,11 +16,13 @@ header {
 }
 
 footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
     background-color: #333;
     color: white;
-    padding: 10px 0;
     text-align: center;
-    width: 100%;
+    padding: 10px 0;
 }
 
 .login-container {
