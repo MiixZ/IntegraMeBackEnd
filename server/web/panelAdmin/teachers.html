@@ -1,27 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Profesores</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/teachers.css">
+    <link rel="stylesheet" type="text/css" href="css/regist.css">
 </head>
 <body>
-    <h1>Registro de Profesores</h1>
-    <form id="teacher-form">
-        <label for="name">Nombre:</label>
-        <input type="text" id="name" name="name" required>
-
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-
-        <label for="subject">Materia:</label>
-        <input type="text" id="subject" name="subject" required>
-
-        <input type="submit" value="Registrar">
+    <header>
+        <h1>Bienvenido al panel de administrador IntegraMe</h1>
+    </header>
+    <h1 id="titulo">Registro de Profesores</h1>
+    <form class="regist-form">
+        <div class="input-group">
+            <label for="name" class="labels">Nombre:</label>
+            <input type="text" id="name" name="name">
+        </div>
+    
+        <div class="input-group">
+            <label for="email" class="labels">Email:</label>
+            <input type="email" id="email" name="email">
+        </div>
+    
+        <div class="input-group">
+            <label for="password" class="labels">Contraseña:</label>
+            <input type="password" id="password" name="password">
+        </div>
+    
+        <input type="submit" value="Registrar" class="boton">
     </form>
-
+    <footer>
+        <p>&copy; IntegraMe App</p>
+    </footer>
     <script src="js/main.js"></script>
     <script src="js/teachers.js"></script>
 </body>

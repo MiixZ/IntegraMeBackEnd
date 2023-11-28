@@ -2,11 +2,15 @@
 <html>
 <head>
     <title>Registro de Estudiantes</title>
-    <link rel="stylesheet" type="text/css" href="css/students.css">
+    <link rel="stylesheet" type="text/css" href="css/regist.css">
 </head>
 <body>
-    <h1>Registro de Estudiantes</h1>
-    <form class="student-form">
+    <header>
+        <h1>Bienvenido al panel de administrador IntegraMe</h1>
+    </header>
+
+    <h1 id="titulo">Registro de Estudiantes</h1>
+    <form class="regist-form">
         <div class="input-group">
             <label for="name" class="labels">Nombre:</label>
             <input type="text" id="name" name="name">
@@ -24,6 +28,11 @@
     
         <input type="submit" value="Registrar" class="boton">
     </form>
+
+    <footer>
+        <p>&copy; IntegraMe App</p>
+    </footer>
+
     <script src="js/main.js"></script>
     <script src="js/students.js"></script>
 </body>

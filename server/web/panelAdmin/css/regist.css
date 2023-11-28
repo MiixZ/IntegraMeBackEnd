@@ -1,14 +1,29 @@
 body {
     font-family: Arial, sans-serif;
     display: flex;
+    margin: 0;
+    padding: 0;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     background-color: #f0f0f0;
 }
 
-.student-form {
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    width: 100%;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    width: 100%;
+}
+
+.regist-form {
     width: 500px;
     margin: 0 auto;
     padding: 20px;
@@ -20,17 +35,17 @@ body {
     gap: 10px;
 }
 
-.student-form input[type="text"],
-.student-form input[type="email"],
-.student-form input[type="password"],
-.student-form select {
+.regist-form input[type="text"],
+.regist-form input[type="email"],
+.regist-form input[type="password"],
+.regist-form select {
     padding: 10px;
     border: 1px solid #a83b3b;
     border-radius: 5px;
     width: 70%;
 }
 
-.student-form .boton {
+.regist-form .boton {
     width: 100%;
     padding: 10px;
     background-color: #007BFF;
@@ -41,11 +56,11 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.student-form .boton:hover {
+.regist-form .boton:hover {
     background-color: #0056b3;
 }
 
-.student-form .labels {
+.regist-form .labels {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -55,7 +70,7 @@ body {
     width: 30%; /* Establece una anchura fija para los label */
 }
 
-h1 {
+#titulo {
     text-align: center;
     color: #333;
 }
