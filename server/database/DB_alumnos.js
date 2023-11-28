@@ -214,6 +214,27 @@ async function studentData(id) {
     return data;
 }
 
+async function getTasks(idStudent) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM TAREA WHERE ID_alumno = ?',
+        [idStudent], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting tasks.', error);
+            }
+        }
+    );
+
+    const data = rows.map(row => ({
+        taskId: row.ID_tarea,
+        displayName: row.Nombre,
+        displayImage: row.Img_tarea,
+    }));
+
+    return data;
+}
+
 module.exports = {
     getIdentityCard,
     getIdentityCards,
@@ -223,6 +244,7 @@ module.exports = {
     getInteracciones,
     getData,
     getPerfil,
+    getTasks,
     getPassword,
     getAuthMethod,
     studentData,

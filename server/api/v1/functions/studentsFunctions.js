@@ -356,6 +356,48 @@ async function loginStudent(req, res) {             // Probar.
     }
 }
 
+async function getTasks(req, res) {             // Probar.
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const userID = req.params.userID;
+
+    // Verificamos token y lo decodificamos
+    let decodedToken;
+    let student = false;
+
+    try {
+        decodedToken = await checkearToken(token, secret_teacher);
+    } catch (error) {
+        try {
+            decodedToken = await checkearToken(token, secret);
+            student = true;
+        } catch (error) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+    }
+
+    if (student && decodedToken.idStudent != userID) {
+        return res.status(401).json({ error: 'Invalid token for user.' });
+    }
+
+    // Obtener tareas del alumno.
+    let tasks = [];
+    try {
+        tasks = await database.getTasks(userID);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error getting tasks.' });
+    }
+
+    // Enviar respuesta al cliente
+    res.status(200).json(tasks);
+}
+
+
 
 module.exports = {
     getIdentityCardsAll,
@@ -364,5 +406,6 @@ module.exports = {
     getProfileContent,
     getProfile,
     loginStudent,
-    getProfile
+    getProfile,
+    getTasks
 };
