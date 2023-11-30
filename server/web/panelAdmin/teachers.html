@@ -6,25 +6,34 @@
 </head>
 <body>
     <header>
-        <h1>IntegraMe</h1>
+        <h1>IntegraMe: Registro de Profesores</h1>
     </header>
-    <h1 id="titulo">Registro de Profesores</h1>
     <form class="regist-form">
         <div class="input-group">
-            <label for="name" class="labels">Nombre:</label>
-            <input type="text" id="name" name="name">
+            <label for="name" class="labels">Nombre: </label>
+            <input type="text" name="name">
+        </div>
+
+        <div class="input-group">
+            <label for="apellido1" class="labels">Primer Apellido: </label>
+            <input type="text" name="apellido1">
+        </div>
+
+        <div class="input-group">
+            <label for="apellido2" class="labels">Segundo Apellido: </label>
+            <input type="text" name="apellido2">
+        </div>
+
+        <div class="input-group">
+            <label for="nickname" class="labels">NickName: </label>
+            <input type="text" name="nickname">
         </div>
     
         <div class="input-group">
-            <label for="email" class="labels">Email:</label>
-            <input type="email" id="email" name="email">
-        </div>
-    
-        <div class="input-group">
-            <label for="password" class="labels">Contraseña:</label>
+            <label for="password" class="labels">Contraseña: </label>
             <input type="password" id="password" name="password">
         </div>
-    
+
         <input type="submit" value="Registrar" class="boton">
     </form>
     <footer>

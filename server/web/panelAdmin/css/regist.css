@@ -29,6 +29,7 @@ footer {
 .regist-form {
     width: 500px;
     margin: 0 auto;
+    margin-top: 15vh;
     padding: 20px;
     background-color: #fff;
     border-radius: 5px;
@@ -39,7 +40,6 @@ footer {
 }
 
 .regist-form input[type="text"],
-.regist-form input[type="email"],
 .regist-form input[type="password"],
 .regist-form input[type="number"],
 .regist-form input[type="capacity"],
@@ -47,7 +47,18 @@ footer {
     padding: 10px;
     border: 1px solid #a83b3b;
     border-radius: 5px;
-    width: 70%;
+    width: 50%;
+}
+
+.regist-form input[type="text"]:focus,
+.regist-form input[type="password"]:focus,
+.regist-form input[type="number"]:focus,
+.regist-form input[type="capacity"]:focus,
+.regist-form select:focus {
+    outline: none;
+    box-shadow: 0 0 10px 0 rgba(0, 123, 255, 0.5);
+    border-color: #007BFF;
+    transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
 
 .regist-form .boton {
@@ -68,11 +79,12 @@ footer {
 .regist-form .labels {
     display: flex;
     flex-direction: column;
+    text-align: right;
     gap: 10px;
     font-size: 1.2em; /* Aumenta el tamaño de la fuente */
     color: #000; /* Cambia el color del texto a negro */
     font-weight: bold; /* Hace el texto en negrita */
-    width: 30%; /* Establece una anchura fija para los label */
+    width: 35%; /* Establece una anchura fija para los label */
 }
 
 #titulo {
