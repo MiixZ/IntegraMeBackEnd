@@ -32,6 +32,28 @@ async function desconectarBD() {
     connection.end();
 }
 
+// TODO: Control de errores general.
+function handleDatabaseError(error) {
+    if (error) {
+        switch (error.code) {
+            case 'ER_BAD_FIELD_ERROR':
+                throw new Error('Invalid field error in the database');
+            case 'ER_NO_REFERENCED_ROW_2':
+                throw new Error('Foreign key error in the database');
+            case 'ER_DUP_ENTRY':
+                throw new Error('Duplicate entry error in the database');
+            case 'ER_TABLE_EXISTS_ERROR':
+                throw new Error('Table already exists in the database');
+            case 'ER_NO_SUCH_TABLE':
+                throw new Error('Table does not exist in the database');
+            case 'ER_WRONG_VALUE_COUNT_ON_ROW':
+                throw new Error('Incorrect number of values in the SQL query');
+            default:
+                throw new Error('There is an error in the database with code: ' + error.code);
+        }
+    }
+}
+
 const encrypt = async (password) => {
     return await bcrypt.hash(password, 10);
 }
