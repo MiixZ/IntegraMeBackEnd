@@ -136,7 +136,8 @@ CREATE TABLE TAREA(
     Img_tarea INT NOT NULL,
     ID_alumno INT NOT NULL,
     Supervisor INT NOT NULL,
-    Tipo_tabla ENUM('GenericTask', 'MenuTask', 'MaterialTask') NOT NULL,
+    Tipo_tarea ENUM('GenericTask', 'MenuTask', 'MaterialTask') NOT NULL,
+    Steps INT DEFAULT NULL,
     FOREIGN KEY (Img_tarea) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (Supervisor) REFERENCES PROFESORES(ID_profesor) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_alumno) REFERENCES ALUMNOS(ID_alumno) ON DELETE CASCADE ON UPDATE CASCADE

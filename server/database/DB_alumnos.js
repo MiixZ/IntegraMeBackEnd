@@ -152,6 +152,10 @@ async function getPerfil(idStudent) {
         }
     );
 
+    if (rows.length === 0) {
+        throw new Error('There is no perfil for this student');
+    }
+
     const perfil = rows.map(result => result.Avatar_id);
 
     return perfil;
@@ -164,10 +168,17 @@ async function getPassword(id) {
         'SELECT Password_hash FROM PERFIL_ALUMNOS WHERE ID_alumno = ? LIMIT 1',
         [id], (error, results, fields) => {
             if (error) {
+                if (error.state === 'ER_BAD_FIELD_ERROR')
+
+
                 throw new Error('Error getting password.', error);
             }
         }
     );
+
+    if (row.length === 0) {
+        throw new Error('This student does not have a password on perfil');
+    }
 
     const password = row[0].Password_hash;
 
@@ -185,6 +196,10 @@ async function getProfileData(id) {
             }
         }
     );
+
+    if (row.length === 0) {
+        throw new Error('There is no student with that id');
+    }
 
     const data = {
         Avatar_id: row[0].Avatar_id,
@@ -209,12 +224,16 @@ async function studentData(id) {
         }
     );
 
+    if (row.length === 0) {
+        throw new Error('There is no student with that id');
+    }
+
     const data = row[0].NickName;
 
     return data;
 }
 
-async function getTasks(idStudent) {
+async function getTasksCards(idStudent) {
     const connection = await conectar();
 
     const [rows, fields] = await connection.execute(
@@ -226,13 +245,72 @@ async function getTasks(idStudent) {
         }
     );
 
+    if (rows.length === 0) {
+        throw new Error('There are no tasks for this student');
+    }
+
     const data = rows.map(row => ({
         taskId: row.ID_tarea,
+        taskState: row.Estado,
         displayName: row.Nombre,
         displayImage: row.Img_tarea,
+        taskType: row.Tipo_tarea
     }));
 
     return data;
+}
+
+async function getTask(idTask) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM TAREA WHERE ID_tarea = ?',
+        [idTask], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting tasks.', error);
+            }
+        }
+    );
+
+    if (rows.length === 0) {
+        throw new Error('There is no task with that id');
+    }
+
+    return rows[0];
+}
+
+async function getStudentFromTaks(idTask) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT ID_alumno FROM TAREA WHERE ID_tarea = ?',
+        [idTask], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting tasks.', error);
+            }
+        }
+    );
+
+    if (rows.length === 0) {
+        throw new Error('There is no student with that task');
+    }
+
+    const student = rows[0].ID_alumno;
+
+    return student;
+}
+
+async function updateStep(state) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'UPDATE TAREA SET Estado = ? WHERE ID_tarea = ?',
+        [state, idTask], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error updating step.', error);
+            }
+        }
+    );
 }
 
 module.exports = {
@@ -244,9 +322,11 @@ module.exports = {
     getInteracciones,
     getData,
     getPerfil,
-    getTasks,
+    getTasksCards,
     getPassword,
     getAuthMethod,
     studentData,
-    getProfileData
+    getProfileData,
+    getStudentFromTaks,
+    getTask
 };

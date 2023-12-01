@@ -86,7 +86,11 @@ AuthRouter.get('/students/:userID/profile', studentsFN.getProfile);
 
 AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfilStudent);
 
-AuthRouter.get('/students/:userID/tasks', studentsFN.getTasks);
+// TODO: PROBAR ENDPOINT
+AuthRouter.get('/students/:userID/tasks/cards', studentsFN.getTasksCards);
+
+// TODO: PROBAR ENDPOINT
+AuthRouter.post('/auth/students/tasks/general/:taskId/:numPaso/state', studentsFN.updateTaskState);
 
  /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {

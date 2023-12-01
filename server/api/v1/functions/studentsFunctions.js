@@ -356,7 +356,7 @@ async function loginStudent(req, res) {             // Probar.
     }
 }
 
-async function getTasks(req, res) {             // Probar.
+async function getTasksCards(req, res) {             // Probar.
     // Obtener datos del cuerpo de la solicitud.
     if (!req.headers.authorization) {
         return res.status(401).json({ error: 'Token not sent' });
@@ -388,13 +388,50 @@ async function getTasks(req, res) {             // Probar.
     // Obtener tareas del alumno.
     let tasks = [];
     try {
-        tasks = await database.getTasks(userID);
+        tasks = await database.getTasksCards(userID);
     } catch (error) {
         return res.status(500).json({ error: 'Error getting tasks.' });
     }
 
     // Enviar respuesta al cliente
     res.status(200).json(tasks);
+}
+
+async function updateTaskState (req, res){    // TODO: HAY QUE PROBARLO
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+    const numPaso = req.params.numPaso;
+
+    // Estado al que se va a actualizar el paso.
+    const state = req.body.isCompleted;
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    try {
+        task = await database.getTask(taskID);
+    }catch (error) {
+        return res.status(500).json({ error: 'Error getting task.' });
+    }
+
+    if (decodedToken.idStudent != task.student || numPaso > task.steps || numPaso < 1) {
+        return res.status(401).json({ error: 'Invalid request.' });
+    }
+
+    try {
+        await database.updateStep(taskID, numPaso, state);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error updating step.' });
+    }
 }
 
 
@@ -407,5 +444,6 @@ module.exports = {
     getProfile,
     loginStudent,
     getProfile,
-    getTasks
+    getTasksCards,
+    updateTaskState
 };
