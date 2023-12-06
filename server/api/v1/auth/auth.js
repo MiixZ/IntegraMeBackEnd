@@ -9,7 +9,6 @@ const adminsFN = require('../functions/adminsFunctions.js');
 const teachersFN = require('../functions/teachersFunctions.js');
 const generalFN = require('../functions/generalFunctions.js');
 
-// TODO: Probar método rehecho para que funcione con el nuevo sistema de tokens.
 /**
  * @api {post} /insertTeacher Inserta un profesor en la base de datos.
  * @apiName insertTeacher
@@ -97,7 +96,15 @@ AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfi
  */
 AuthRouter.get('/students/:userID/tasks/cards', studentsFN.getTasksCards);
 
-// TODO: PROBAR ENDPOINT
+/**
+ * @api {post} /updateState Comprueba si el token es válido.
+ * @apiName update state
+ * @apiGroup students
+ * 
+ * @apiSuccess {String} Se ha completado la tarea.
+ * @apiError {String} Error en la solicitud.
+ * @apiError {String} Token expirado.
+ */
 AuthRouter.post('/students/tasks/general/:taskId/:numPaso/state', studentsFN.updateTaskState);
 
 /*
