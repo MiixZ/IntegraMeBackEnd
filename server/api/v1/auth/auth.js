@@ -86,13 +86,21 @@ AuthRouter.get('/students/:userID/profile', studentsFN.getProfile);
 
 AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfilStudent);
 
-// TODO: PROBAR ENDPOINT
+/**
+ * @api {post} /getTaskCards Comprueba si el token es válido.
+ * @apiName get tasks
+ * @apiGroup students
+ * 
+ * @apiSuccess {String} Devuelve las tareas del alumno.
+ * @apiError {String} Error en la solicitud.
+ * @apiError {String} Token expirado.
+ */
 AuthRouter.get('/students/:userID/tasks/cards', studentsFN.getTasksCards);
 
 // TODO: PROBAR ENDPOINT
-AuthRouter.post('/auth/students/tasks/general/:taskId/:numPaso/state', studentsFN.updateTaskState);
+AuthRouter.post('/students/tasks/general/:taskId/:numPaso/state', studentsFN.updateTaskState);
 
- /*
+/*
 AuthRouter.post('/register/studentProfile', async (req, res) => {
     // Coge el token enviado en el header de la solicitud.
     if (!req.headers.authorization) {

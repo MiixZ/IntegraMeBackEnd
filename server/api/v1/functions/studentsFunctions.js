@@ -397,7 +397,7 @@ async function getTasksCards(req, res) {             // Probar.
     res.status(200).json(tasks);
 }
 
-async function updateTaskState (req, res){    // TODO: HAY QUE PROBARLO
+async function updateTaskState (req, res) {    // TODO: HAY QUE PROBARLO
     // Obtener datos del cuerpo de la solicitud.
     if (!req.headers.authorization) {
         return res.status(401).json({ error: 'Token not sent' });
@@ -419,19 +419,21 @@ async function updateTaskState (req, res){    // TODO: HAY QUE PROBARLO
 
     try {
         task = await database.getTask(taskID);
-    }catch (error) {
+    } catch (error) {
         return res.status(500).json({ error: 'Error getting task.' });
     }
 
-    if (decodedToken.idStudent != task.student || numPaso > task.steps || numPaso < 1) {
+    if (decodedToken.idStudent != task.Student || numPaso > task.Steps || numPaso < 1) {
         return res.status(401).json({ error: 'Invalid request.' });
     }
 
     try {
-        await database.updateStep(taskID, numPaso, state);
+        await database.updateStep(taskID, state);
     } catch (error) {
-        return res.status(500).json({ error: 'Error updating step.' });
+        return res.status(500).json({ error: 'Error updating step.' + error });
     }
+
+    return res.json({ result: 'Step updated.' });
 }
 
 

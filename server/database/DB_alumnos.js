@@ -276,7 +276,16 @@ async function getTask(idTask) {
         throw new Error('There is no task with that id');
     }
 
-    return rows[0];
+    const data = {
+        taskId: rows[0].ID_tarea,
+        taskState: rows[0].Estado,
+        displayName: rows[0].Nombre,
+        displayImage: rows[0].Img_tarea,
+        taskType: rows[0].Tipo_tarea,
+        Student: rows[0].ID_alumno
+    };
+
+    return data;
 }
 
 async function getStudentFromTaks(idTask) {
@@ -300,17 +309,19 @@ async function getStudentFromTaks(idTask) {
     return student;
 }
 
-async function updateStep(state) {
+async function updateStep(idTask, state) {
     const connection = await conectar();
 
     const [rows, fields] = await connection.execute(
         'UPDATE TAREA SET Estado = ? WHERE ID_tarea = ?',
         [state, idTask], (error, results, fields) => {
             if (error) {
-                throw new Error('Error updating step.', error);
+                throw new Error('Error updating step.' + error);
             }
         }
     );
+
+    return "OK";
 }
 
 module.exports = {
@@ -328,5 +339,6 @@ module.exports = {
     studentData,
     getProfileData,
     getStudentFromTaks,
-    getTask
+    getTask,
+    updateStep
 };
