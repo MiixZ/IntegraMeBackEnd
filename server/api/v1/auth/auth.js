@@ -9,7 +9,6 @@ const adminsFN = require('../functions/adminsFunctions.js');
 const teachersFN = require('../functions/teachersFunctions.js');
 const generalFN = require('../functions/generalFunctions.js');
 
-// TODO: Probar método rehecho para que funcione con el nuevo sistema de tokens.
 /**
  * @api {post} /insertTeacher Inserta un profesor en la base de datos.
  * @apiName insertTeacher
@@ -82,11 +81,51 @@ AuthRouter.post('/updateClassTeacher', adminsFN.updateClassTeacher);
  */
 AuthRouter.post('/CheckToken', generalFN.checkToken);
 
+/**
+ * @api {get} /getProfile Comprueba si el token es válido.
+ * @apiName Get Profile
+ * @apiGroup students && teachers
+ * 
+ * @apiSuccess {String} El perfil del usuario.
+ * @apiError {String} Error en la solicitud.
+ * @apiError {String} Token expirado.
+ */
 AuthRouter.get('/students/:userID/profile', studentsFN.getProfile);
 
+/**
+ * @api {get} /getProfileStudent Comprueba si el token es válido.
+ * @apiName Get Profile
+ * @apiGroup students && teachers
+ * 
+ * @apiSuccess {String} El perfil del alumno.
+ * @apiError {String} Error en la solicitud.
+ * @apiError {String} Token expirado.
+ */
 AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfilStudent);
 
- /*
+/**
+ * @api {get} /getTaskCards Comprueba si el token es válido.
+ * @apiName get tasks
+ * @apiGroup students
+ * 
+ * @apiSuccess {String} Devuelve las tareas del alumno.
+ * @apiError {String} Error en la solicitud.
+ * @apiError {String} Token expirado.
+ */
+AuthRouter.get('/students/:userID/tasks/cards', studentsFN.getTasksCards);
+
+/**
+ * @api {post} /updateState Comprueba si el token es válido.
+ * @apiName update state
+ * @apiGroup students
+ * 
+ * @apiSuccess {String} Se ha completado la tarea.
+ * @apiError {String} Error en la solicitud.
+ * @apiError {String} Token expirado.
+ */
+AuthRouter.post('/students/tasks/general/:taskId/:numPaso/state', studentsFN.updateTaskState);
+
+/*
 AuthRouter.post('/register/studentProfile', async (req, res) => {
     // Coge el token enviado en el header de la solicitud.
     if (!req.headers.authorization) {

@@ -15,7 +15,7 @@ CREATE TABLE PROFESORES (
     FOREIGN KEY (ID_profesor) REFERENCES USUARIOS(ID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE ALUMNOS (  
+CREATE TABLE ALUMNOS (
     ID_alumno INT PRIMARY KEY,
     Nombre VARCHAR(20) NOT NULL,
     Apellido1 VARCHAR(50) NOT NULL,
@@ -82,15 +82,10 @@ CREATE TABLE USUARIOS (
 );
 
 CREATE TABLE PLANTILLATAREA (
-    ID_Plantilla INT AUTO_INCREMENT PRIMARY KEY;
+    ID_plantilla INT AUTO_INCREMENT PRIMARY KEY;
     Nombre VARCHAR(20) NOT NULL;
     Descripcion VARCHAR(100) NOT NULL;
     Dificultad INT NOT NULL;
-);
-
-CREATE TABLE TAREA(
-    ID_Tarea INT AUTO_INCREMENT PRIMARY KEY;
-
 );
 
 CREATE TABLE TOKENS (
@@ -122,13 +117,92 @@ CREATE TABLE IMAGENES_SET (
 );
 
 CREATE TABLE MATERIALES (
-    ID_Material INT AUTO_INCREMENT PRIMARY KEY,
+    ID_material INT AUTO_INCREMENT PRIMARY KEY,
     Nombre VARCHAR(20) NOT NULL,
     Descripcion VARCHAR(100) NOT NULL,
     Foto_material INT NOT NULL,
     Foto_propiedades INT DEFAULT NULL,
     FOREIGN KEY (Foto_material) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (Foto_propiedades) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE TAREA(
+    ID_tarea INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre VARCHAR(20) NOT NULL,
+    Descripcion VARCHAR(100) NOT NULL,
+    Dificultad INT NOT NULL,
+    Estado ENUM('Completed', 'Pending', 'Failed') DEFAULT 'Pending',
+    COLUMN Steps INT DEFAULT NULL,
+    Img_tarea INT NOT NULL,
+    ID_alumno INT NOT NULL,
+    Supervisor INT NOT NULL,
+    Tipo_tarea ENUM('GenericTask', 'MenuTask', 'MaterialTask') NOT NULL,
+    Steps INT DEFAULT NULL,
+    FOREIGN KEY (Img_tarea) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Supervisor) REFERENCES PROFESORES(ID_profesor) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_alumno) REFERENCES ALUMNOS(ID_alumno) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE PASO_GENERAL (
+    ID_tarea INT NOT NULL,
+    ID_paso INT NOT NULL,
+    Nombre VARCHAR(20) NOT NULL,
+    Descripcion VARCHAR(100) NOT NULL,
+    Imagen_tarea INT NOT NULL,
+    Audio_tarea INT NOT NULL,
+    Video_tarea INT NOT NULL,
+    Texto_tarea VARCHAR(100) NOT NULL,
+    Estado ENUM('true', 'false') DEFAULT 'false',
+    FOREIGN KEY (ID_tarea) REFERENCES TAREA(ID_tarea) ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY (ID_Tarea, ID_paso),
+    FOREIGN KEY (Imagen_tarea) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Audio_tarea) REFERENCES AUDIOS(ID_audio) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Video_tarea) REFERENCES VIDEOS(ID_video) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE VIDEOS (
+    ID_video INT AUTO_INCREMENT PRIMARY KEY,
+    Descripcion VARCHAR(100) NOT NULL,
+    Tipo VARCHAR(20) DEFAULT NULL
+);
+
+CREATE TABLE AUDIOS (
+    ID_audio INT AUTO_INCREMENT PRIMARY KEY,
+    Descripcion VARCHAR(100) NOT NULL,
+    Tipo VARCHAR(20) DEFAULT NULL
+);
+
+
+CREATE TABLE IMAGENES_PASO(
+    ID_paso INT NOT NULL,
+    ID_imagen INT NOT NULL,
+    PRIMARY KEY (ID_paso, ID_imagen),
+    FOREIGN KEY (ID_paso) REFERENCES PASO_GENERAL(ID_paso) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_imagen) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE VIDEOS_PASO(
+    ID_paso INT NOT NULL,
+    ID_video INT NOT NULL,
+    PRIMARY KEY (ID_paso, ID_video),
+    FOREIGN KEY (ID_paso) REFERENCES PASO_GENERAL(ID_paso) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_video) REFERENCES VIDEOS(ID_video) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE AUDIOS_PASO(
+    ID_paso INT NOT NULL,
+    ID_audio INT NOT NULL,
+    PRIMARY KEY (ID_paso, ID_audio),
+    FOREIGN KEY (ID_paso) REFERENCES PASO_GENERAL(ID_paso) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_audio) REFERENCES AUDIOS(ID_audio) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE PROFESORES_TAREA (
+    ID_profesor INT NOT NULL,
+    ID_tarea INT NOT NULL,
+    PRIMARY KEY (ID_profesor, ID_tarea),
+    FOREIGN KEY (ID_profesor) REFERENCES PROFESORES(ID_profesor) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_Tarea) REFERENCES TAREA(ID_tarea) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- Crear un disparador para insertar automáticamente en la tabla usuarios cuando se añade un profesor
@@ -167,7 +241,19 @@ DELIMITER;
 --IMPORTANTE --> Los delimiters cambian los ";" por "//" y viceversa
 
 DELIMITER //
+CREATE PROCEDURE InsertPaso(IN Nombre VARCHAR(20), IN Descripcion VARCHAR(100), IN Imagen_tarea INT, IN Audio_tarea INT, IN Video_tarea INT, IN Texto_tarea VARCHAR(100), IN ID_tarea INT)
+BEGIN
+    DECLARE paso_id INT;
 
+    SELECT COALESCE(MAX(ID_paso), 0) + 1 INTO paso_id FROM PASO_GENERAL WHERE ID_tarea = ID_tarea;
+
+    INSERT INTO PASO_GENERAL(ID_tarea, ID_paso, Nombre, Descripcion, Imagen_tarea, Audio_tarea, Video_tarea, Texto_tarea, Estado)
+    VALUES (ID_tarea, paso_id, Nombre, Descripcion, Imagen_tarea, Audio_tarea, Video_tarea, Texto_tarea, 'false');
+END//
+DELIMITER ;
+
+
+DELIMITER //
 CREATE PROCEDURE InsertarAlumno(IN Nombre_param VARCHAR(20), IN Apellidos_param1 VARCHAR(50), IN Apellidos_param2 VARCHAR(50), IN Curso_param INT, OUT last_id_param INT)
 BEGIN
     -- Inserción en la tabla USUARIOS
@@ -264,3 +350,6 @@ VALUES (6, 1, 'TextAuth', '$2b$10$tiSJ79Iy/Moga5gsTQFmcuuHdky8RB5.5Uk75aeb5rQvcQ
 
 INSERT INTO IMAGENES (ID_imagen, Descripcion, Img_path, Tipo) 
 VALUES (1, 'Bob Esponja', '1', 'AVATAR');
+
+INSERT INTO TAREA(Nombre, Descripcion, Dificultad, Img_tarea, ID_alumno, Supervisor, Tipo_tabla)
+VALUES ('Hacer cama', 'La tarea consiste en hacer la cama', 1, 1, 5, 8, 'GenericTask');

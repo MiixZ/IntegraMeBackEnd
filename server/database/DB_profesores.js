@@ -103,11 +103,11 @@ async function registContentProfile(idStudent, contentAdaptationFormats, interac
 }
 
 module.exports = {
-    TeacherData,
-    getPassword,
-    getTeachers,
-    registPerfilStudent,
-    getStudent,
-    registContentProfile
+  TeacherData,
+  getPassword,
+  getTeachers,
+  registPerfilStudent,
+  getStudent,
+  registContentProfile
 };
 

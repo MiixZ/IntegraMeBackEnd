@@ -1,0 +1,101 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    flex-direction: column;
+    background-color: #f0f0f0;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    width: 100%;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.regist-form {
+    width: 500px;
+    margin: 0 auto;
+    margin-top: 15vh;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.regist-form input[type="text"],
+.regist-form input[type="password"],
+.regist-form input[type="number"],
+.regist-form input[type="capacity"],
+.regist-form select {
+    padding: 10px;
+    border: 1px solid #a83b3b;
+    border-radius: 5px;
+    width: 50%;
+}
+
+.regist-form input[type="text"]:focus,
+.regist-form input[type="password"]:focus,
+.regist-form input[type="number"]:focus,
+.regist-form input[type="capacity"]:focus,
+.regist-form select:focus {
+    outline: none;
+    box-shadow: 0 0 10px 0 rgba(0, 123, 255, 0.5);
+    border-color: #007BFF;
+    transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+.regist-form .boton {
+    width: 100%;
+    padding: 10px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.regist-form .boton:hover {
+    background-color: #0056b3;
+}
+
+.regist-form .labels {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    gap: 10px;
+    font-size: 1.2em; /* Aumenta el tamaño de la fuente */
+    color: #000; /* Cambia el color del texto a negro */
+    font-weight: bold; /* Hace el texto en negrita */
+    width: 35%; /* Establece una anchura fija para los label */
+}
+
+#titulo {
+    text-align: center;
+    color: #333;
+}
+
+.input-group {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px; /* Añade un espacio entre el label y el input */
+}
