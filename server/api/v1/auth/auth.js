@@ -81,12 +81,30 @@ AuthRouter.post('/updateClassTeacher', adminsFN.updateClassTeacher);
  */
 AuthRouter.post('/CheckToken', generalFN.checkToken);
 
+/**
+ * @api {get} /getProfile Comprueba si el token es válido.
+ * @apiName Get Profile
+ * @apiGroup students && teachers
+ * 
+ * @apiSuccess {String} El perfil del usuario.
+ * @apiError {String} Error en la solicitud.
+ * @apiError {String} Token expirado.
+ */
 AuthRouter.get('/students/:userID/profile', studentsFN.getProfile);
 
+/**
+ * @api {get} /getProfileStudent Comprueba si el token es válido.
+ * @apiName Get Profile
+ * @apiGroup students && teachers
+ * 
+ * @apiSuccess {String} El perfil del alumno.
+ * @apiError {String} Error en la solicitud.
+ * @apiError {String} Token expirado.
+ */
 AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfilStudent);
 
 /**
- * @api {post} /getTaskCards Comprueba si el token es válido.
+ * @api {get} /getTaskCards Comprueba si el token es válido.
  * @apiName get tasks
  * @apiGroup students
  * 
