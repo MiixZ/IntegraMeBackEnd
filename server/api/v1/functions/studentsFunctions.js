@@ -78,7 +78,7 @@ async function getIdentityCard(req, res) {          // Probar.
     res.json(response);
 }
 
-// TODO: Probar.
+
 async function getAuthMethod(req, res) {
     /**
      * el json a devolver debería tener este formato:
@@ -180,7 +180,7 @@ async function getProfileContent(req, res) {        // FUNCIONA
             is_teacher = true;
             console.log("Es profesor.");
         } catch (error) {
-            console.log("No es profesor.");     // TODO: Probar con token de alumno.
+            console.log("No es profesor.");
             decoded_token = await checkearToken(token, secret);
         }
 
@@ -243,6 +243,7 @@ async function getProfileContent(req, res) {        // FUNCIONA
     }
  */
 
+// TODO: Hay que añadir la url a la tabla imagenes y devolver aquí según si es null o no.
 async function getProfile(req, res) {           // Probar.
     // Coge el token enviado en el header de la solicitud.
     if (!req.headers.authorization) {
@@ -397,7 +398,7 @@ async function getTasksCards(req, res) {             // Probar.
     res.status(200).json(tasks);
 }
 
-async function updateTaskState (req, res) {    // TODO: HAY QUE PROBARLO
+async function updateTaskState (req, res) {
     // Obtener datos del cuerpo de la solicitud.
     if (!req.headers.authorization) {
         return res.status(401).json({ error: 'Token not sent' });
