@@ -492,6 +492,36 @@ async function getMaterialRequest(req, res) {
     return res.json(materialRequest);
 }
 
+async function toggleDelivered(req, res) {
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+    const resquestID = req.params.requestId;
+
+    const isDelivered = req.body.isDelivered;
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    let materialRequest = {};
+
+    try {
+        materialRequest = await database.toggleDelivered(taskID, resquestID, isDelivered);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error toggling delivered. ' + error });
+    }
+
+    return res.json(materialRequest);
+}
+
 module.exports = {
     getIdentityCardsAll,
     getIdentityCard,
@@ -503,5 +533,6 @@ module.exports = {
     getTasksCards,
     updateTaskState,
     getTaskModel,
-    getMaterialRequest
+    getMaterialRequest,
+    toggleDelivered
 };

@@ -381,9 +381,17 @@ async function getMaterialTaskModel(idTask) {
         }
     );
 
-    n_materiales = rows2[0]['COUNT(*)'];
+    if (rows2.length === 0) {
+        throw new Error('There are no materials in this task.');
+    }
 
-    imageTask = await database.getImageContent(rows[0].Img_tarea);
+    n_materiales = rows2[0]['COUNT(*)'];
+    
+    try {
+        imageTask = await database.getImageContent(rows[0].Img_tarea);
+    } catch(error) {
+        throw new Error('Error getting image content.', error);
+    }
 
     const data = {
         type: "MaterialTaskModel",
@@ -409,8 +417,6 @@ async function getMaterialRequest(TaskId, RequestId) {
         }
     );
 
-    console.log(rows);
-
     if (rows.length === 0) {
         throw new Error('There is no material request with that id.');
     }
@@ -429,9 +435,12 @@ async function getMaterialRequest(TaskId, RequestId) {
         throw new Error('There is no material with that id.');
     }
 
-    material_ = await database.getMaterial(rows[0].ID_material);
-
-    imagen_peticion = await database.getImageContent(rows[0].Imagen_peticion);
+    try {
+        material_ = await database.getMaterial(rows[0].ID_material);
+        imagen_peticion = await database.getImageContent(rows[0].Imagen_peticion);
+    } catch(error) {
+        throw new Error('Error getting material or image content.', error);
+    }
 
     const data = {
         material : material_,
@@ -440,6 +449,21 @@ async function getMaterialRequest(TaskId, RequestId) {
     };
 
     return data;
+}
+
+async function toggleDelivered(TaskId, RequestId, isDelivered) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'UPDATE MATERIALES_TAREA SET estaEntregado = ? WHERE ID_tarea = ? AND num_peticion = ?',
+        [isDelivered, TaskId, RequestId], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error updating material request.', error);
+            }
+        }
+    );
+
+    return "OK";
 }
 
 module.exports = {
@@ -460,5 +484,6 @@ module.exports = {
     getTask,
     updateStep,
     getMaterialTaskModel,
-    getMaterialRequest
+    getMaterialRequest,
+    toggleDelivered
 };
