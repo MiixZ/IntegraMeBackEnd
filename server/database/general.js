@@ -132,14 +132,14 @@ async function getImageContent(idImage) {
     // Si la url de la imagen es null, se devuelve el endpoint local.
 
     const data = {
-        type: "ImageContent",
+        type: "RemoteImage",
         id: rows[0].ID_imagen,
     };
 
     if (rows[0].Url_imagen) {
         data.imageUrl = rows[0].Url_imagen;
     } else {
-        data.imageUrl = ip + ':6969/api/v1/images/' + rows[0].ID_imagen;
+        data.imageUrl = 'http://' + ip + ':6969/api/v1/images/' + rows[0].ID_imagen;
     }
 
     return data;
@@ -169,7 +169,7 @@ async function getAudio(idAudio) {
     if (rows[0].Url_audio) {
         data.audioUrl = rows[0].Url_audio;
     } else {
-        data.audioUrl = ip + ':6969/api/v1/audios/' + rows[0].ID_audio;
+        data.audioUrl = 'http://' + ip + ':6969/api/v1/audios/' + rows[0].ID_audio;
     }
 
     return data;
@@ -199,7 +199,7 @@ async function getVideo(idVideo) {
     if (rows[0].Url_video) {
         data.videoUrl = rows[0].Url_video;
     } else {
-        data.videoUrl = ip + ':6969/api/v1/videos/' + rows[0].ID_video;
+        data.videoUrl = 'http://' + ip + ':6969/api/v1/videos/' + rows[0].ID_video;
     }
 
     return data;
@@ -232,7 +232,6 @@ async function getMaterial(idMaterial) {
     }
 
     return data;
-
 }
 
 async function insertarToken(id, token, fecha) {

@@ -154,16 +154,16 @@ CREATE TABLE TAREA (
 Intermediario entre material y tarea (para tarea de tipo material)
 */
 CREATE TABLE MATERIALES_TAREA (
+    Num_peticion INT NOT NULL,
     ID_material INT NOT NULL,
     ID_tarea INT NOT NULL,
-    PRIMARY KEY (ID_material, ID_tarea),
+    Cantidad INT,
+    Esta_entregado BOOLEAN,
+    Imagen_peticion INT NOT NULL FOREIGN KEY REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY (num_peticion, ID_tarea),
     FOREIGN KEY (ID_material) REFERENCES MATERIALES(ID_material) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_tarea) REFERENCES TAREA(ID_tarea) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-ALTER TABLE MATERIALES_TAREA
-ADD Cantidad INT,
-ADD estaEntregado BOOLEAN;
 
 /*
 En este diseño, Recompensa es un campo de tipo VARCHAR(255) que puede

@@ -464,6 +464,34 @@ async function getTaskModel (req, res) {
     return res.json(taskModel);
 }
 
+async function getMaterialRequest(req, res) {
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+    const resquestID = req.params.requestId;
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    let materialRequest = {};
+
+    try {
+        materialRequest = await database.getMaterialRequest(taskID, resquestID);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error getting material request. ' + error });
+    }
+
+    return res.json(materialRequest);
+}
+
 module.exports = {
     getIdentityCardsAll,
     getIdentityCard,
@@ -474,5 +502,6 @@ module.exports = {
     getProfile,
     getTasksCards,
     updateTaskState,
-    getTaskModel
+    getTaskModel,
+    getMaterialRequest
 };

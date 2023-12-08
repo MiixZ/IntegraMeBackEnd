@@ -348,7 +348,12 @@ async function getMaterialTaskModel(idTask) {
 
     // Cogemos la recompensa según su tipo.
     switch (rows[0].Recompensa_tipo) {
-        case "String" : recompensa = rows[0].Recompensa; break;
+        case "String" :
+            recompensa = {
+                type: "TextContent",
+                string: rows[0].Recompensa
+            };
+            break;
 
         case "Imagenes" :
             recompensa = await database.getImageContent(rows[0].Recompensa);
@@ -392,6 +397,51 @@ async function getMaterialTaskModel(idTask) {
     return data;
 }
 
+async function getMaterialRequest(TaskId, RequestId) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM MATERIALES_TAREA WHERE ID_tarea = ? AND num_peticion = ?',
+        [TaskId, RequestId], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting material request.', error);
+            }
+        }
+    );
+
+    console.log(rows);
+
+    if (rows.length === 0) {
+        throw new Error('There is no material request with that id.');
+    }
+
+    // Cogemos la imagen del material.
+    const [rows2, fields2] = await connection.execute(
+        'SELECT * FROM MATERIALES WHERE ID_material = ?',
+        [rows[0].ID_material], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting material.', error);
+            }
+        }
+    );
+
+    if (rows2.length === 0) {
+        throw new Error('There is no material with that id.');
+    }
+
+    material_ = await database.getMaterial(rows[0].ID_material);
+
+    imagen_peticion = await database.getImageContent(rows[0].Imagen_peticion);
+
+    const data = {
+        material : material_,
+        displayImage: imagen_peticion,
+        isDelivered: rows[0].estaEntregado
+    };
+
+    return data;
+}
+
 module.exports = {
     getIdentityCard,
     getIdentityCards,
@@ -409,5 +459,6 @@ module.exports = {
     getStudentFromTaks,
     getTask,
     updateStep,
-    getMaterialTaskModel
+    getMaterialTaskModel,
+    getMaterialRequest
 };

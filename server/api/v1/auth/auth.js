@@ -82,7 +82,7 @@ AuthRouter.post('/updateClassTeacher', adminsFN.updateClassTeacher);
 AuthRouter.post('/CheckToken', generalFN.checkToken);
 
 /**
- * @api {get} /getProfile Comprueba si el token es válido.
+ * @api {get} /getProfile Devuelve el perfil del usuario.
  * @apiName Get Profile
  * @apiGroup students && teachers
  * 
@@ -93,8 +93,8 @@ AuthRouter.post('/CheckToken', generalFN.checkToken);
 AuthRouter.get('/students/:userID/profile', studentsFN.getProfile);
 
 /**
- * @api {get} /getProfileStudent Comprueba si el token es válido.
- * @apiName Get Profile
+ * @api {get} /registProfileStudent Registra el perfil del alumno.
+ * @apiName Insert Profile
  * @apiGroup students && teachers
  * 
  * @apiSuccess {String} El perfil del alumno.
@@ -104,7 +104,7 @@ AuthRouter.get('/students/:userID/profile', studentsFN.getProfile);
 AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfilStudent);
 
 /**
- * @api {get} /getTaskCards Comprueba si el token es válido.
+ * @api {get} /getTaskCards Devuelve las tareas del alumno.
  * @apiName get tasks
  * @apiGroup students
  * 
@@ -115,7 +115,7 @@ AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfi
 AuthRouter.get('/students/:userID/tasks/cards', studentsFN.getTasksCards);
 
 /**
- * @api {post} /updateState Comprueba si el token es válido.
+ * @api {post} /updateState Actualiza el estado de la tarea.
  * @apiName update state
  * @apiGroup students
  * 
@@ -125,7 +125,19 @@ AuthRouter.get('/students/:userID/tasks/cards', studentsFN.getTasksCards);
  */
 AuthRouter.post('/students/tasks/general/:taskId/:numPaso/state', studentsFN.updateTaskState);
 
+/**
+ * @api {get} /getMaterialTaskModel Devuelve los datos principales de la tarea.
+ * @apiName get MaterialTaskModel
+ * @apiGroup Students
+ * @apiParam {Number} taskId Identificador de la tarea.
+ * 
+ * @apiSuccess {String} Se devuelve la información de la tarea.
+ * @apiError {String} Error en la solicitud.
+ * @apiError {String} Token expirado.
+ */
 AuthRouter.get('/students/tasks/:taskId/MaterialTaskModel', studentsFN.getTaskModel);
+
+AuthRouter.get('/students/tasks/:taskId/:requestId/MaterialRequest', studentsFN.getMaterialRequest);
 
 /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {
