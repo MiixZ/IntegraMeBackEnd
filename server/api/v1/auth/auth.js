@@ -125,6 +125,8 @@ AuthRouter.get('/students/:userID/tasks/cards', studentsFN.getTasksCards);
  */
 AuthRouter.post('/students/tasks/general/:taskId/:numPaso/state', studentsFN.updateTaskState);
 
+AuthRouter.get('/students/tasks/:taskId/MaterialTaskModel', studentsFN.getTaskModel);
+
 /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {
     // Coge el token enviado en el header de la solicitud.

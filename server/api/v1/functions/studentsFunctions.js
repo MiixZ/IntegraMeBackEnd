@@ -437,7 +437,32 @@ async function updateTaskState (req, res) {
     return res.json({ result: 'Step updated.' });
 }
 
+async function getTaskModel (req, res) {
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
 
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    let taskModel = {};
+
+    try {
+        taskModel = await database.getMaterialTaskModel(taskID);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error getting task model. ' + error });
+    }
+
+    return res.json(taskModel);
+}
 
 module.exports = {
     getIdentityCardsAll,
@@ -448,5 +473,6 @@ module.exports = {
     loginStudent,
     getProfile,
     getTasksCards,
-    updateTaskState
+    updateTaskState,
+    getTaskModel
 };

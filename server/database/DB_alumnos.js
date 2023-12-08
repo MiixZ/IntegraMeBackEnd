@@ -1,8 +1,8 @@
 require('dotenv').config();
-const baseDatos = require('./general.js');
+const database = require('./general.js');
 
 async function conectar() {
-    return await baseDatos.conectarBD();
+    return await database.conectarBD();
 }
 
 async function getIdentityCards() {
@@ -324,6 +324,74 @@ async function updateStep(idTask, state) {
     return "OK";
 }
 
+// ---------------------------------------------- MATERIAL TASK ----------------------------------------------
+
+async function getMaterialTaskModel(idTask) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM TAREA WHERE ID_tarea = ?',
+        [idTask], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting material task.', error);
+            }
+        }
+    );
+
+    if (rows[0].Tipo_tarea !== 'MaterialTask') {
+        throw new Error('This task is not a material task.');
+    }
+
+    if (rows.length === 0) {
+        throw new Error('There is no task with that id.');
+    }
+
+    // Cogemos la recompensa según su tipo.
+    switch (rows[0].Recompensa_tipo) {
+        case "String" : recompensa = rows[0].Recompensa; break;
+
+        case "Imagenes" :
+            recompensa = await database.getImageContent(rows[0].Recompensa);
+            break;
+
+        case "Audios" :
+            recompensa = await database.getAudio(rows[0].Recompensa);
+            break;
+
+        case "Videos" :
+            recompensa = await database.getVideo(rows[0].Recompensa);
+            break;
+
+        default : throw new Error('There is no reward type with that name. '
+                                    + rows[0].Recompensa_tipo);
+    }
+
+    // Contamos cuántos materiales hay en MATERIALES_TAREA.
+    const [rows2, fields2] = await connection.execute(
+        'SELECT COUNT(*) FROM MATERIALES_TAREA WHERE ID_tarea = ?',
+        [idTask], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error counting materials.', error);
+            }
+        }
+    );
+
+    n_materiales = rows2[0]['COUNT(*)'];
+
+    imageTask = await database.getImageContent(rows[0].Img_tarea);
+
+    const data = {
+        type: "MaterialTaskModel",
+        taskId: rows[0].ID_tarea,
+        displayName: rows[0].Nombre,
+        displayImage: imageTask,
+        reward: recompensa,
+        requests: n_materiales
+    };
+
+    return data;
+}
+
 module.exports = {
     getIdentityCard,
     getIdentityCards,
@@ -340,5 +408,6 @@ module.exports = {
     getProfileData,
     getStudentFromTaks,
     getTask,
-    updateStep
+    updateStep,
+    getMaterialTaskModel
 };
