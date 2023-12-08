@@ -1,6 +1,7 @@
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 const schedule = require('node-schedule');
+const ip = '34.175.9.11';
 
 const jwt = require('jsonwebtoken');
 
@@ -32,28 +33,6 @@ async function desconectarBD() {
     connection.end();
 }
 
-// TODO: Control de errores general.
-function handleDatabaseError(error) {
-    if (error) {
-        switch (error.code) {
-            case 'ER_BAD_FIELD_ERROR':
-                throw new Error('Invalid field error in the database');
-            case 'ER_NO_REFERENCED_ROW_2':
-                throw new Error('Foreign key error in the database');
-            case 'ER_DUP_ENTRY':
-                throw new Error('Duplicate entry error in the database');
-            case 'ER_TABLE_EXISTS_ERROR':
-                throw new Error('Table already exists in the database');
-            case 'ER_NO_SUCH_TABLE':
-                throw new Error('Table does not exist in the database');
-            case 'ER_WRONG_VALUE_COUNT_ON_ROW':
-                throw new Error('Incorrect number of values in the SQL query');
-            default:
-                throw new Error('There is an error in the database with code: ' + error.code);
-        }
-    }
-}
-
 const encrypt = async (password) => {
     return await bcrypt.hash(password, 10);
 }
@@ -82,7 +61,7 @@ async function checkearToken(token, typeSecret) {
     const connection = await conectarBD();
 
     const [rows] = await connection.execute('SELECT Token FROM TOKENS WHERE Token = ?',
-                           [token]
+                                            [token]
     );
 
     if (rows.length > 0) {
@@ -106,7 +85,7 @@ async function VerificarToken(token) {              // Cambio en la tabla tokens
     const connection = await conectarBD();
 
     const [rows, fields] = connection.execute('SELECT Token FROM TOKENS WHERE Token = ?',
-                           [token], (error, results, fields) => {
+                                                [token], (error, results, fields) => {
         if (error) {
             throw new Error('Error getting token');
         }
@@ -128,6 +107,129 @@ async function getImage(idImage) {
         imgDescription: rows[0].Descripcion,
         Type: rows[0].Tipo
     };
+
+    return data;
+}
+
+// TODO: Si la url de imagen, video o audio es null, se devuelve el endpoint local.
+
+async function getImageContent(idImage) {
+    const connection = await conectarBD();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM IMAGENES WHERE ID_imagen = ?',
+        [idImage], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting image. ' + error);
+            }
+        }
+    );
+
+    if (rows.length === 0) {
+        throw new Error('There is no image with that id.');
+    }
+
+    // Si la url de la imagen es null, se devuelve el endpoint local.
+
+    const data = {
+        type: "RemoteImage",
+        id: rows[0].ID_imagen,
+    };
+
+    if (rows[0].Url_imagen) {
+        data.imageUrl = rows[0].Url_imagen;
+    } else {
+        data.imageUrl = 'http://' + ip + ':6969/api/v1/images/' + rows[0].ID_imagen;
+    }
+
+    return data;
+}
+
+async function getAudio(idAudio) {
+    const connection = await conectarBD();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM AUDIOS WHERE ID_audio = ?',
+        [idAudio], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting audio. ' + error);
+            }
+        }
+    );
+
+    if (rows.length === 0) {
+        throw new Error('There is no audio with that id.');
+    }
+
+    const data = {
+        type: "AudioContent",
+        id: rows[0].ID_audio,
+    };
+
+    if (rows[0].Url_audio) {
+        data.audioUrl = rows[0].Url_audio;
+    } else {
+        data.audioUrl = 'http://' + ip + ':6969/api/v1/audios/' + rows[0].ID_audio;
+    }
+
+    return data;
+}
+
+async function getVideo(idVideo) {
+    const connection = await conectarBD();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM VIDEOS WHERE ID_video = ?',
+        [idVideo], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting video. ' + error);
+            }
+        }
+    );
+
+    if (rows.length === 0) {
+        throw new Error('There is no video with that id.');
+    }
+
+    const data = {
+        type: "VideoContent",
+        id: rows[0].ID_video,
+    };
+
+    if (rows[0].Url_video) {
+        data.videoUrl = rows[0].Url_video;
+    } else {
+        data.videoUrl = 'http://' + ip + ':6969/api/v1/videos/' + rows[0].ID_video;
+    }
+
+    return data;
+}
+
+async function getMaterial(idMaterial) {
+    const connection = await conectarBD();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM MATERIALES WHERE ID_material = ?',
+        [idMaterial]
+    );
+
+    fotoMaterial = await getImageContent(rows[0].Foto_material);
+
+    data = {
+        displayName: rows[0].Nombre,
+        displayImage: fotoMaterial,
+    };
+
+    if (rows[0].Propiedad) {
+        fotoPropiedad = await getImageContent(rows[0].Foto_propiedades);
+
+        propiedad = {
+            displayName: rows[0].Propiedad,
+            displayImage: fotoPropiedad
+        };
+
+        data.property = propiedad;
+    }
 
     return data;
 }
@@ -185,5 +287,9 @@ module.exports = {
     VerificarToken,
     insertarToken,
     getSetImages,
-    getAvatar
+    getAvatar,
+    getImageContent,
+    getAudio,
+    getVideo,
+    getMaterial
 };

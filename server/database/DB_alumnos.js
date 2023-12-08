@@ -1,8 +1,8 @@
 require('dotenv').config();
-const baseDatos = require('./general.js');
+const database = require('./general.js');
 
 async function conectar() {
-    return await baseDatos.conectarBD();
+    return await database.conectarBD();
 }
 
 async function getIdentityCards() {
@@ -324,6 +324,148 @@ async function updateStep(idTask, state) {
     return "OK";
 }
 
+// ---------------------------------------------- MATERIAL TASK ----------------------------------------------
+
+async function getMaterialTaskModel(idTask) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM TAREA WHERE ID_tarea = ?',
+        [idTask], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting material task.', error);
+            }
+        }
+    );
+
+    if (rows[0].Tipo_tarea !== 'MaterialTask') {
+        throw new Error('This task is not a material task.');
+    }
+
+    if (rows.length === 0) {
+        throw new Error('There is no task with that id.');
+    }
+
+    // Cogemos la recompensa según su tipo.
+    switch (rows[0].Recompensa_tipo) {
+        case "String" :
+            recompensa = {
+                type: "TextContent",
+                string: rows[0].Recompensa
+            };
+            break;
+
+        case "Imagenes" :
+            recompensa = await database.getImageContent(rows[0].Recompensa);
+            break;
+
+        case "Audios" :
+            recompensa = await database.getAudio(rows[0].Recompensa);
+            break;
+
+        case "Videos" :
+            recompensa = await database.getVideo(rows[0].Recompensa);
+            break;
+
+        default : throw new Error('There is no reward type with that name. '
+                                    + rows[0].Recompensa_tipo);
+    }
+
+    // Contamos cuántos materiales hay en MATERIALES_TAREA.
+    const [rows2, fields2] = await connection.execute(
+        'SELECT COUNT(*) FROM MATERIALES_TAREA WHERE ID_tarea = ?',
+        [idTask], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error counting materials.', error);
+            }
+        }
+    );
+
+    if (rows2.length === 0) {
+        throw new Error('There are no materials in this task.');
+    }
+
+    n_materiales = rows2[0]['COUNT(*)'];
+    
+    try {
+        imageTask = await database.getImageContent(rows[0].Img_tarea);
+    } catch(error) {
+        throw new Error('Error getting image content.', error);
+    }
+
+    const data = {
+        type: "MaterialTaskModel",
+        taskId: rows[0].ID_tarea,
+        displayName: rows[0].Nombre,
+        displayImage: imageTask,
+        reward: recompensa,
+        requests: n_materiales
+    };
+
+    return data;
+}
+
+async function getMaterialRequest(TaskId, RequestId) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM MATERIALES_TAREA WHERE ID_tarea = ? AND num_peticion = ?',
+        [TaskId, RequestId], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting material request.', error);
+            }
+        }
+    );
+
+    if (rows.length === 0) {
+        throw new Error('There is no material request with that id.');
+    }
+
+    // Cogemos la imagen del material.
+    const [rows2, fields2] = await connection.execute(
+        'SELECT * FROM MATERIALES WHERE ID_material = ?',
+        [rows[0].ID_material], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting material.', error);
+            }
+        }
+    );
+
+    if (rows2.length === 0) {
+        throw new Error('There is no material with that id.');
+    }
+
+    try {
+        material_ = await database.getMaterial(rows[0].ID_material);
+        imagen_peticion = await database.getImageContent(rows[0].Imagen_peticion);
+    } catch(error) {
+        throw new Error('Error getting material or image content.', error);
+    }
+
+    const data = {
+        material : material_,
+        displayImage: imagen_peticion,
+        isDelivered: rows[0].estaEntregado
+    };
+
+    return data;
+}
+
+async function toggleDelivered(TaskId, RequestId, isDelivered) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'UPDATE MATERIALES_TAREA SET estaEntregado = ? WHERE ID_tarea = ? AND num_peticion = ?',
+        [isDelivered, TaskId, RequestId], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error updating material request.', error);
+            }
+        }
+    );
+
+    return "OK";
+}
+
 module.exports = {
     getIdentityCard,
     getIdentityCards,
@@ -340,5 +482,8 @@ module.exports = {
     getProfileData,
     getStudentFromTaks,
     getTask,
-    updateStep
+    updateStep,
+    getMaterialTaskModel,
+    getMaterialRequest,
+    toggleDelivered
 };

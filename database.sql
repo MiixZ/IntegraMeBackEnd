@@ -126,7 +126,14 @@ CREATE TABLE MATERIALES (
     FOREIGN KEY (Foto_propiedades) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE TAREA(
+/*
+Campo "Propiedad"
+*/
+ALTER TABLE MATERIALES
+ADD Propiedad VARCHAR(255) DEFAULT NULL;
+/*-----------------------------*/
+
+CREATE TABLE TAREA (
     ID_tarea INT AUTO_INCREMENT PRIMARY KEY,
     Nombre VARCHAR(20) NOT NULL,
     Descripcion VARCHAR(100) NOT NULL,
@@ -142,6 +149,32 @@ CREATE TABLE TAREA(
     FOREIGN KEY (Supervisor) REFERENCES PROFESORES(ID_profesor) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_alumno) REFERENCES ALUMNOS(ID_alumno) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+/*
+Intermediario entre material y tarea (para tarea de tipo material)
+*/
+CREATE TABLE MATERIALES_TAREA (
+    Num_peticion INT NOT NULL,
+    ID_material INT NOT NULL,
+    ID_tarea INT NOT NULL,
+    Cantidad INT,
+    Esta_entregado BOOLEAN,
+    Imagen_peticion INT NOT NULL FOREIGN KEY REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY (num_peticion, ID_tarea),
+    FOREIGN KEY (ID_material) REFERENCES MATERIALES(ID_material) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_tarea) REFERENCES TAREA(ID_tarea) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+/*
+En este diseño, Recompensa es un campo de tipo VARCHAR(255) que puede
+contener un string o un id (como un string). Recompensa_tipo es un
+campo de tipo ENUM que indica el tipo de la recompensa: un string,
+una imagen, un video o un audio.
+*/
+ALTER TABLE TAREA
+ADD Recompensa VARCHAR(255),
+ADD Recompensa_tipo ENUM('String', 'Imagenes', 'Videos', 'Audios');
+/*--------------------------------------*/
 
 CREATE TABLE PASO_GENERAL (
     ID_tarea INT NOT NULL,
@@ -160,6 +193,13 @@ CREATE TABLE PASO_GENERAL (
     FOREIGN KEY (Video_tarea) REFERENCES VIDEOS(ID_video) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+/*
+Agregado este alter para que funcione la agregación de pasos
+*/
+ALTER TABLE PASO_GENERAL
+ADD INDEX idx_ID_paso (ID_paso);
+/*--------------------------------------*/
+
 CREATE TABLE VIDEOS (
     ID_video INT AUTO_INCREMENT PRIMARY KEY,
     Descripcion VARCHAR(100) NOT NULL,
@@ -172,8 +212,22 @@ CREATE TABLE AUDIOS (
     Tipo VARCHAR(20) DEFAULT NULL
 );
 
+/* Agregar url */
 
-CREATE TABLE IMAGENES_PASO(
+ALTER TABLE IMAGENES
+ADD imageUrl VARCHAR(255);
+
+ALTER TABLE VIDEO
+ADD videoUrl VARCHAR(255);
+
+ALTER TABLE AUDIO
+ADD audioUrl VARCHAR(255);
+
+/*
+AGREGADO A PARTIR DE AQUÍ
+*/
+
+CREATE TABLE IMAGENES_PASO (
     ID_paso INT NOT NULL,
     ID_imagen INT NOT NULL,
     PRIMARY KEY (ID_paso, ID_imagen),
@@ -181,7 +235,7 @@ CREATE TABLE IMAGENES_PASO(
     FOREIGN KEY (ID_imagen) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE VIDEOS_PASO(
+CREATE TABLE VIDEOS_PASO (
     ID_paso INT NOT NULL,
     ID_video INT NOT NULL,
     PRIMARY KEY (ID_paso, ID_video),
@@ -189,7 +243,7 @@ CREATE TABLE VIDEOS_PASO(
     FOREIGN KEY (ID_video) REFERENCES VIDEOS(ID_video) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE AUDIOS_PASO(
+CREATE TABLE AUDIOS_PASO (
     ID_paso INT NOT NULL,
     ID_audio INT NOT NULL,
     PRIMARY KEY (ID_paso, ID_audio),
