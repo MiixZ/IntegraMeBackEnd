@@ -142,6 +142,8 @@ async function getImageContent(idImage) {
         data.imageUrl = 'http://' + ip + ':6969/api/v1/images/' + rows[0].ID_imagen;
     }
 
+    data.altDescription = rows[0].Descripcion;
+
     return data;
 }
 
