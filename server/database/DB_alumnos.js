@@ -324,7 +324,7 @@ async function updateStep(idTask, state) {
     return "OK";
 }
 
-// ---------------------------------------------- MATERIAL TASK ----------------------------------------------
+// ---------------------------------------------- TASKS ----------------------------------------------
 
 async function getMaterialTaskModel(idTask) {
     const connection = await conectar();
@@ -466,6 +466,139 @@ async function toggleDelivered(TaskId, RequestId, isDelivered) {
     return "OK";
 }
 
+async function getGenericTaskModel(idTask) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM TAREA WHERE ID_tarea = ?',
+        [idTask], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting generic task.', error);
+            }
+        }
+    );
+
+    if (rows[0].Tipo_tarea !== 'GenericTask') {
+        throw new Error('This task is not a generic task.');
+    }
+
+    if (rows.length === 0) {
+        throw new Error('There is no task with that id.');
+    }
+
+    // Cogemos la recompensa según su tipo.
+    switch (rows[0].Recompensa_tipo) {
+        case "String" :
+            recompensa = {
+                type: "TextContent",
+                string: rows[0].Recompensa
+            };
+            break;
+
+        case "Imagenes" :
+            recompensa = await database.getImageContent(rows[0].Recompensa);
+            break;
+
+        case "Audios" :
+            recompensa = await database.getAudio(rows[0].Recompensa);
+            break;
+
+        case "Videos" :
+            recompensa = await database.getVideo(rows[0].Recompensa);
+            break;
+
+        default : throw new Error('There is no reward type with that name. '
+                                    + rows[0].Recompensa_tipo);
+    }
+
+    try {
+        imageTask = await database.getImageContent(rows[0].Img_tarea);
+    } catch(error) {
+        throw new Error('Error getting image content.', error);
+    }
+
+    const data = {
+        type: "GenericTaskModel",
+        taskId: rows[0].ID_tarea,
+        displayName: rows[0].Nombre,
+        displayImage: imageTask,
+        reward: recompensa,
+        steps: rows[0].Steps
+    };
+
+    return data;
+}
+
+async function getGenericTaskStep(TaskId, StepId) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM PASO_GENERAL WHERE ID_tarea = ? AND ID_paso = ?',
+        [TaskId, StepId], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting generic task.', error);
+            }
+        }
+    );
+
+    if (rows.length === 0) {
+        throw new Error('There is no step with that id.');
+    }
+
+    try {
+        imageStep = await database.getImageContent(rows[0].Imagen_tarea);
+    } catch(error) {
+        throw new Error('Error getting image content.', error);
+    }
+
+    try {
+        videoStep = await database.getVideo(rows[0].Video_tarea);
+    } catch(error) {
+        throw new Error('Error getting video content.', error);
+    }
+
+    try {
+        audioStep = await database.getAudio(rows[0].Audio_tarea);
+    } catch(error) {
+        throw new Error('Error getting audio content.', error);
+    }
+
+    texto = {
+        type: "TextContent",
+        string: rows[0].Texto_tarea
+    };
+
+    contentPack = {
+        text: texto,
+        image: imageStep,
+        video: videoStep,
+        audio: audioStep
+    };
+
+    const data = {
+        displayName: rows[0].Nombre,
+        isCompleted: rows[0].Estado,
+        content: contentPack
+    };
+
+    return data;
+}
+
+async function toggleStepCompleted(TaskId, StepId, isCompleted) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'UPDATE PASO_GENERAL SET Estado = ? WHERE ID_tarea = ? AND ID_paso = ?',
+        [isCompleted, TaskId, StepId], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error updating step.', error);
+            }
+        }
+    );
+
+    return "OK";
+}
+
 module.exports = {
     getIdentityCard,
     getIdentityCards,
@@ -485,5 +618,8 @@ module.exports = {
     updateStep,
     getMaterialTaskModel,
     getMaterialRequest,
-    toggleDelivered
+    toggleDelivered,
+    getGenericTaskModel,
+    getGenericTaskStep,
+    toggleStepCompleted
 };
