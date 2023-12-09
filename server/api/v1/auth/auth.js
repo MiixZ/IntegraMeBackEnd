@@ -137,9 +137,38 @@ AuthRouter.post('/students/tasks/general/:taskId/:numPaso/state', studentsFN.upd
  */
 AuthRouter.get('/students/tasks/:taskId/MaterialTaskModel', studentsFN.getTaskModel);
 
+/**
+ * @api {get} /getMaterialRequest Devuelve una petición de material de la tarea.
+ * @apiName get MaterialRequest
+ * @apiGroup Students
+ * @apiParam {Number} taskId Identificador de la tarea.
+ * @apiParam {Number} requestId Identificador de la petición.
+ * 
+ * @apiSuccess {String} Se devuelve la información de la petición.
+ * @apiError {String} Error en la solicitud.
+ * @apiError {String} Token expirado.
+ */
 AuthRouter.get('/students/tasks/:taskId/:requestId/MaterialRequest', studentsFN.getMaterialRequest);
 
+/**
+ * @api {post} /toggleDelivered Cambia el estado de la petición de material.
+ * @apiName toggle Delivered
+ * @apiGroup Students
+ * @apiParam {Number} taskId Identificador de la tarea.
+ * @apiParam {Number} requestId Identificador de la petición.
+ * 
+ * @apiSuccess {String} Se cambia el estado de la petición.
+ * @apiError {String} Error en la solicitud.
+ * @apiError {String} Token expirado.
+ */
 AuthRouter.post('/students/tasks/:taskId/:requestId/ToggleDelivered', studentsFN.toggleDelivered);
+
+
+AuthRouter.get('/students/tasks/:taskId/GenericTaskModel', studentsFN.getGenericTaskModel);
+
+AuthRouter.get('/students/tasks/:taskId/:stepId/GenericTaskStep', studentsFN.getGenericTaskStep);
+
+AuthRouter.post('/students/tasks/:taskId/:stepId/ToggleStepCompleted', studentsFN.toggleStepCompleted);
 
 /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {

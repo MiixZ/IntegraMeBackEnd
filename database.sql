@@ -145,6 +145,8 @@ CREATE TABLE TAREA (
     Supervisor INT NOT NULL,
     Tipo_tarea ENUM('GenericTask', 'MenuTask', 'MaterialTask') NOT NULL,
     Steps INT DEFAULT NULL,
+    Recompensa VARCHAR(255),    -- Campo para la recompensa (Si es texto es normal, si es imagen el la id de la imagen...)
+    Recompensa_tipo ENUM('String', 'Imagenes', 'Videos', 'Audios'),
     FOREIGN KEY (Img_tarea) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (Supervisor) REFERENCES PROFESORES(ID_profesor) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_alumno) REFERENCES ALUMNOS(ID_alumno) ON DELETE CASCADE ON UPDATE CASCADE
@@ -165,15 +167,6 @@ CREATE TABLE MATERIALES_TAREA (
     FOREIGN KEY (ID_tarea) REFERENCES TAREA(ID_tarea) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-/*
-En este diseño, Recompensa es un campo de tipo VARCHAR(255) que puede
-contener un string o un id (como un string). Recompensa_tipo es un
-campo de tipo ENUM que indica el tipo de la recompensa: un string,
-una imagen, un video o un audio.
-*/
-ALTER TABLE TAREA
-ADD Recompensa VARCHAR(255),
-ADD Recompensa_tipo ENUM('String', 'Imagenes', 'Videos', 'Audios');
 /*--------------------------------------*/
 
 CREATE TABLE PASO_GENERAL (

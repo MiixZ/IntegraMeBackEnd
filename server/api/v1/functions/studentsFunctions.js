@@ -522,6 +522,92 @@ async function toggleDelivered(req, res) {
     return res.json(materialRequest);
 }
 
+async function getGenericTaskModel(req, res) {
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    let taskModel = {};
+
+    try {
+        taskModel = await database.getGenericTaskModel(taskID);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error getting task model. ' + error });
+    }
+
+    return res.json(taskModel);
+}
+
+async function getGenericTaskStep(req, res) {
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+    const stepID = req.params.stepId;
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    let taskStep = {};
+
+    try {
+        taskStep = await database.getGenericTaskStep(taskID, stepID);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error getting task step. ' + error });
+    }
+
+    return res.json(taskStep);
+}
+
+async function toggleStepCompleted(req, res) {
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+    const token = req.headers.authorization.split(' ')[1];
+    const taskID = req.params.taskId;
+    const stepID = req.params.stepId;
+    const isCompleted = req.body.isCompleted;
+
+    if (!isCompleted) {
+        return res.status(400).json({ error: 'Data not sent on body.' });
+    }
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    let taskStep = {};
+
+    try {
+        taskStep = await database.toggleStepCompleted(taskID, stepID, isCompleted);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error toggling step completed. ' + error });
+    }
+
+    return res.json(taskStep);
+}
+
 module.exports = {
     getIdentityCardsAll,
     getIdentityCard,
@@ -534,5 +620,8 @@ module.exports = {
     updateTaskState,
     getTaskModel,
     getMaterialRequest,
-    toggleDelivered
+    toggleDelivered,
+    getGenericTaskModel,
+    getGenericTaskStep,
+    toggleStepCompleted
 };
