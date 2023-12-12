@@ -293,15 +293,15 @@ async function getProfile(req, res) {           // Probar.
 
     res.json({
         type: "StudentProfile",
+        userId: userID,
+        nickname: studentProfile.NickName,
+        avatar: imagen,
+        name: dataStudent.Name,
+        surnames: dataStudent.Lastname1 + " " + dataStudent.Lastname2,
         contentProfile: {
             contentAdaptationFormats: arrayFormatos,
             interactionMethods: arrayInteracciones 
         },
-        userId: userID,
-        name: dataStudent.Name,
-        surnames: dataStudent.Lastname1 + " " + dataStudent.Lastname2,
-        nickname: studentProfile.NickName,
-        avatar: imagen,
     });
 }
 
