@@ -251,13 +251,21 @@ async function getTasksCards(idStudent) {
         throw new Error('There are no tasks for this student');
     }
 
-    const data = rows.map(row => ({
-        taskId: row.ID_tarea,
-        taskState: row.Estado,
-        displayName: row.Nombre,
-        displayImage: row.Img_tarea,
-        taskType: row.Tipo_tarea
-    }));
+    const data = [];
+
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+
+        displayImagen = await database.getImageContent(row.Img_tarea);
+
+        data.push({
+            taskId: row.ID_tarea,
+            taskState: row.Estado,
+            displayName: row.Nombre,
+            displayImage: displayImagen,
+            taskType: row.Tipo_tarea
+        });
+    }
 
     return data;
 }
