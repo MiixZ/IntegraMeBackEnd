@@ -22,7 +22,7 @@ async function getIdentityCard(idStudent) {
     const connection = await conectar();
 
     const [rows, fields] = await connection.execute(
-        'SELECT ID_alumno, NickName FROM ALUMNOS WHERE id_alumno = ?',
+        'SELECT ID_alumno, NickName FROM ALUMNOS WHERE ID_alumno = ?',
         [idStudent]
     );
 
@@ -421,29 +421,16 @@ async function getMaterialRequest(TaskId, RequestId) {
         throw new Error('There is no material request with that id.');
     }
 
-    // Cogemos la imagen del material.
-    const [rows2, fields2] = await connection.execute(
-        'SELECT * FROM MATERIALES WHERE ID_material = ?',
-        [rows[0].ID_material], (error, results, fields) => {
-            if (error) {
-                throw new Error('Error getting material.', error);
-            }
-        }
-    );
-
-    if (rows2.length === 0) {
-        throw new Error('There is no material with that id.');
-    }
-
+    // Cogemos los datos del material y la imagen del mismo.
     try {
-        material_ = await database.getMaterial(rows[0].ID_material);
+        material_data = await database.getMaterial(rows[0].ID_material);  // no se hace la misma consulta 2 veces?
         imagen_peticion = await database.getImageContent(rows[0].Imagen_peticion);
     } catch(error) {
         throw new Error('Error getting material or image content.', error);
     }
 
     const data = {
-        material : material_,
+        material : material_data, 
         displayImage: imagen_peticion,
         isDelivered: rows[0].estaEntregado
     };
