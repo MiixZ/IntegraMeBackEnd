@@ -378,7 +378,7 @@ async function getTasksCards(req, res) {             // Probar.
 
     const userID = decodedToken.idStudent;
 
-    if (student) {
+    if (!student) {
         return res.status(401).json({ error: 'Invalid token for user.' });
     }
 
