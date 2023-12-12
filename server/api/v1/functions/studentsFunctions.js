@@ -12,7 +12,7 @@ async function getIdentityCardsAll(req, res) {          // Probar.
     let nicknames = [];
 
     try {
-        [ids, nicknames] = await database.getIdentityCards();
+        [ids, nicknames, avatars] = await database.getIdentityCards();
     } catch (error) {
         return res.status(500).json({ error: 'Error getting identity cards.' });
     }
@@ -23,13 +23,12 @@ async function getIdentityCardsAll(req, res) {          // Probar.
      * Se devuelve una lista []:{"userId": 2,"nickname": "asd","avatar": {"id": id_imagen,"altDescription": "descripción textual"}
     */
     const response = [];
+    console.log("avatares: " + avatars);
 
     for (let i = 0; i < ids.length; i++) {
-        let avatar_id = -1;
-        let avatar_description = "";
 
         try {
-            [avatar_id, avatar_description] = await database.getAvatar(ids[i]);     // [0] es el id del alumno. [1] es el nickname.
+            imageContent = await general.getImageContent(avatars[i]);     // [0] es el id del alumno. [1] es el nickname.
         } catch (error) {
             return res.status(500).json({ error: 'Error getting ' + nicknames[i] + ' avatar.' });
         }
@@ -37,10 +36,7 @@ async function getIdentityCardsAll(req, res) {          // Probar.
         response.push({
             userId: ids[i],
             nickname: nicknames[i],
-            avatar: {
-                id: avatar_id,     // Puede ser avatar.avatarId y avatar.altDescription.
-                altDescription: avatar_description
-            }
+            avatar: imageContent
         });
     }
 

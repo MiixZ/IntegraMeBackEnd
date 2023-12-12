@@ -9,13 +9,14 @@ async function getIdentityCards() {
     const connection = await conectar();
 
     const [rows, fields] = await connection.execute(
-        'SELECT ID_alumno, NickName FROM PERFIL_ALUMNOS'
+        'SELECT ID_alumno, NickName, Avatar_id FROM PERFIL_ALUMNOS'
     );
 
     const ids = rows.map(result => result.ID_alumno);
     const nicknames = rows.map(result => result.NickName);
+    const avatars = rows.map(result => result.Avatar_id);
 
-    return [ids, nicknames];
+    return [ids, nicknames, avatars];
 }
 
 async function getIdentityCard(idStudent) {
