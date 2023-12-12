@@ -9,7 +9,7 @@ async function getIdentityCards() {
     const connection = await conectar();
 
     const [rows, fields] = await connection.execute(
-        'SELECT ID_alumno, NickName FROM ALUMNOS'
+        'SELECT ID_alumno, NickName FROM PERFIL_ALUMNOS'
     );
 
     const ids = rows.map(result => result.ID_alumno);
