@@ -347,7 +347,7 @@ async function loginStudent(req, res) {             // Probar.
                 userId : idStudent,
                 token: token
             }
-            res.status(200).json({ respuesta });
+            res.status(200).json(respuesta);
         } catch {
             return res.status(500).json({ error: 'Error saving token' });
         }
