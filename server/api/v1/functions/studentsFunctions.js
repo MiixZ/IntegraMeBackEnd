@@ -136,8 +136,8 @@ async function getProfileContent(req, res) {        // FUNCIONA
     for (let i = 0; i < formatos.length; i++) {
         arrayFormats.push(formatos[i].Nom_formato);
     }
- 
-     for (let i = 0; i < interacciones.length; i++) {
+
+    for (let i = 0; i < interacciones.length; i++) {
         arrayIteractions.push(interacciones[i].Nom_interaccion);
     }
 
@@ -271,7 +271,7 @@ async function getProfile(req, res) {           // Probar.
     try {
         dataStudent = await database.getData(userID);
         studentProfile = await database.getProfileData(userID);                // [avatarId, altDescription
-        imagen = await general.getImage(studentProfile.Avatar_id);                   // [avatarId, altDescription
+        imagen = await general.getImageContent(studentProfile.Avatar_id);                   // [avatarId, altDescription
     } catch (error) {
         return res.status(404).json({ error: 'Could not get student data or avatar.' });
     }
@@ -283,12 +283,13 @@ async function getProfile(req, res) {           // Probar.
     const interacciones = await database.getInteracciones(userID);
     
     for (let i = 0; i < formatos.length; i++) {
-       arrayFormatos.push(formatos[i].Nom_formato);
+        arrayFormatos.push(formatos[i].Nom_formato);
     }
 
     for (let i = 0; i < interacciones.length; i++) {
         arrayInteracciones.push(interacciones[i].Nom_interaccion);
     }
+
 
     res.json({
         type: "StudentProfile",
@@ -299,10 +300,7 @@ async function getProfile(req, res) {           // Probar.
         name: dataStudent.Name,
         surnames: dataStudent.Lastname1 + " " + dataStudent.Lastname2,
         nickname: studentProfile.NickName,
-        avatar: {
-            id: studentProfile.Avatar_id,
-            altDescription: imagen.imgDescription
-        },
+        avatar: imagen,
     });
 }
 
