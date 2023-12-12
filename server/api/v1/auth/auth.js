@@ -112,7 +112,7 @@ AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfi
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.get('/students/:userID/tasks/cards', studentsFN.getTasksCards);
+AuthRouter.get('/students/taskCards', studentsFN.getTasksCards);
 
 /**
  * @api {post} /updateState Actualiza el estado de la tarea.

@@ -361,8 +361,6 @@ async function getTasksCards(req, res) {             // Probar.
 
     const token = req.headers.authorization.split(' ')[1];
 
-    const userID = req.params.userID;
-
     // Verificamos token y lo decodificamos
     let decodedToken;
     let student = false;
@@ -378,7 +376,9 @@ async function getTasksCards(req, res) {             // Probar.
         }
     }
 
-    if (student && decodedToken.idStudent != userID) {
+    const userID = decodedToken.idStudent;
+
+    if (student) {
         return res.status(401).json({ error: 'Invalid token for user.' });
     }
 
