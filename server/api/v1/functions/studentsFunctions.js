@@ -290,9 +290,7 @@ async function getProfile(req, res) {           // Probar.
         arrayInteracciones.push(interacciones[i].Nom_interaccion);
     }
 
-
     res.json({
-        type: "StudentProfile",
         userId: userID,
         nickname: studentProfile.NickName,
         avatar: imagen,
