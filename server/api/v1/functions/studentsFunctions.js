@@ -311,8 +311,11 @@ async function loginStudent(req, res) {             // Probar.
     let hash = "";
     let profileData = "";
 
-    const idStudent = req.body.idStudent;
+    const idStudent = req.body.userId;
     const password = req.body.password;
+
+    console.log("idStudent: " + idStudent);
+    console.log("password: " + password);
 
     // Verificar si todos los campos necesarios están presentes
     if (!idStudent || !password) {
