@@ -23,14 +23,15 @@ async function getIdentityCard(idStudent) {
     const connection = await conectar();
 
     const [rows, fields] = await connection.execute(
-        'SELECT ID_alumno, NickName FROM ALUMNOS WHERE ID_alumno = ?',
+        'SELECT ID_alumno, NickName, Avatar_id FROM PERFIL_ALUMNOS WHERE ID_alumno = ?',
         [idStudent]
     );
 
     const id = rows[0].ID_alumno;
     const nickname = rows[0].NickName;
+    const avatar = rows[0].Avatar_id;
 
-    return [id, nickname];
+    return [id, nickname, avatar];
 }
 
 async function getAvatar(idStudent) {

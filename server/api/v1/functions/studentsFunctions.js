@@ -23,7 +23,6 @@ async function getIdentityCardsAll(req, res) {          // Probar.
      * Se devuelve una lista []:{"userId": 2,"nickname": "asd","avatar": {"id": id_imagen,"altDescription": "descripción textual"}
     */
     const response = [];
-    console.log("avatares: " + avatars);
 
     for (let i = 0; i < ids.length; i++) {
 
@@ -45,17 +44,15 @@ async function getIdentityCardsAll(req, res) {          // Probar.
 
 async function getIdentityCard(req, res) {          // Probar.
     // Obtener datos del cuerpo de la solicitud.
-    const idStudent = req.params.idStudent;
+    const userId = req.params.userID;
     let id_Student = -1;
     let nickname = "";
-
-    let avatar_id = -1;
-    let avatar_description = "";
+    let avatar = "";
 
     // Obtener tarjetas de identidad del alumno.
     try {
-        [id_Student, nickname] = await database.getIdentityCard(idStudent);       // [id, nickname]
-        [avatar_id, avatar_description] = await database.getAvatar(idStudent);                   // [avatarId, altDescription]
+        [id_Student, nickname, avatar] = await database.getIdentityCard(userId);
+        imageContent = await general.getImageContent(avatar);
     } catch (error) {
         res.status(500).json({ error: 'Error getting identity card or avatar.' });
         return;
@@ -65,10 +62,7 @@ async function getIdentityCard(req, res) {          // Probar.
     const response = {
         userId: id_Student,        // Puede ser identityCard.id e identityCard.nickname.
         nickname: nickname,
-        avatar: {
-            id: avatar_id,              // Puede ser avatar.avatarId y avatar.altDescription.
-            altDescription: avatar_description
-        }
+        avatar: imageContent
     };
 
     res.json(response);
