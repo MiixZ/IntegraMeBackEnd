@@ -297,6 +297,7 @@ async function getProfile(req, res) {           // Probar.
             contentAdaptationFormats: arrayFormatos,
             interactionMethods: arrayInteracciones 
         },
+        userId: userID,
         name: dataStudent.Name,
         surnames: dataStudent.Lastname1 + " " + dataStudent.Lastname2,
         nickname: studentProfile.NickName,
