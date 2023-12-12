@@ -343,7 +343,11 @@ async function loginStudent(req, res) {             // Probar.
         const token = jwt.sign({ idStudent, nickname: profileData.NickName, EXP: fecha}, secret); //{ expiresIn: '1h' });
         try {
             await general.insertarToken(idStudent, token, fecha);
-            res.status(200).json({ token });
+            const respuesta = {
+                userId : idStudent,
+                token: token
+            }
+            res.status(200).json({ respuesta });
         } catch {
             return res.status(500).json({ error: 'Error saving token' });
         }
