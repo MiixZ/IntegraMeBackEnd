@@ -135,7 +135,7 @@ AuthRouter.post('/students/tasks/general/:taskId/:numPaso/state', studentsFN.upd
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.get('/students/tasks/:taskId/MaterialTaskModel', studentsFN.getTaskModel);
+AuthRouter.get('/students/tasks/material/:taskId', studentsFN.getTaskModel);
 
 /**
  * @api {get} /getMaterialRequest Devuelve una petición de material de la tarea.
@@ -148,7 +148,7 @@ AuthRouter.get('/students/tasks/:taskId/MaterialTaskModel', studentsFN.getTaskMo
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.get('/students/tasks/:taskId/:requestId/MaterialRequest', studentsFN.getMaterialRequest);
+AuthRouter.get('/students/tasks/material/:taskId/:requestId', studentsFN.getMaterialRequest);
 
 /**
  * @api {post} /toggleDelivered Cambia el estado de la petición de material.
