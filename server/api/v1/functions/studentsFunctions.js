@@ -311,8 +311,10 @@ async function loginStudent(req, res) {             // Probar.
     let hash = "";
     let profileData = "";
 
+    // Falta hacer diferentes logins dependientdo de si es texto o imagen
+
     const idStudent = req.body.userId;
-    const password = req.body.password;
+    const password = req.body.password.password;         // password.password porque el body es {password: {password: "contraseña"}}
 
     console.log("idStudent: " + idStudent);
     console.log("password: " + password);
