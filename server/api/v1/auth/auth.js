@@ -163,12 +163,11 @@ AuthRouter.get('/students/tasks/:taskId/:requestId/MaterialRequest', studentsFN.
  */
 AuthRouter.post('/students/tasks/:taskId/:requestId/ToggleDelivered', studentsFN.toggleDelivered);
 
+AuthRouter.get('/students/tasks/generic/:taskId', studentsFN.getGenericTaskModel);
 
-AuthRouter.get('/students/tasks/:taskId/GenericTaskModel', studentsFN.getGenericTaskModel);
+AuthRouter.get('/students/tasks/generic/:taskId/:stepId', studentsFN.getGenericTaskStep);
 
-AuthRouter.get('/students/tasks/:taskId/:stepId/GenericTaskStep', studentsFN.getGenericTaskStep);
-
-AuthRouter.post('/students/tasks/:taskId/:stepId/ToggleStepCompleted', studentsFN.toggleStepCompleted);
+AuthRouter.post('/students/tasks/:taskId/:stepId/completed', studentsFN.toggleStepCompleted);
 
 /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {
