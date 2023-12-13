@@ -3,7 +3,7 @@ CREATE TABLE AULAS (
     Capacidad INT NOT NULL
 );
 
-CREATE TABLE PROFESORES (   /*HA SIDO ACTUALIZADA, MEJOR BORRAR Y VOLVER A CREAR*/
+CREATE TABLE PROFESORES ( 
     ID_profesor INT PRIMARY KEY,
     Nombre VARCHAR(20) NOT NULL,
     Apellido1 VARCHAR(50) NOT NULL,
@@ -100,7 +100,8 @@ CREATE TABLE TOKENS (
 CREATE TABLE IMAGENES (
     ID_imagen INT AUTO_INCREMENT PRIMARY KEY,
     Descripcion VARCHAR(100) NOT NULL,
-    Tipo VARCHAR(20) DEFAULT NULL
+    Tipo VARCHAR(20) DEFAULT NULL,
+    Imagen_url VARCHAR(255)
 );
 
 CREATE TABLE CONJUNTOS (
@@ -124,16 +125,11 @@ CREATE TABLE MATERIALES (
     Descripcion VARCHAR(100) NOT NULL,
     Foto_material INT NOT NULL,
     Foto_propiedades INT DEFAULT NULL,
+    Propiedad VARCHAR(255) DEFAULT NULL,
     FOREIGN KEY (Foto_material) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (Foto_propiedades) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-/*
-Campo "Propiedad"
-*/
-ALTER TABLE MATERIALES
-ADD Propiedad VARCHAR(255) DEFAULT NULL;
-/*-----------------------------*/
 
 CREATE TABLE TAREA (
     ID_tarea INT AUTO_INCREMENT PRIMARY KEY,
@@ -141,7 +137,6 @@ CREATE TABLE TAREA (
     Descripcion VARCHAR(100) NOT NULL,
     Dificultad INT NOT NULL,
     Estado ENUM('Completed', 'Pending', 'Failed') DEFAULT 'Pending',
-    COLUMN Steps INT DEFAULT NULL,
     Img_tarea INT NOT NULL,
     ID_alumno INT NOT NULL,
     Supervisor INT NOT NULL,
@@ -157,14 +152,14 @@ CREATE TABLE TAREA (
 /*
 Intermediario entre material y tarea (para tarea de tipo material)
 */
-CREATE TABLE MATERIALES_TAREA (     /*HAY QUE CREARLE SU PROCEDURE AUTOINCREMENTAL, ESCRIBIR BIEN LOS CAMPOS Y VLVER A CREARLA*/
+CREATE TABLE MATERIALES_TAREA ( 
     Num_peticion INT NOT NULL,
     ID_material INT NOT NULL,
     ID_tarea INT NOT NULL,
     Cantidad INT,
     Esta_entregado BOOLEAN,
     Imagen_peticion INT NOT NULL FOREIGN KEY REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE,
-    PRIMARY KEY (num_peticion, ID_tarea),
+    PRIMARY KEY (Num_peticion, ID_tarea),
     FOREIGN KEY (ID_material) REFERENCES MATERIALES(ID_material) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_tarea) REFERENCES TAREA(ID_tarea) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -192,37 +187,31 @@ CREATE TABLE PASO_GENERAL (
 Agregado este alter para que funcione la agregación de pasos
 */
 ALTER TABLE PASO_GENERAL
-ADD INDEX idx_ID_paso (ID_paso);
+ADD INDEX index_idPaso (ID_paso);
 /*--------------------------------------*/
 
 CREATE TABLE VIDEOS (
     ID_video INT AUTO_INCREMENT PRIMARY KEY,
     Descripcion VARCHAR(100) NOT NULL,
-    Tipo VARCHAR(20) DEFAULT NULL
+    Tipo VARCHAR(20) DEFAULT NULL,
+    Video_url VARCHAR(255)
 );
 
 CREATE TABLE AUDIOS (
     ID_audio INT AUTO_INCREMENT PRIMARY KEY,
     Descripcion VARCHAR(100) NOT NULL,
-    Tipo VARCHAR(20) DEFAULT NULL
+    Tipo VARCHAR(20) DEFAULT NULL,
+    Audio_url VARCHAR(255)
 );
-
-/* Agregar url */
-
-ALTER TABLE IMAGENES
-ADD imageUrl VARCHAR(255);
-
-ALTER TABLE VIDEO
-ADD videoUrl VARCHAR(255);
-
-ALTER TABLE AUDIO
-ADD audioUrl VARCHAR(255);
 
 /*
 AGREGADO A PARTIR DE AQUÍ
 */
 
-CREATE TABLE IMAGENES_PASO (    /*HAY QUE CREARLE SU PROCEDURE AUTOINCREMENTAL*/
+/* NECESITO IAMGENES PASO, VIDEOS PASO, Y AUDIOS PASO???? */
+
+
+CREATE TABLE IMAGENES_PASO ( 
     ID_paso INT NOT NULL,
     ID_imagen INT NOT NULL,
     PRIMARY KEY (ID_paso, ID_imagen),
@@ -298,6 +287,19 @@ BEGIN
 
     INSERT INTO PASO_GENERAL(ID_tarea, ID_paso, Nombre, Descripcion, Imagen_tarea, Audio_tarea, Video_tarea, Texto_tarea, Estado)
     VALUES (ID_tarea, paso_id, Nombre, Descripcion, Imagen_tarea, Audio_tarea, Video_tarea, Texto_tarea, 'false');
+END//
+DELIMITER ;
+
+/* COMPROBAR QUE FUNCIONAR EL PROCEDURE */
+DELIMITER //
+CREATE PROCEDURE InsertMaterialesTarea(IN p_ID_tarea INT, IN p_ID_material INT, IN p_Cantidad INT, IN p_Esta_entregado BOOLEAN, IN p_Imagen_peticion INT)
+BEGIN
+    DECLARE num_peticion INT;
+
+    SELECT COALESCE(MAX(Num_peticion), 0) + 1 INTO num_peticion FROM MATERIALES_TAREA WHERE ID_tarea = p_ID_tarea;
+
+    INSERT INTO MATERIALES_TAREA(Num_peticion, ID_material, ID_tarea, Cantidad, Esta_entregado, Imagen_peticion)
+    VALUES (num_peticion, p_ID_material, p_ID_tarea, p_Cantidad, p_Esta_entregado, p_Imagen_peticion);
 END//
 DELIMITER ;
 

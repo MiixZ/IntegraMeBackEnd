@@ -136,8 +136,8 @@ async function getImageContent(idImage) {
         id: rows[0].ID_imagen,
     };
 
-    if (rows[0].Url_imagen) {
-        data.imageUrl = rows[0].Url_imagen;
+    if (rows[0].Imagen_url) {
+        data.imageUrl = rows[0].Imagen_url;
     } else {
         data.imageUrl = 'http://' + ip + ':6969/api/v1/images/' + rows[0].ID_imagen;
     }
@@ -168,8 +168,8 @@ async function getAudio(idAudio) {
         id: rows[0].ID_audio,
     };
 
-    if (rows[0].Url_audio) {
-        data.audioUrl = rows[0].Url_audio;
+    if (rows[0].Audio_url) {
+        data.audioUrl = rows[0].Audio_url;
     } else {
         data.audioUrl = 'http://' + ip + ':6969/api/v1/audios/' + rows[0].ID_audio;
     }
@@ -198,8 +198,8 @@ async function getVideo(idVideo) {
         id: rows[0].ID_video,
     };
 
-    if (rows[0].Url_video) {
-        data.videoUrl = rows[0].Url_video;
+    if (rows[0].Video_url) {
+        data.videoUrl = rows[0].Video_url;
     } else {
         data.videoUrl = 'http://' + ip + ':6969/api/v1/videos/' + rows[0].ID_video;
     }
