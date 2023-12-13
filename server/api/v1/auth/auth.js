@@ -112,7 +112,7 @@ AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfi
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.get('/students/:userID/tasks/cards', studentsFN.getTasksCards);
+AuthRouter.get('/students/taskCards', studentsFN.getTasksCards);
 
 /**
  * @api {post} /updateState Actualiza el estado de la tarea.
@@ -135,7 +135,7 @@ AuthRouter.post('/students/tasks/general/:taskId/:numPaso/state', studentsFN.upd
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.get('/students/tasks/:taskId/MaterialTaskModel', studentsFN.getTaskModel);
+AuthRouter.get('/students/tasks/material/:taskId', studentsFN.getTaskModel);
 
 /**
  * @api {get} /getMaterialRequest Devuelve una petición de material de la tarea.
@@ -148,7 +148,7 @@ AuthRouter.get('/students/tasks/:taskId/MaterialTaskModel', studentsFN.getTaskMo
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.get('/students/tasks/:taskId/:requestId/MaterialRequest', studentsFN.getMaterialRequest);
+AuthRouter.get('/students/tasks/material/:taskId/:requestId', studentsFN.getMaterialRequest);
 
 /**
  * @api {post} /toggleDelivered Cambia el estado de la petición de material.
@@ -163,12 +163,11 @@ AuthRouter.get('/students/tasks/:taskId/:requestId/MaterialRequest', studentsFN.
  */
 AuthRouter.post('/students/tasks/:taskId/:requestId/ToggleDelivered', studentsFN.toggleDelivered);
 
+AuthRouter.get('/students/tasks/generic/:taskId', studentsFN.getGenericTaskModel);
 
-AuthRouter.get('/students/tasks/:taskId/GenericTaskModel', studentsFN.getGenericTaskModel);
+AuthRouter.get('/students/tasks/generic/:taskId/:stepId', studentsFN.getGenericTaskStep);
 
-AuthRouter.get('/students/tasks/:taskId/:stepId/GenericTaskStep', studentsFN.getGenericTaskStep);
-
-AuthRouter.post('/students/tasks/:taskId/:stepId/ToggleStepCompleted', studentsFN.toggleStepCompleted);
+AuthRouter.post('/students/tasks/:taskId/:stepId/completed', studentsFN.toggleStepCompleted);
 
 /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {

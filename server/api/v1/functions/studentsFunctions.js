@@ -12,7 +12,7 @@ async function getIdentityCardsAll(req, res) {          // Probar.
     let nicknames = [];
 
     try {
-        [ids, nicknames] = await database.getIdentityCards();
+        [ids, nicknames, avatars] = await database.getIdentityCards();
     } catch (error) {
         return res.status(500).json({ error: 'Error getting identity cards.' });
     }
@@ -25,11 +25,9 @@ async function getIdentityCardsAll(req, res) {          // Probar.
     const response = [];
 
     for (let i = 0; i < ids.length; i++) {
-        let avatar_id = -1;
-        let avatar_description = "";
 
         try {
-            [avatar_id, avatar_description] = await database.getAvatar(ids[i]);     // [0] es el id del alumno. [1] es el nickname.
+            imageContent = await general.getImageContent(avatars[i]);     // [0] es el id del alumno. [1] es el nickname.
         } catch (error) {
             return res.status(500).json({ error: 'Error getting ' + nicknames[i] + ' avatar.' });
         }
@@ -37,10 +35,7 @@ async function getIdentityCardsAll(req, res) {          // Probar.
         response.push({
             userId: ids[i],
             nickname: nicknames[i],
-            avatar: {
-                id: avatar_id,     // Puede ser avatar.avatarId y avatar.altDescription.
-                altDescription: avatar_description
-            }
+            avatar: imageContent
         });
     }
 
@@ -49,17 +44,15 @@ async function getIdentityCardsAll(req, res) {          // Probar.
 
 async function getIdentityCard(req, res) {          // Probar.
     // Obtener datos del cuerpo de la solicitud.
-    const idStudent = req.params.idStudent;
+    const userId = req.params.userID;
     let id_Student = -1;
     let nickname = "";
-
-    let avatar_id = -1;
-    let avatar_description = "";
+    let avatar = "";
 
     // Obtener tarjetas de identidad del alumno.
     try {
-        [id_Student, nickname] = await database.getIdentityCard(idStudent);       // [id, nickname]
-        [avatar_id, avatar_description] = await database.getAvatar(idStudent);                   // [avatarId, altDescription]
+        [id_Student, nickname, avatar] = await database.getIdentityCard(userId);
+        imageContent = await general.getImageContent(avatar);
     } catch (error) {
         res.status(500).json({ error: 'Error getting identity card or avatar.' });
         return;
@@ -69,10 +62,7 @@ async function getIdentityCard(req, res) {          // Probar.
     const response = {
         userId: id_Student,        // Puede ser identityCard.id e identityCard.nickname.
         nickname: nickname,
-        avatar: {
-            id: avatar_id,              // Puede ser avatar.avatarId y avatar.altDescription.
-            altDescription: avatar_description
-        }
+        avatar: imageContent
     };
 
     res.json(response);
@@ -146,8 +136,8 @@ async function getProfileContent(req, res) {        // FUNCIONA
     for (let i = 0; i < formatos.length; i++) {
         arrayFormats.push(formatos[i].Nom_formato);
     }
- 
-     for (let i = 0; i < interacciones.length; i++) {
+
+    for (let i = 0; i < interacciones.length; i++) {
         arrayIteractions.push(interacciones[i].Nom_interaccion);
     }
 
@@ -281,7 +271,7 @@ async function getProfile(req, res) {           // Probar.
     try {
         dataStudent = await database.getData(userID);
         studentProfile = await database.getProfileData(userID);                // [avatarId, altDescription
-        imagen = await general.getImage(studentProfile.Avatar_id);                   // [avatarId, altDescription
+        imagen = await general.getImageContent(studentProfile.Avatar_id);                   // [avatarId, altDescription
     } catch (error) {
         return res.status(404).json({ error: 'Could not get student data or avatar.' });
     }
@@ -293,7 +283,7 @@ async function getProfile(req, res) {           // Probar.
     const interacciones = await database.getInteracciones(userID);
     
     for (let i = 0; i < formatos.length; i++) {
-       arrayFormatos.push(formatos[i].Nom_formato);
+        arrayFormatos.push(formatos[i].Nom_formato);
     }
 
     for (let i = 0; i < interacciones.length; i++) {
@@ -301,17 +291,14 @@ async function getProfile(req, res) {           // Probar.
     }
 
     res.json({
-        type: "StudentProfile",
+        userId: userID,
+        nickname: studentProfile.NickName,
+        avatar: imagen,
+        name: dataStudent.Name,
+        surnames: dataStudent.Lastname1 + " " + dataStudent.Lastname2,
         contentProfile: {
             contentAdaptationFormats: arrayFormatos,
             interactionMethods: arrayInteracciones 
-        },
-        name: dataStudent.Name,
-        surnames: dataStudent.Lastname1 + " " + dataStudent.Lastname2,
-        nickname: studentProfile.NickName,
-        avatar: {
-            id: studentProfile.Avatar_id,
-            altDescription: imagen.imgDescription
         },
     });
 }
@@ -321,8 +308,13 @@ async function loginStudent(req, res) {             // Probar.
     let hash = "";
     let profileData = "";
 
-    const idStudent = req.body.idStudent;
-    const password = req.body.password;
+    // Falta hacer diferentes logins dependientdo de si es texto o imagen
+
+    const idStudent = req.body.userId;
+    const password = req.body.password.password;         // password.password porque el body es {password: {password: "contraseña"}}
+
+    console.log("idStudent: " + idStudent);
+    console.log("password: " + password);
 
     // Verificar si todos los campos necesarios están presentes
     if (!idStudent || !password) {
@@ -348,7 +340,11 @@ async function loginStudent(req, res) {             // Probar.
         const token = jwt.sign({ idStudent, nickname: profileData.NickName, EXP: fecha}, secret); //{ expiresIn: '1h' });
         try {
             await general.insertarToken(idStudent, token, fecha);
-            res.status(200).json({ token });
+            const respuesta = {
+                userId : idStudent,
+                token: token
+            }
+            res.status(200).json(respuesta);
         } catch {
             return res.status(500).json({ error: 'Error saving token' });
         }
@@ -365,8 +361,6 @@ async function getTasksCards(req, res) {             // Probar.
 
     const token = req.headers.authorization.split(' ')[1];
 
-    const userID = req.params.userID;
-
     // Verificamos token y lo decodificamos
     let decodedToken;
     let student = false;
@@ -382,7 +376,9 @@ async function getTasksCards(req, res) {             // Probar.
         }
     }
 
-    if (student && decodedToken.idStudent != userID) {
+    const userID = decodedToken.idStudent;
+
+    if (!student) {
         return res.status(401).json({ error: 'Invalid token for user.' });
     }
 
