@@ -101,7 +101,7 @@ CREATE TABLE IMAGENES (
     ID_imagen INT AUTO_INCREMENT PRIMARY KEY,
     Descripcion VARCHAR(100) NOT NULL,
     Tipo VARCHAR(20) DEFAULT NULL,
-    Imagen_url VARCHAR(255)
+    Imagen_url VARCHAR(255) DEFAULT NULL
 );
 
 CREATE TABLE CONJUNTOS (
@@ -279,14 +279,14 @@ DELIMITER;
 --IMPORTANTE --> Los delimiters cambian los ";" por "//" y viceversa
 
 DELIMITER //
-CREATE PROCEDURE InsertPaso(IN Nombre VARCHAR(20), IN Descripcion VARCHAR(100), IN Imagen_tarea INT, IN Audio_tarea INT, IN Video_tarea INT, IN Texto_tarea VARCHAR(100), IN ID_tarea INT)
+CREATE PROCEDURE InsertPaso(IN pNombre VARCHAR(20), IN pDescripcion VARCHAR(100), IN pImagen_tarea INT, IN pAudio_tarea INT, IN pVideo_tarea INT, IN pTexto_tarea VARCHAR(100), IN pID_tarea INT)
 BEGIN
     DECLARE paso_id INT;
 
-    SELECT COALESCE(MAX(ID_paso), 0) + 1 INTO paso_id FROM PASO_GENERAL WHERE ID_tarea = ID_tarea;
+    SELECT COALESCE((SELECT MAX(ID_paso) FROM PASO_GENERAL WHERE ID_tarea = pID_tarea), 0) + 1 INTO paso_id;
 
     INSERT INTO PASO_GENERAL(ID_tarea, ID_paso, Nombre, Descripcion, Imagen_tarea, Audio_tarea, Video_tarea, Texto_tarea, Estado)
-    VALUES (ID_tarea, paso_id, Nombre, Descripcion, Imagen_tarea, Audio_tarea, Video_tarea, Texto_tarea, 'false');
+    VALUES (pID_tarea, paso_id, pNombre, pDescripcion, pImagen_tarea, pAudio_tarea, pVideo_tarea, pTexto_tarea, 'false');
 END//
 DELIMITER ;
 

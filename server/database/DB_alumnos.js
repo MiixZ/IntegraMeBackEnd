@@ -361,7 +361,7 @@ async function getMaterialTaskModel(idTask) {
         case "String" :
             recompensa = {
                 type: "TextContent",
-                string: rows[0].Recompensa
+                text: rows[0].Recompensa
             };
             break;
 
@@ -410,6 +410,30 @@ async function getMaterialTaskModel(idTask) {
         displayImage: imageTask,
         reward: recompensa,
         requests: n_materiales
+    };
+
+    return data;
+}
+
+async function getTaskType(idTask) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT Tipo_tarea FROM TAREA WHERE ID_tarea = ?',
+        [idTask], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting material task.', error);
+            }
+        }
+    );
+    
+
+    if (rows.length === 0) {
+        throw new Error('There is no material request with that id.');
+    }
+
+    const data = {
+        type: rows[0].Tipo_tarea
     };
 
     return data;
@@ -488,7 +512,7 @@ async function getGenericTaskModel(idTask) {
         case "String" :
             recompensa = {
                 type: "TextContent",
-                string: rows[0].Recompensa
+                text: rows[0].Recompensa
             };
             break;
 
@@ -533,6 +557,7 @@ async function getGenericTaskStep(TaskId, StepId) {
         'SELECT * FROM PASO_GENERAL WHERE ID_tarea = ? AND ID_paso = ?',
         [TaskId, StepId], (error, results, fields) => {
             if (error) {
+                console.log("QUE PASAAAAAA");
                 throw new Error('Error getting generic task.', error);
             }
         }
@@ -562,7 +587,7 @@ async function getGenericTaskStep(TaskId, StepId) {
 
     texto = {
         type: "TextContent",
-        string: rows[0].Texto_tarea
+        text: rows[0].Texto_tarea
     };
 
     contentPack = {
@@ -574,7 +599,7 @@ async function getGenericTaskStep(TaskId, StepId) {
 
     const data = {
         displayName: rows[0].Nombre,
-        isCompleted: rows[0].Estado,
+        isCompleted: rows[0].Estado === 'false' ? false : Boolean(rows[0].Estado),
         content: contentPack
     };
 
@@ -594,6 +619,21 @@ async function toggleStepCompleted(TaskId, StepId, isCompleted) {
     );
 
     return "OK";
+}
+
+async function addGenericStep(TaskId, Description, StepName, StepText, StepImage, StepVideo, StepAudio) {
+    const connection = await conectar();
+
+    const [rows, fields] =  await connection.execute(
+        'CALL InsertPaso(?, ?, ?, ?, ?, ?, ?)', 
+        [StepName, Description, StepImage, StepAudio, StepVideo, StepText, TaskId] , (error, results, fields)=> {
+            if (error) {
+                throw new Error('Error adding step.', error);
+            }
+        });
+
+    return rows;
+
 }
 
 module.exports = {
@@ -618,5 +658,7 @@ module.exports = {
     toggleDelivered,
     getGenericTaskModel,
     getGenericTaskStep,
-    toggleStepCompleted
+    toggleStepCompleted,
+    getTaskType,
+    addGenericStep
 };

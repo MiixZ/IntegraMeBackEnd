@@ -449,6 +449,48 @@ async function getTaskModel (req, res) {
         return res.status(401).json({ error: 'Invalid token' });
     }
 
+    try {
+        
+        taskType = await database.getTaskType(taskID);
+        console.log("HA PASADO");
+
+
+        console.log("taskType: " + taskType.type);
+
+        switch (taskType.type) {
+            case "MenuTask":
+                /* taskModel =  */
+                break;
+            case "MaterialTask":
+                return await getMaterialTaskModel(req, res);
+                break;
+            case "GenericTask":
+                return await getGenericTaskModel(req, res);
+                break;
+            default:
+                return res.status(500).json({ error: 'Error that task type does not exit. ' + error });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: 'Error getting task model or calling methods. ' + error });
+    }
+}
+
+async function getMaterialTaskModel (req, res) {
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
     let taskModel = {};
 
     try {
@@ -554,7 +596,7 @@ async function getGenericTaskStep(req, res) {
     const token = req.headers.authorization.split(' ')[1];
 
     const taskID = req.params.taskId;
-    const stepID = req.params.stepId;
+    const stepID = parseInt(req.params.stepId) +1 ;
 
     try {
         decodedToken = await checkearToken(token, secret);
@@ -604,6 +646,35 @@ async function toggleStepCompleted(req, res) {
     return res.json(taskStep);
 }
 
+async function addGenericTaskStep(req, res) {
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const TaskId = req.params.taskId; // HAY QUE COMPROBAR SI EXISTE ESA TAREA
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const { StepName, Description, StepImage, StepAudio, StepVideo, StepText} = req.body;
+    if (!StepName || !Description || !TaskId || !StepText || !StepImage || !StepVideo || !StepAudio) {
+        return res.status(400).json({ error: 'Data not sent on body.' });
+    }
+
+    try {
+        result = await database.addGenericStep(TaskId, Description, StepName, StepText, StepImage, StepVideo, StepAudio);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error adding step. ' + error });
+    }
+
+    return res.json(result);
+}
+
 module.exports = {
     getIdentityCardsAll,
     getIdentityCard,
@@ -619,5 +690,7 @@ module.exports = {
     toggleDelivered,
     getGenericTaskModel,
     getGenericTaskStep,
-    toggleStepCompleted
+    toggleStepCompleted,
+    getMaterialTaskModel,
+    addGenericTaskStep
 };
