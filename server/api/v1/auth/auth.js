@@ -169,7 +169,7 @@ AuthRouter.get('/students/tasks/generic/:taskId/:stepId', studentsFN.getGenericT
 
 AuthRouter.post('/students/tasks/generic/:taskId/addStep', studentsFN.addGenericTaskStep);
 
-AuthRouter.post('/students/tasks/:taskId/:stepId/completed', studentsFN.toggleStepCompleted);
+AuthRouter.post('/students/tasks/generic/:taskId/:stepId/completed', studentsFN.toggleStepCompleted);
 
 AuthRouter.get('/students/tasks/:taskId', studentsFN.getTaskModel);
 

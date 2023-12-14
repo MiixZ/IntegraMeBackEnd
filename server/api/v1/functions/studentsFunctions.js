@@ -622,12 +622,10 @@ async function toggleStepCompleted(req, res) {
     }
     const token = req.headers.authorization.split(' ')[1];
     const taskID = req.params.taskId;
-    const stepID = req.params.stepId;
+    const stepID = parseInt(req.params.stepId) +1;
     const isCompleted = req.body.isCompleted;
 
-    if (!isCompleted) {
-        return res.status(400).json({ error: 'Data not sent on body.' });
-    }
+    console.log("isCompleted: " + isCompleted);
 
     try {
         decodedToken = await checkearToken(token, secret);

@@ -544,8 +544,10 @@ async function getGenericTaskModel(idTask) {
         displayName: rows[0].Nombre,
         displayImage: imageTask,
         reward: recompensa,
-        steps: rows[0].Steps
+        steps: await getNumSteps(idTask),
     };
+
+    console.log (data.steps);
 
     return data;
 }
@@ -609,6 +611,9 @@ async function getGenericTaskStep(TaskId, StepId) {
 async function toggleStepCompleted(TaskId, StepId, isCompleted) {
     const connection = await conectar();
 
+    isCompleted = isCompleted ? 'true' : 'false';
+    console.log(isCompleted);
+
     const [rows, fields] = await connection.execute(
         'UPDATE PASO_GENERAL SET Estado = ? WHERE ID_tarea = ? AND ID_paso = ?',
         [isCompleted, TaskId, StepId], (error, results, fields) => {
@@ -636,6 +641,21 @@ async function addGenericStep(TaskId, Description, StepName, StepText, StepImage
 
 }
 
+async function getNumSteps (TaskID){
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT COUNT(*) FROM PASO_GENERAL WHERE ID_tarea = ?',
+        [TaskID], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error counting steps.', error);
+            }
+        }
+    );
+
+    return rows[0]['COUNT(*)'];
+}
+
 module.exports = {
     getIdentityCard,
     getIdentityCards,
@@ -660,5 +680,6 @@ module.exports = {
     getGenericTaskStep,
     toggleStepCompleted,
     getTaskType,
-    addGenericStep
+    addGenericStep,
+    getNumSteps
 };
