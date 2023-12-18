@@ -243,6 +243,8 @@ CREATE TABLE PROFESORES_TAREA (
     FOREIGN KEY (ID_Tarea) REFERENCES TAREA(ID_tarea) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE MENU_CLASE ()
+
 -- Crear un disparador para insertar automáticamente en la tabla usuarios cuando se añade un profesor
 DELIMITER //
 CREATE TRIGGER Profesor_insert_trigger
