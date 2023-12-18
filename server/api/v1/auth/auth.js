@@ -161,7 +161,7 @@ AuthRouter.get('/students/tasks/material/:taskId/:requestId', studentsFN.getMate
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.post('/students/tasks/:taskId/:requestId/ToggleDelivered', studentsFN.toggleDelivered);
+AuthRouter.post('/students/tasks/material/:taskId/:requestId/delivered', studentsFN.toggleDelivered);
 
 AuthRouter.get('/students/tasks/generic/:taskId', studentsFN.getGenericTaskModel);
 
@@ -172,6 +172,12 @@ AuthRouter.post('/students/tasks/generic/:taskId/addStep', studentsFN.addGeneric
 AuthRouter.post('/students/tasks/generic/:taskId/:stepId/completed', studentsFN.toggleStepCompleted);
 
 AuthRouter.get('/students/tasks/:taskId', studentsFN.getTaskModel);
+
+// ENDPOINTS DE MENUS
+AuthRouter.get('/students/getClassrooms', studentsFN.getListClassrooms);
+
+AuthRouter.get('/students/menuTasks/:taskId', studentsFN.getMenuTaskModel);
+
 
 /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {

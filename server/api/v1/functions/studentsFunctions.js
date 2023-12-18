@@ -673,6 +673,59 @@ async function addGenericTaskStep(req, res) {
     return res.json(result);
 }
 
+async function getMenuTaskModel(req, res) {
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    let taskModel = {};
+
+    try {
+        taskModel = await database.getMenuTaskModel(taskID);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error getting task model. ' + error });
+    }
+
+    return res.json(taskModel);
+}
+
+async function getListClassrooms(req, res) {
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    let listClassrooms = {};
+
+    try {
+        listClassrooms = await database.getListClassrooms();
+        console.log("listClassrooms: " + listClassrooms);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error getting classrooms list model. ' + error });
+    }
+
+    return res.json(listClassrooms);
+}
+
 module.exports = {
     getIdentityCardsAll,
     getIdentityCard,
@@ -690,5 +743,7 @@ module.exports = {
     getGenericTaskStep,
     toggleStepCompleted,
     getMaterialTaskModel,
-    addGenericTaskStep
+    addGenericTaskStep,
+    getMenuTaskModel,
+    getListClassrooms
 };

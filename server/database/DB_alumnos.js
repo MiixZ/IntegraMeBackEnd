@@ -348,12 +348,12 @@ async function getMaterialTaskModel(idTask) {
         }
     );
 
-    if (rows[0].Tipo_tarea !== 'MaterialTask') {
-        throw new Error('This task is not a material task.');
-    }
-
     if (rows.length === 0) {
         throw new Error('There is no task with that id.');
+    }
+
+    if (rows[0].Tipo_tarea !== 'MaterialTask') {
+        throw new Error('This task is not a material task.');
     }
 
     // Cogemos la recompensa según su tipo.
@@ -415,6 +415,68 @@ async function getMaterialTaskModel(idTask) {
     return data;
 }
 
+async function getMenuTaskModel(idTask) {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM TAREA WHERE ID_tarea = ?',
+        [idTask], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting menu task.', error);
+            }
+        }
+    );
+
+    if (rows.length === 0) {
+        throw new Error('There is no task with that id.');
+    }
+
+    if (rows[0].Tipo_tarea !== 'MenuTask') {
+        throw new Error('This task is not a menu task.');
+    }
+
+    // Cogemos la recompensa según su tipo.
+    switch (rows[0].Recompensa_tipo) {
+        case "String" :
+            recompensa = {
+                type: "TextContent",
+                text: rows[0].Recompensa
+            };
+            break;
+
+        case "Imagenes" :
+            recompensa = await database.getImageContent(rows[0].Recompensa);
+            break;
+
+        case "Audios" :
+            recompensa = await database.getAudio(rows[0].Recompensa);
+            break;
+
+        case "Videos" :
+            recompensa = await database.getVideo(rows[0].Recompensa);
+            break;
+
+        default : throw new Error('There is no reward type with that name. '
+                                    + rows[0].Recompensa_tipo);
+    }
+    
+    try {
+        imageTask = await database.getImageContent(rows[0].Img_tarea);
+    } catch(error) {
+        throw new Error('Error getting image content.', error);
+    }
+
+    const data = {
+        type: "MenuTaskModel",
+        taskId: rows[0].ID_tarea,
+        displayName: rows[0].Nombre,
+        displayImage: imageTask,
+        reward: recompensa,
+    };
+
+    return data;
+}
+
 async function getTaskType(idTask) {
     const connection = await conectar();
 
@@ -465,8 +527,8 @@ async function getMaterialRequest(TaskId, RequestId) {
 
     const data = {
         material : material_data, 
-        displayImage: imagen_peticion,
-        isDelivered: rows[0].estaEntregado
+        displayAmount: imagen_peticion,
+        isDelivered: rows[0].Esta_entregado === 1 ? true : false
     };
 
     return data;
@@ -476,7 +538,7 @@ async function toggleDelivered(TaskId, RequestId, isDelivered) {
     const connection = await conectar();
 
     const [rows, fields] = await connection.execute(
-        'UPDATE MATERIALES_TAREA SET estaEntregado = ? WHERE ID_tarea = ? AND num_peticion = ?',
+        'UPDATE MATERIALES_TAREA SET Esta_entregado = ? WHERE ID_tarea = ? AND num_peticion = ?',
         [isDelivered, TaskId, RequestId], (error, results, fields) => {
             if (error) {
                 throw new Error('Error updating material request.', error);
@@ -484,7 +546,7 @@ async function toggleDelivered(TaskId, RequestId, isDelivered) {
         }
     );
 
-    return "OK";
+    return rows;
 }
 
 async function getGenericTaskModel(idTask) {
@@ -499,12 +561,12 @@ async function getGenericTaskModel(idTask) {
         }
     );
 
-    if (rows[0].Tipo_tarea !== 'GenericTask') {
-        throw new Error('This task is not a generic task.');
-    }
-
     if (rows.length === 0) {
         throw new Error('There is no task with that id.');
+    }
+
+    if (rows[0].Tipo_tarea !== 'GenericTask') {
+        throw new Error('This task is not a generic task.');
     }
 
     // Cogemos la recompensa según su tipo.
@@ -638,7 +700,6 @@ async function addGenericStep(TaskId, Description, StepName, StepText, StepImage
         });
 
     return rows;
-
 }
 
 async function getNumSteps (TaskID){
@@ -654,6 +715,20 @@ async function getNumSteps (TaskID){
     );
 
     return rows[0]['COUNT(*)'];
+}
+
+async function getListClassrooms (ID){
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT Num_aula FROM AULAS'
+    );
+
+    const data = {
+        classRoomIds: rows.map(row => row.Num_aula)
+    };
+
+    return data;
 }
 
 module.exports = {
@@ -681,5 +756,7 @@ module.exports = {
     toggleStepCompleted,
     getTaskType,
     addGenericStep,
-    getNumSteps
+    getNumSteps,
+    getMenuTaskModel,
+    getListClassrooms
 };

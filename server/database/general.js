@@ -218,7 +218,9 @@ async function getMaterial(idMaterial) {
     fotoMaterial = await getImageContent(rows[0].Foto_material);
 
     data = {
-        displayName: rows[0].Nombre,
+        displayName: {
+            text: rows[0].Nombre
+        },
         displayImage: fotoMaterial,
     };
 
@@ -226,7 +228,9 @@ async function getMaterial(idMaterial) {
         fotoPropiedad = await getImageContent(rows[0].Foto_propiedades);
 
         propiedad = {
-            displayName: rows[0].Propiedad,
+            displayName: {
+                text: rows[0].Propiedad
+            },
             displayImage: fotoPropiedad
         };
 
