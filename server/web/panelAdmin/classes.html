@@ -9,7 +9,7 @@
         <h1>IntegraMe: Registro de Aulas</h1>
     </header>
 
-    <form class="regist-form">
+    <form class="regist-form" onsubmit="handleSubmit(event)">
         <div class="input-group">
             <label for="number" class="labels">Nº de Aula:</label>
             <input type="number" name="number">
@@ -20,7 +20,7 @@
             <input type="number" name="capacity">
         </div>
 
-        <input type="submit" value="Registrar" class="boton">
+        <input type="submit" class="boton">
     </form>
 
     <footer>
@@ -28,6 +28,6 @@
     </footer>
 
     <script src="js/main.js"></script>
-    <script src="js/classrooms.js"></script>
+    <script type="module" src="js/classes.js"></script>
 </body>
 </html>

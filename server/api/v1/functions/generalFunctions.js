@@ -23,9 +23,9 @@ async function checkToken(req, res) {
                                         message: 'Token correct' });
                 }
             } else {
-              res.status(401).json('Token not found in the database');
+                res.status(401).json('Token not found in the database');
             }
-          }).catch(error => {
+        }).catch(error => {
             console.error('An error has ocurred in VerificarToken call', error);
         });
     } catch (error) {
@@ -50,4 +50,4 @@ async function generateHash(req, res){
 module.exports = {
     checkToken,
     generateHash
-  };
+};

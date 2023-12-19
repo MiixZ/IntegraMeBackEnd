@@ -8,6 +8,15 @@ body {
 
 .botones {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.lista {
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     margin: 20px 0;
@@ -17,6 +26,11 @@ body {
     margin: 0 10px;
     text-decoration: none; /* Elimina el subrayado */
     color: inherit; /* Cambia el color del enlace al color del texto circundante */
+}
+
+.texto_boton:hover {
+    text-decoration: underline; /* Subraya el texto al pasar el ratón por encima */
+    color: #f80404; /* Cambia el color del texto al pasar el ratón por encima */
 }
 
 .container {
