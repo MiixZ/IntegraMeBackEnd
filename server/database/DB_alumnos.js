@@ -621,7 +621,6 @@ async function getGenericTaskStep(TaskId, StepId) {
         'SELECT * FROM PASO_GENERAL WHERE ID_tarea = ? AND ID_paso = ?',
         [TaskId, StepId], (error, results, fields) => {
             if (error) {
-                console.log("QUE PASAAAAAA");
                 throw new Error('Error getting generic task.', error);
             }
         }
@@ -717,7 +716,7 @@ async function getNumSteps (TaskID){
     return rows[0]['COUNT(*)'];
 }
 
-async function getListClassrooms (ID){
+async function getListClassrooms (){ //PROBAR
     const connection = await conectar();
 
     const [rows, fields] = await connection.execute(
@@ -729,6 +728,94 @@ async function getListClassrooms (ID){
     };
 
     return data;
+}
+
+async function getListMenuTasks (TaskId, ClassRoomId){ //PROBAR
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        `SELECT * FROM OPCIONES_MENU_TAREA WHERE ID_tarea = ? AND ID_aula = ?`,
+        [TaskId, ClassRoomId]
+    );
+
+    const data = {
+        menuOptionList: rows.map(row => {
+            return {
+                name: row.Nombre,
+                //displayDescription: row.Descripcion,
+                image: row.Imagen_opcion
+            };
+        })
+    };
+
+    return data;
+}
+
+//NO DEBERIA DE IR AQUI PORQUE ES DEL PROFESOR, PROBLEMA DEL GUILLE DE MAÑANA
+async function insertMenu (taskID, classroomID, menuOptionID, amount){  ////PROBAR-> SERA PARA EL PROFESOR QUE EL JERMU ES GILIPOLLAS
+    const connection = await conectar();
+
+    const [rows1, fields] = await connection.execute(
+        'SELECT * FROM TAREA WHERE ID_tarea = ?',
+        [taskID]
+    );
+
+    if (rows1.length === 0) {
+        throw new Error('There is no task with that id.');
+    }
+
+    const [rows2, fields2] = await connection.execute(
+        'SELECT * FROM AULAS WHERE Num_aula = ?',
+        [classroomID]
+    );
+
+    if (rows2.length === 0) {
+        throw new Error('There is no classroom with that id.');
+    }
+
+    const [rows3, fields3] = await connection.execute(
+        'SELECT * FROM OPCIONES_MENU WHERE ID_opcion = ?',
+        [menuOptionID]
+    );
+
+    if (rows3.length === 0) {
+        throw new Error('There is no menu option with that id.');
+    }
+
+    const [rows4, fields4] = await connection.execute(
+        'INSERT INTO OPCIONES_MENU_TAREA (ID_tarea, ID_opcion, Cantidad, ID_aula, Fecha) VALUES (?, ?, ?, ?, CURDATE())',
+        [taskID, menuOptionID, classroomID, amount], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error inserting menu', error);
+            }
+        }
+    );
+
+    return rows4;
+}
+
+async function updateAmountMenu(taskID, classroomID, menuOptionID, amount){ //PROBAR
+    const connection = await conectar();
+
+    const [rows1, fields] = await connection.execute(
+        'SELECT * FROM OPCIONES_MENU_TAREA WHERE ID_tarea = ? AND ID_opcion = ? AND ID_aula = ?',
+        [taskID, menuOptionID, classroomID]
+    );
+
+    if (rows1.length === 0) {
+        throw new Error('There is no menu option with that id.');
+    }
+
+    const [rows2, fields2] = await connection.execute(
+        'UPDATE OPCIONES_MENU_TAREA SET Cantidad = ? WHERE ID_tarea = ? AND ID_opcion = ? AND ID_aula = ?',
+        [amount, taskID, menuOptionID, classroomID], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error updating amount', error);
+            }
+        }
+    );
+
+    return rows2;
 }
 
 module.exports = {
@@ -758,5 +845,8 @@ module.exports = {
     addGenericStep,
     getNumSteps,
     getMenuTaskModel,
-    getListClassrooms
+    getListClassrooms,
+    getListMenuTasks,
+    insertMenu,
+    updateAmountMenu
 };

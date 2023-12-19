@@ -178,6 +178,11 @@ AuthRouter.get('/students/getClassrooms', studentsFN.getListClassrooms);
 
 AuthRouter.get('/students/menuTasks/:taskId', studentsFN.getMenuTaskModel);
 
+AuthRouter.get('/students/menuTasks/:taskId/classroom/:classroomId', studentsFN.getListMenuTasks);
+
+AuthRouter.post('/students/menuTasks/info', studentsFN.insertMenu);  //PARA CREARLA PERO LO USA EL PROFESOR JERMU GILIPOLLAS
+
+AuthRouter.post('/students/menuTasks/amount', studentFN.updateAmountMenu); //PARA ACTUALIZAR LA CANTIDAD DE UN MENU
 
 /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {

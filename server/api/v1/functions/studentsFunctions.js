@@ -700,7 +700,7 @@ async function getMenuTaskModel(req, res) {
     return res.json(taskModel);
 }
 
-async function getListClassrooms(req, res) {
+async function getListClassrooms(req, res) { //PROBAR
     // Obtener datos del cuerpo de la solicitud.
     if (!req.headers.authorization) {
         return res.status(401).json({ error: 'Token not sent' });
@@ -726,6 +726,89 @@ async function getListClassrooms(req, res) {
     return res.json(listClassrooms);
 }
 
+async function getListMenuTasks(req, res) { //PROBAR
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+
+    const classroomID = req.params.classroomId;
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    let menuOptions = {};
+
+    try {
+        menuOptions = await database.getListMenuTasks(taskID, classroomID);
+    }catch (error) {
+        return res.status(500).json({ error: 'Error getting menu options. ' + error });
+    }
+
+    return res.json(menuOptions);
+}
+
+//NO DEBERIA DE IR AQUI PORQUE ES DEL PROFESOR, PROBLEMA DEL GUILLE DE MAÑANA
+async function insertMenu(req, res) { //PROBAR-> SERA PARA EL PROFESOR QUE EL JERMU ES GILIPOLLAS
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+    const classroomID = req.params.classroomId;
+    const menuOptionID = req.params.menuOptionId;
+    const amount = req.body.amount;
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    try{
+        await database.insertMenu(taskID, classroomID, menuOptionID, amount);
+    }catch (error) {
+        return res.status(500).json({ error: 'Error inserting menu. ' + error });
+    }
+}
+
+async function updateAmountMenu(req, res) { //PROBAR
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+    const classroomID = req.params.classroomId;
+    const menuOptionID = req.params.menuOptionId;
+    const amount = req.body.amount;
+
+    try {
+        decodedToken = await checkearToken(token, secret);
+    }catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    try{
+        await database.updateAmountMenu(taskID, classroomID, menuOptionID, amount);
+    }catch (error) {
+        return res.status(500).json({ error: 'Error updating amount menu. ' + error });
+    }
+}
+
+
+
 module.exports = {
     getIdentityCardsAll,
     getIdentityCard,
@@ -745,5 +828,8 @@ module.exports = {
     getMaterialTaskModel,
     addGenericTaskStep,
     getMenuTaskModel,
-    getListClassrooms
+    getListClassrooms,
+    getListMenuTasks,
+    insertMenu,
+    updateAmountMenu
 };
