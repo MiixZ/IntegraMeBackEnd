@@ -1,48 +1,36 @@
-import * as main from './main.js';
+window.sendPostRequest = function() {
+  // URL de la API a la que quieres hacer la petición POST
+const url = 'http://localhost:8080/api/v1/admins/insertClass';
+const number = document.getElementById('number').value;
+const capacity = document.getElementById('capacity').value;
 
-const CLASSES_URL = main.BASE_IP + main.BASE_PORT + main.V_API + main.USER + '/insertClass';
+// Los datos que quieres enviar en formato JSON
+let data = {
+    NUMBER: number,
+    CAPACITY: capacity
+};
 
-export function handleSubmit(event) {
-  event.preventDefault();
+let auth = 'Bearer ' + localStorage.getItem('token');
 
-  var number = document.getElementsByName('number')[0].value;
-  var capacity = document.getElementsByName('capacity')[0].value;
-
-  if (number && capacity) {
-    // Crear el objeto de datos a enviar
-    var data = { 
-      number: number, 
-      capacity: capacity 
-    };
-
-    // Enviar la petición HTTP POST
-    fetch('../../../api/v1/admins/insertClass', {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
+// Opciones de la petición
+let options = {
+    method: 'POST',
+    headers: {
         'Content-Type': 'application/json',
-        // Agrega el token como Bearer en la cabecera Authorization
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Success:', data);
-      alert('Aula registrada correctamente.');
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-      alert('Error al registrar el aula.');
-    });
-  } else {
-    alert('Por favor, completa todos los campos del formulario.');
-  }
-}
+        'authorization': auth
+    },
+    body: JSON.stringify(data)
+};
 
-window.handleSubmit = handleSubmit;
+// Envía la petición
+fetch(url, options)
+    .then(response => response.json())
+    .then(data => {
+        const dataAsString = JSON.stringify(data.result);
+        let dataSinComillas = dataAsString.replace(/"/g, '');
+        localStorage.setItem('token', dataSinComillas) // Llama a editToken con los datos obtenidos
+        // Enviamos a la página de inicio del panel de administración
+        alert('Aula creada correctamente.');
+    })
+    .catch(error => console.error('Error:', error));
+}

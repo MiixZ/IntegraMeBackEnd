@@ -9,30 +9,30 @@
         <h1>IntegraMe: Registro de Estudiantes</h1>
     </header>
 
-    <form class="regist-form">
+    <form class="regist-form" onsubmit="event.preventDefault(); sendPostRequest()">
         <div class="input-group">
             <label for="name" class="labels">Nombre: </label>
-            <input type="text" name="name">
+            <input type="text" id="nombre" name="name">
         </div>
 
         <div class="input-group">
             <label for="apellido1" class="labels">Primer Apellido: </label>
-            <input type="text" name="apellido1">
+            <input type="text" id="apellido1" name="apellido1">
         </div>
 
         <div class="input-group">
             <label for="apellido2" class="labels">Segundo Apellido: </label>
-            <input type="text" name="apellido2">
+            <input type="text" id="apellido2" name="apellido2">
         </div>
 
         <div class="input-group">
             <label for="grade" class="labels">Grado: </label>
-            <input type="number" name="grade">
+            <input type="number" id="grado" name="grade">
         </div>
 
         <div class="input-group">
             <label for="tutor" class="labels">Tutor: </label>
-            <input type="text" name="tutor">
+            <input type="text" id="tutor" name="tutor">
         </div>
     
         <input type="submit" value="Registrar" class="boton">
@@ -42,7 +42,6 @@
         <p>&copy; IntegraMe App</p>
     </footer>
 
-    <script src="js/main.js"></script>
     <script src="js/students.js"></script>
 </body>
 </html>

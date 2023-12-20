@@ -1,40 +1,48 @@
-// VARIABLES
-const BASE_IP = 'http://34.175.9.11';
-const V_API = '/api/v1';
-const BASE_PORT = ':6969';
-const USER = '/admins';
-const PETICION_TOKEN = BASE_IP + BASE_PORT + V_API + '/CheckToken';
-let TOKEN = 'none';
+// URL de la API a la que quieres hacer la petición POST
+let url = 'http://localhost:8080/api/v1/checkTokenAdmin';
 
-const data = {
+// Datos que quieres enviar en formato JSON
+let data = {
 
+};
+
+// Opciones de la petición.
+const auth = 'Bearer ' + localStorage.getItem('token');
+
+let opciones = {
+    method: 'POST', // Método de la petición
+    headers: {
+        'content-type': 'application/json', // Tipo de contenido que se enviará
+        authorization: auth // Token de autenticación
+    },
+    body: JSON.stringify(data), // Convertimos los datos a una cadena JSON
+};
+
+function bloquearBotones() {
+    document.getElementById('registrar').style.display = 'none';
 }
 
-var xhr = new XMLHttpRequest();
-xhr.open("POST", PETICION_TOKEN, true);
-xhr.setRequestHeader("Authorization", "Bearer " + TOKEN);
+function desbloquearBotones() {
+    document.getElementById('registrar').style.display = '';
+}
 
-xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+// Hacemos la petición.
+fetch(url, opciones)
+    .then(response => {
+        if (response.ok) {
+            let success = document.getElementById('success-message');
+            success.innerHTML = 'Está autorizado.';
+            success.style.display = 'block';
+            success.style.color = 'green';
 
-xhr.onreadystatechange = function () {
-    if (xhr.readyState == 4 && xhr.status == 200) {
-        console.log(xhr.responseText);
-    }
-};
+            desbloquearBotones();
+        } else {
+            // Si no se ha podido realizar la petición, cargamos el error
+            let error_message = document.getElementById('error-message');
+            error_message.innerHTML = 'No está autorizado. Por favor, inicie sesión.';
+            error_message.style.display = 'block';
+            error_message.style.color = 'red';
 
-xhr.onload = function () {
-    if (xhr.status === 200) {
-      // La solicitud fue exitosa, puedes manejar la respuesta aquí
-        console.log(xhr.responseText);
-    } else {
-      // La solicitud falló, manejar el error aquí
-        console.error("Error en la solicitud. Estado:", xhr.status);
-    }
-};
-
-xhr.onerror = function () {
-    // Manejar errores de red o de otra índole
-    console.error("Error de red al realizar la solicitud");
-};
-
-xhr.send(data);
+            bloquearBotones();
+        }
+    })
