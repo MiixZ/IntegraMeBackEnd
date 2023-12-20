@@ -58,7 +58,7 @@ async function insertTeacher(req, res) {
     }
 
     // Enviar respuesta al cliente
-    res.json(resultado);
+    res.json({result : resultado});
 }
 
 async function insertClass(req, res) {
@@ -68,7 +68,6 @@ async function insertClass(req, res) {
     }
 
     const token = req.headers.authorization.split(' ')[1];
-
     try {
         await checkearToken(token, secret_admin);
     } catch (error) {
@@ -77,7 +76,6 @@ async function insertClass(req, res) {
 
     // Obtener datos del cuerpo de la solicitud
     const { NUMBER, CAPACITY } = req.body;
-
     // Verificar si todos los campos necesarios están presentes
     if (!NUMBER || !CAPACITY) {
         return res.status(400).json({ error: 'All fields are necessary.' });
@@ -127,7 +125,7 @@ async function insertStudent(req, res) {
     }
 
     // Enviar respuesta al cliente
-    res.json(resultado);
+    res.json({result : resultado});
 }
 
 async function loginAdmin(req, res) {

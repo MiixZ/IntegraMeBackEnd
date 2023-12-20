@@ -39,6 +39,8 @@ routerv1.use('/images', express.static('images', { extensions : imageExtensions 
  */
 routerv1.post('/CheckToken', generalFN.checkToken);
 
+routerv1.post('/CheckTokenAdmin', generalFN.checkTokenAdmin);
+
 // ------------------------- FUNCIONES DE ALUMNOS -------------------------------------
 
 // FUNCIONA CORRECTAMENTE

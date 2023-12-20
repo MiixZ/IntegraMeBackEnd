@@ -11,7 +11,7 @@
 
     <div class="container">
         <h2>Login</h2>
-        <form id="loginForm">
+        <form id="loginForm" onsubmit="event.preventDefault(); sendPostRequest()">
             <div class="form-group">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
@@ -28,6 +28,6 @@
         <p>&copy; IntegraMe App</p>
     </footer>
 
-    <script src="js/login.js"></script>
+    <script type="module" src="js/login.js"></script>
 </body>
 </html>

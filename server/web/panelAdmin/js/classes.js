@@ -1,14 +1,36 @@
-document.getElementById('classesForm').addEventListener('submit', function(event) {
-  event.preventDefault();
+window.sendPostRequest = function() {
+  // URL de la API a la que quieres hacer la petición POST
+const url = 'http://34.175.9.11:6969/api/v1/admins/insertClass';
+const number = document.getElementById('number').value;
+const capacity = document.getElementById('capacity').value;
 
-  var className = document.getElementById('className').value;
-  var classDescription = document.getElementById('classDescription').value;
+// Los datos que quieres enviar en formato JSON
+let data = {
+    NUMBER: number,
+    CAPACITY: capacity
+};
 
-  if (className && classDescription) {
-    // Aquí podrías hacer una llamada AJAX para enviar los datos al servidor
-    console.log('Nombre de la clase: ' + className);
-    console.log('Descripción de la clase: ' + classDescription);
-  } else {
-    alert('Por favor, completa todos los campos del formulario.');
-  }
-});
+let auth = 'Bearer ' + localStorage.getItem('token');
+
+// Opciones de la petición
+let options = {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'authorization': auth
+    },
+    body: JSON.stringify(data)
+};
+
+// Envía la petición
+fetch(url, options)
+    .then(response => response.json())
+    .then(data => {
+        const dataAsString = JSON.stringify(data.result);
+        let dataSinComillas = dataAsString.replace(/"/g, '');
+        localStorage.setItem('token', dataSinComillas) // Llama a editToken con los datos obtenidos
+        // Enviamos a la página de inicio del panel de administración
+        alert('Aula creada correctamente.');
+    })
+    .catch(error => console.error('Error:', error));
+}
