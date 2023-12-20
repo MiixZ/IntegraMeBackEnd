@@ -1,6 +1,6 @@
 window.sendPostRequest = function() {
 // URL de la API a la que quieres hacer la petición POST
-const url = 'http://localhost:8080/api/v1/admins/insertStudent';
+const url = 'http://34.175.9.11:6969/api/v1/admins/insertStudent';
 const nombre = document.getElementById('nombre').value;
 const apellido1 = document.getElementById('apellido1').value;
 const apellido2 = document.getElementById('apellido2').value;

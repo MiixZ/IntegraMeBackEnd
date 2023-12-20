@@ -1,6 +1,6 @@
 window.sendPostRequest = function() {
   // URL de la API a la que quieres hacer la petición POST
-const url = 'http://localhost:8080/api/v1/admins/insertClass';
+const url = 'http://34.175.9.11:6969/api/v1/admins/insertClass';
 const number = document.getElementById('number').value;
 const capacity = document.getElementById('capacity').value;
 

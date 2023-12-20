@@ -1,5 +1,5 @@
 // URL de la API a la que quieres hacer la petición POST
-let url = 'http://localhost:8080/api/v1/checkTokenAdmin';
+let url = 'http://34.175.9.11:6969/api/v1/checkTokenAdmin';
 
 // Datos que quieres enviar en formato JSON
 let data = {
