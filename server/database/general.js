@@ -84,7 +84,7 @@ async function checkearToken(token, typeSecret) {
 async function VerificarToken(token) {              // Cambio en la tabla tokens?
     const connection = await conectarBD();
 
-    const [rows, fields] = connection.execute('SELECT Token FROM TOKENS WHERE Token = ?',
+    const [rows] = await connection.execute('SELECT Token FROM TOKENS WHERE Token = ?',
                                                 [token], (error, results, fields) => {
         if (error) {
             throw new Error('Error getting token');

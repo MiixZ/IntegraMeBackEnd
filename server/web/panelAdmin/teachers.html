@@ -8,25 +8,25 @@
     <header>
         <h1>IntegraMe: Registro de Profesores</h1>
     </header>
-    <form class="regist-form">
+    <form class="regist-form" onsubmit="event.preventDefault(); sendPostRequest()">
         <div class="input-group">
             <label for="name" class="labels">Nombre: </label>
-            <input type="text" name="name">
+            <input type="text" id="nombret" name="name">
         </div>
 
         <div class="input-group">
             <label for="apellido1" class="labels">Primer Apellido: </label>
-            <input type="text" name="apellido1">
+            <input type="text" id="apellido1t" name="apellido1">
         </div>
 
         <div class="input-group">
             <label for="apellido2" class="labels">Segundo Apellido: </label>
-            <input type="text" name="apellido2">
+            <input type="text" id="apellido2t" name="apellido2">
         </div>
 
         <div class="input-group">
             <label for="nickname" class="labels">NickName: </label>
-            <input type="text" name="nickname">
+            <input type="text" id="nicknamet" name="nickname">
         </div>
     
         <div class="input-group">
@@ -39,7 +39,7 @@
     <footer>
         <p>&copy; IntegraMe App</p>
     </footer>
-    <script src="js/main.js"></script>
+
     <script src="js/teachers.js"></script>
 </body>
 </html>
