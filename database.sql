@@ -246,7 +246,7 @@ CREATE TABLE PROFESORES_TAREA (
 CREATE TABLE OPCIONES_MENU_TAREA (
     ID_tarea INT NOT NULL,
     ID_opcion INT NOT NULL,
-    Cantidad INT NOT NULL,
+    Cantidad INT DEFAULT NULL,
     ID_aula INT NOT NULL,
     Fecha DATE NOT NULL,
     PRIMARY KEY (ID_opcion, ID_aula, Fecha),

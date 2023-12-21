@@ -718,7 +718,6 @@ async function getListClassrooms(req, res) { //PROBAR
 
     try {
         listClassrooms = await database.getListClassrooms();
-        console.log("listClassrooms: " + listClassrooms);
     } catch (error) {
         return res.status(500).json({ error: 'Error getting classrooms list model. ' + error });
     }
@@ -753,33 +752,6 @@ async function getListMenuTasks(req, res) { //PROBAR
     }
 
     return res.json(menuOptions);
-}
-
-//NO DEBERIA DE IR AQUI PORQUE ES DEL PROFESOR, PROBLEMA DEL GUILLE DE MAÑANA
-async function insertMenu(req, res) { //PROBAR-> SERA PARA EL PROFESOR QUE EL JERMU ES GILIPOLLAS
-    // Obtener datos del cuerpo de la solicitud.
-    if (!req.headers.authorization) {
-        return res.status(401).json({ error: 'Token not sent' });
-    }
-
-    const token = req.headers.authorization.split(' ')[1];
-
-    const taskID = req.params.taskId;
-    const classroomID = req.params.classroomId;
-    const menuOptionID = req.params.menuOptionId;
-    const amount = req.body.amount;
-
-    try {
-        decodedToken = await checkearToken(token, secret);
-    } catch (error) {
-        return res.status(401).json({ error: 'Invalid token' });
-    }
-
-    try{
-        await database.insertMenu(taskID, classroomID, menuOptionID, amount);
-    }catch (error) {
-        return res.status(500).json({ error: 'Error inserting menu. ' + error });
-    }
 }
 
 async function updateAmountMenu(req, res) { //PROBAR

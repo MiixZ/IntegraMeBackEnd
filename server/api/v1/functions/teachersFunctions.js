@@ -137,8 +137,35 @@ async function registPerfilStudent(req, res) {  // SE HA PROBADO SIN IDSET, FALT
     }
 }
 
+async function insertMenu(req, res) { //PROBAR-> SERA PARA EL PROFESOR QUE EL JERMU ES GILIPOLLAS
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+    const classroomID = req.params.classroomId;
+    const menuOptionID = req.params.menuOptionId;
+    const amount = req.body.amount;
+
+    try {
+        decodedToken = await checkearToken(token, secret_teacher);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    try{
+        await database.insertMenu(taskID, classroomID, menuOptionID, amount);
+    }catch (error) {
+        return res.status(500).json({ error: 'Error inserting menu. ' + error });
+    }
+}
+
 module.exports = {
     getTeachers,
     login,
-    registPerfilStudent
+    registPerfilStudent,
+    insertMenu
 };

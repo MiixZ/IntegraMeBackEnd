@@ -466,6 +466,15 @@ async function getMenuTaskModel(idTask) {
         throw new Error('Error getting image content.', error);
     }
 
+    try{
+        classrooms = await getClassroomsMenuTask();
+    }catch(error){
+        throw new Error('Error getting classrooms.', error);
+    }
+
+
+
+
     const data = {
         type: "MenuTaskModel",
         taskId: rows[0].ID_tarea,
@@ -475,6 +484,27 @@ async function getMenuTaskModel(idTask) {
     };
 
     return data;
+}
+
+async function getClassroomsMenuTask() {
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+       'SELECT DISTINCT ID_aula FROM OPCIONES_MENU_TAREA',
+    );
+
+    const data = {
+        classrooms: rows.map(row => row.ID_aula)
+    };
+
+    return data;
+}
+
+async function getClassroomInfo (idAula){
+    const connection = await conectar();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT '
 }
 
 async function getTaskType(idTask) {
@@ -751,49 +781,6 @@ async function getListMenuTasks (TaskId, ClassRoomId){ //PROBAR
     return data;
 }
 
-//NO DEBERIA DE IR AQUI PORQUE ES DEL PROFESOR, PROBLEMA DEL GUILLE DE MAÑANA
-async function insertMenu (taskID, classroomID, menuOptionID, amount){  ////PROBAR-> SERA PARA EL PROFESOR QUE EL JERMU ES GILIPOLLAS
-    const connection = await conectar();
-
-    const [rows1, fields] = await connection.execute(
-        'SELECT * FROM TAREA WHERE ID_tarea = ?',
-        [taskID]
-    );
-
-    if (rows1.length === 0) {
-        throw new Error('There is no task with that id.');
-    }
-
-    const [rows2, fields2] = await connection.execute(
-        'SELECT * FROM AULAS WHERE Num_aula = ?',
-        [classroomID]
-    );
-
-    if (rows2.length === 0) {
-        throw new Error('There is no classroom with that id.');
-    }
-
-    const [rows3, fields3] = await connection.execute(
-        'SELECT * FROM OPCIONES_MENU WHERE ID_opcion = ?',
-        [menuOptionID]
-    );
-
-    if (rows3.length === 0) {
-        throw new Error('There is no menu option with that id.');
-    }
-
-    const [rows4, fields4] = await connection.execute(
-        'INSERT INTO OPCIONES_MENU_TAREA (ID_tarea, ID_opcion, Cantidad, ID_aula, Fecha) VALUES (?, ?, ?, ?, CURDATE())',
-        [taskID, menuOptionID, classroomID, amount], (error, results, fields) => {
-            if (error) {
-                throw new Error('Error inserting menu', error);
-            }
-        }
-    );
-
-    return rows4;
-}
-
 async function updateAmountMenu(taskID, classroomID, menuOptionID, amount){ //PROBAR
     const connection = await conectar();
 
@@ -847,6 +834,6 @@ module.exports = {
     getMenuTaskModel,
     getListClassrooms,
     getListMenuTasks,
-    insertMenu,
-    updateAmountMenu
+    updateAmountMenu,
+    getClassroomsMenuTask
 };
