@@ -239,28 +239,33 @@ async function registPerfilStudent(req, res) {  // SE HA PROBADO SIN IDSET, FALT
     const token = req.headers.authorization.split(' ')[1];
 
     // Cogemos el id del estudiante del primer parámetro de la ruta.
-    const idStudent = req.params.userID;
-
+    console.log("hola")
     try {
         token_decoded = await checkearToken(token, secret_admin); 
     } catch (error) {
         return res.status(500).json({ error: 'Token has expired or you are not identified.' });
     }
 
-    const { nickname, avatarId, idSet = null, passwordFormat, password, contentAdaptationFormats, interactionMethods} = req.body;
+    const { name, nickname, avatarId, idSet = null, passwordFormat, password, contentAdaptationFormats, interactionMethods} = req.body;
 
-    if (!idStudent || !nickname || !avatarId || !passwordFormat || !password 
+    if (!name || !nickname || !avatarId || !passwordFormat || !password
         || !contentAdaptationFormats || !interactionMethods) {
         return res.status(400).json({ error: 'All fields are required' });
     }
 
-    try {
-        // Comprobar que el id del estudiante existe en la base de datos.
-        const student = await database_students.studentData(idStudent);
+    lastname1 = name.split(' ')[1];
+    lastname2 = name.split(' ')[2];
 
-        if (student.length === 0) {
-            return res.status(400).json({ error: 'Student with that id does not exist' });
-        }
+    console.log("apellido 1" + lastname1);
+    console.log("apellido 2" + lastname2);
+
+    idStudent = 0;
+
+    try {
+        console.log("buscando id")
+        idStudent = await database_students.getIdStudentByLastnames(lastname1, lastname2);
+        // Comprobar que el id del estudiante existe en la base de datos.
+        console.log("idStudent " + idStudent)
     } catch (error) {
         return res.status(500).json({ error: 'Error while checking student.' });
     }
@@ -278,17 +283,6 @@ async function registPerfilStudent(req, res) {  // SE HA PROBADO SIN IDSET, FALT
         }
     }
 
-    try {
-        // Comprobar que el id del avatar existe en la base de datos.
-        const avatar = await general.getAvatar(avatarId);
-
-        if (avatar.length === 0) {
-            return res.status(400).json({ error: 'Avatar with that id does not exist.' });
-        }
-    } catch (error) {
-        return res.status(500).json({ error: 'Error while checking avatar.' });
-    }
-
     // Si la autenticacion es por imagen hace falta el idSet.
     if (passwordFormat == 'ImageAuth' && !idSet) {
         return res.status(400).json({ error: 'SetId is required with Image Login.' });
@@ -299,7 +293,7 @@ async function registPerfilStudent(req, res) {  // SE HA PROBADO SIN IDSET, FALT
         await database.registPerfilStudent(idStudent, nickname, avatarId, idSet, passwordFormat, passwordHash);
         await database.registContentProfile(idStudent, contentAdaptationFormats, interactionMethods);
 
-        res.status(200).json({ result: 'Student profile registered.' });
+        res.status(200).json({ result: result });
     } catch (error) {
         return res.status(500).json({ error: 'Could not regist student profile.' });
     }

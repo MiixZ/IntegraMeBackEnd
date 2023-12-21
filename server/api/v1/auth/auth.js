@@ -101,7 +101,7 @@ AuthRouter.get('/students/:userID/profile', studentsFN.getProfile);
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.post('/admins/:userID/RegistProfileStudent', teachersFN.registPerfilStudent);
+AuthRouter.post('/admins/registProfileStudent', adminsFN.registPerfilStudent);
 
 /**
  * @api {get} /getTaskCards Devuelve las tareas del alumno.
@@ -176,13 +176,13 @@ AuthRouter.get('/students/tasks/:taskId', studentsFN.getTaskModel);
 // ENDPOINTS DE MENUS
 AuthRouter.get('/students/getClassrooms', studentsFN.getListClassrooms);
 
-AuthRouter.get('/students/menuTasks/:taskId', studentsFN.getMenuTaskModel);
+AuthRouter.get('/students/tasks/menu/:taskId', studentsFN.getMenuTaskModel);
 
-AuthRouter.get('/students/menuTasks/:taskId/classroom/:classroomId', studentsFN.getListMenuTasks);
+AuthRouter.get('/students/tasks/menu/:taskId/:classroomId/menu', studentsFN.getListMenuTasks);
 
-AuthRouter.post('/students/menuTasks/info', teachersFN.insertMenu);  //PARA CREARLA PERO LO USA EL PROFESOR JERMU GILIPOLLAS
+AuthRouter.post('/students/menuTasks/info', teachersFN.insertMenu);
 
-AuthRouter.post('/students/menuTasks/amount', studentsFN.updateAmountMenu); //PARA ACTUALIZAR LA CANTIDAD DE UN MENU
+AuthRouter.post('/students/tasks/menu/:taskId/:classroomId/:menuOptionId', studentsFN.updateAmountMenu); //PARA ACTUALIZAR LA CANTIDAD DE UN MENU
 
 /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {

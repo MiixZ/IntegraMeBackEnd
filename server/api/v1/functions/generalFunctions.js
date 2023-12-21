@@ -71,7 +71,7 @@ async function checkTokenAdmin(req, res) {
 }
 
 
-async function generateHash(req, res){
+async function generateHash(req, res) {
     const { id, password } = req.body;
 
     // Verificar si todos los campos necesarios están presentes
@@ -84,8 +84,18 @@ async function generateHash(req, res){
     res.json(passwordHash);
 }
 
+async function getAvatars(req, res) {
+    try {
+        const avatars = await general.getAvatars();
+        res.json({avatars : avatars});
+    } catch (error) {
+        console.error('An error has ocurred in getAvatars call', error);
+    }
+}
+
 module.exports = {
     checkToken,
     checkTokenAdmin,
-    generateHash
+    generateHash,
+    getAvatars
 };

@@ -51,10 +51,13 @@ async function login(req, res) {                // Probar.
         const token = jwt.sign({ idTeacher: idTeacher, nickname, EXP: fecha}, secret_teacher);
         try {
             await general.insertarToken(idTeacher, token, fecha);
-            res.status(200).json({ token });
+            const respuesta = {
+                userId : idTeacher,
+                token: token
+            }
+            res.status(200).json(respuesta);
         } catch {
-            reject(error);
-            return;
+            return res.status(500).json({ error: 'Error saving token' });
         }
     } else {
         res.status(401).json({ error: 'Incorrect Credentials.' });
@@ -167,6 +170,5 @@ module.exports = {
     login,
     registPerfilStudent,
     insertMenu,
-    getTeachers,
-    login
+    getTeachers
 };

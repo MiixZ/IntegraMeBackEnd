@@ -323,12 +323,12 @@ async function loginStudent(req, res) {             // Probar.
 
     try {
         profileData = await database.getProfileData(idStudent);
-        hash = profileData.Password;
     } catch (error) {
         return res.status(500).json({ error: 'Error getting student or password' });
     }
 
     let correcta = false;
+    hash = profileData.Password;
     try {
         correcta = await compare(password, hash);
     } catch (error) {
@@ -450,16 +450,14 @@ async function getTaskModel (req, res) {
     }
 
     try {
-        
         taskType = await database.getTaskType(taskID);
-        console.log("HA PASADO");
 
 
         console.log("taskType: " + taskType.type);
 
         switch (taskType.type) {
             case "MenuTask":
-                /* taskModel =  */
+                return await getMenuTaskModel(req, res);
                 break;
             case "MaterialTask":
                 return await getMaterialTaskModel(req, res);
@@ -700,7 +698,7 @@ async function getMenuTaskModel(req, res) {
     return res.json(taskModel);
 }
 
-async function getListClassrooms(req, res) { //PROBAR
+async function getListClassrooms(req, res) {
     // Obtener datos del cuerpo de la solicitud.
     if (!req.headers.authorization) {
         return res.status(401).json({ error: 'Token not sent' });
@@ -725,7 +723,7 @@ async function getListClassrooms(req, res) { //PROBAR
     return res.json(listClassrooms);
 }
 
-async function getListMenuTasks(req, res) { //PROBAR
+async function getListMenuTasks(req, res) {
     // Obtener datos del cuerpo de la solicitud.
     if (!req.headers.authorization) {
         return res.status(401).json({ error: 'Token not sent' });
@@ -773,10 +771,14 @@ async function updateAmountMenu(req, res) { //PROBAR
     }
 
     try{
-        await database.updateAmountMenu(taskID, classroomID, menuOptionID, amount);
+        result = await database.updateAmountMenu(taskID, classroomID, menuOptionID, amount);
     }catch (error) {
         return res.status(500).json({ error: 'Error updating amount menu. ' + error });
     }
+
+    console.log("result: " + result);
+
+    return res.json(result);
 }
 
 
@@ -802,6 +804,5 @@ module.exports = {
     getMenuTaskModel,
     getListClassrooms,
     getListMenuTasks,
-    insertMenu,
     updateAmountMenu
 };

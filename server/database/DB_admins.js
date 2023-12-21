@@ -135,12 +135,10 @@ async function GetPassword(nickname) {
 async function registStudentFormats (idStudent, contentAdaptationFormats) {
   const connection = await conectar();
 
-  for (let format of contentAdaptationFormats) {
-    await connection.execute(
-      'INSERT INTO FORMATOS_ALUMNOS (ID_alumno, Nom_formato) VALUES (?, ?)',
-      [idStudent, format]
-    );
-  }
+  await connection.execute(
+    'INSERT INTO FORMATOS_ALUMNOS (ID_alumno, Nom_formato) VALUES (?, ?)',
+    [idStudent, contentAdaptationFormats]
+  );
 
   return "formats registed";
 }
@@ -148,12 +146,10 @@ async function registStudentFormats (idStudent, contentAdaptationFormats) {
 async function registStudentInteractions (idStudent, interactionMethods) {
   const connection = await conectar();
 
-  for (let interaction of interactionMethods) {
-    await connection.execute(
-      'INSERT INTO INTERACCION_ALUMNOS (ID_alumno, Nom_interaccion) VALUES (?, ?)',
-      [idStudent, interaction]
-    );
-  }
+  await connection.execute(
+    'INSERT INTO INTERACCION_ALUMNOS (ID_alumno, Nom_interaccion) VALUES (?, ?)',
+    [idStudent, interactionMethods]
+  );
 
   return "interactions registed";
 }
@@ -165,7 +161,7 @@ async function registContentProfile(idStudent, contentAdaptationFormats, interac
 
 async function registPerfilStudent(idStudent, nickname, avatarId, idSet, passwordFormat, password){
   const connection = await conectar();
-  
+
   await connection.execute(
     'INSERT INTO PERFIL_ALUMNOS (ID_alumno, NickName, Avatar_id, ID_set, FormatoPassword, Password_hash) VALUES (?, ?, ?, ?, ?, ?)',
     [idStudent, nickname, avatarId, idSet, passwordFormat, password]

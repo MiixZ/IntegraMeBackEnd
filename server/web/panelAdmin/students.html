@@ -35,22 +35,57 @@
             <label for="tutor" class="labels">Tutor: </label>
             <input type="text" id="tutor" name="tutor">
         </div>
-    
+
         <input type="submit" value="Registrar" class="boton">
     </form>
 
-    <form class="regist-form" onsubmit="event.preventDefault(); sendPostRequest()">
-        <h2> DATOS DEL PERFIL DE ALUMNO </h2>
-        <div class="input-group">
-            <label for="name" class="labels">NickName: </label>
-            <input type="text" id="nombre" name="name">
+    <div id="perfil_">
 
-            <label for="apellido1" class="labels">ID avatar (si no se sabe, introducir "1"): </label>
-    </form>
+        <div id="avatares">
+            <h2>Avatares disponibles:</h2>
+        </div>
 
-    <footer>
-        <p>&copy; IntegraMe App</p>
-    </footer>
+        <form class="regist-form" onsubmit="event.preventDefault(); sendPerfil()">
+            <h2> DATOS DEL PERFIL DE ALUMNO </h2>
+            <div class="input-group">
+                <label for="nombre_completo" class="labels">Nombre Completo Estudiante: </label>
+                <input type="text" id="nombrecompleto" name="nombre_completo">
+            </div>
+
+            <div class="input-group">
+                <label for="nickname" class="labels">NickName: </label>
+                <input type="text" id="nickname" name="nickname">
+            </div>
+
+            <div class="input-group">
+                <label for="avatar" class="labels">ID avatar: </label>
+                <input type="number" id="avatar" name="avatar">
+            </div>
+
+            <div class="input-group">
+                <label for="formato" class="labels">Formato Contraseña: </label>
+                <input type="text" id="formato" name="formato">
+            </div>
+
+            <div class="input-group">
+                <label for="password" class="labels">Contraseña: </label>
+                <input type="password" id="password" name="password">
+            </div>
+
+            <div class="input-group">
+                <label for="Formatos_Adaptacion" class="labels">Formato Adaptación: </label>
+                <input type="text" id="Formatos_Adaptacion" name="Formatos_Adaptacion">
+            </div>
+
+            <div class="input-group">
+                <label for="interaction" class="labels">Métodos interacción: </label>
+                <input type="text" id="interaction" name="interaction">
+            </div>
+
+            <input type="submit" value="Registrar" class="boton">
+        </form>
+
+    </div>
 
     <script src="js/students.js"></script>
 </body>

@@ -1,6 +1,8 @@
 CREATE TABLE AULAS (
     Num_aula INT PRIMARY KEY,
     Capacidad INT NOT NULL
+    Nombre VARCHAR(20) NOT NULL,
+    Imagen_clase INT NOT NULL
 );
 
 CREATE TABLE PROFESORES ( 
@@ -246,7 +248,7 @@ CREATE TABLE PROFESORES_TAREA (
 CREATE TABLE OPCIONES_MENU_TAREA (
     ID_tarea INT NOT NULL,
     ID_opcion INT NOT NULL,
-    Cantidad INT DEFAULT NULL,
+    Cantidad INT DEFAULT -1,
     ID_aula INT NOT NULL,
     Fecha DATE NOT NULL,
     PRIMARY KEY (ID_opcion, ID_aula, Fecha),

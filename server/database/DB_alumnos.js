@@ -214,6 +214,23 @@ async function getProfileData(id) {
     return data;
 }
 
+async function getIdStudentByLastnames(lastname1, lastname2) {
+    const connection = await conectar();
+
+    const [row] = await connection.execute(
+        'SELECT ID_alumno FROM ALUMNOS WHERE Apellido1 = ? AND Apellido2 = ? LIMIT 1',
+        [lastname1, lastname2]
+    );
+
+    if (row.length === 0) {
+        throw new Error('There is no student with that lastnames');
+    }
+
+    const id = row[0].ID_alumno;
+
+    return id;
+}
+
 async function studentData(id) {
     const connection = await conectar();
 
@@ -467,13 +484,11 @@ async function getMenuTaskModel(idTask) {
     }
 
     try{
-        classrooms = await getClassroomsMenuTask();
+        const classroomsIds = await getClassroomsMenuTask();
+        classrooms = await Promise.all(classroomsIds.classrooms.map(getClassroomInfo));
     }catch(error){
         throw new Error('Error getting classrooms.', error);
     }
-
-
-
 
     const data = {
         type: "MenuTaskModel",
@@ -481,7 +496,10 @@ async function getMenuTaskModel(idTask) {
         displayName: rows[0].Nombre,
         displayImage: imageTask,
         reward: recompensa,
+        classrooms: classrooms
     };
+
+    console.log(data);
 
     return data;
 }
@@ -504,7 +522,36 @@ async function getClassroomInfo (idAula){
     const connection = await conectar();
 
     const [rows, fields] = await connection.execute(
-        'SELECT '
+        'SELECT Num_aula, Imagen_clase, Nombre FROM AULAS WHERE Num_aula = ?',
+        [idAula], (error, results, fields) => {
+            if (error) {
+                throw new Error('Error getting material task.', error);
+            }
+        }
+    );
+    
+    if (rows.length === 0) {
+        throw new Error('There is no classroom with that id.');
+    }
+
+    try{
+        imageContent = await database.getImageContent(rows[0].Imagen_clase);
+    }catch{
+        throw new Error('Error getting image content.', error);
+    }
+
+    textContent = {
+        type: "TextContent",
+        text: rows[0].Nombre
+    };
+   
+    const data = {
+        classroomId: rows[0].Num_aula,
+        displayText: textContent,
+        displayImage: imageContent
+    };
+
+    return data;
 }
 
 async function getTaskType(idTask) {
@@ -764,19 +811,55 @@ async function getListMenuTasks (TaskId, ClassRoomId){ //PROBAR
     const connection = await conectar();
 
     const [rows, fields] = await connection.execute(
-        `SELECT * FROM OPCIONES_MENU_TAREA WHERE ID_tarea = ? AND ID_aula = ?`,
+        `SELECT * 
+         FROM OPCIONES_MENU_TAREA 
+         INNER JOIN OPCIONES_MENU ON OPCIONES_MENU_TAREA.ID_opcion = OPCIONES_MENU.ID_opcion 
+         WHERE OPCIONES_MENU_TAREA.ID_tarea = ? AND OPCIONES_MENU_TAREA.ID_aula = ?`,
         [TaskId, ClassRoomId]
     );
+    if (rows.length === 0) {
+        throw new Error('There is no menu task with that id.');
+    }
+
+    const [rows1, filds] = await connection.execute(
+        'SELECT * FROM OPCIONES_MENU WHERE ID_opcion = ?',
+        [rows[0].ID_opcion]
+    );
+
+    if (rows1.length === 0) {
+        throw new Error('There is no options menu with that id.');
+    }
+
+    try{
+        clasroomInfo = await getClassroomInfo(ClassRoomId);
+    }catch{
+        throw new Error('Error getting classroom info.', error);
+    }
+
+    for (let row of rows) {
+        try{
+            row.displayImage = await database.getImageContent(row.Imagen_opcion);
+        }catch{
+            throw new Error('Error getting image content.', error);
+        }
+    }
+
 
     const data = {
-        menuOptionList: rows.map(row => {
+        menuOptions: rows.map(row => {
             return {
-                name: row.Nombre,
-                //displayDescription: row.Descripcion,
-                image: row.Imagen_opcion
+                menuOptionId: row.ID_opcion,
+                requestedAmount: row.Cantidad,
+                displayName: textContent = {
+                    type: "TextContent",
+                    text: row.Nombre
+                },
+                displayImage: row.displayImage,
             };
-        })
+        }),
+        classroom: clasroomInfo
     };
+
 
     return data;
 }
@@ -788,6 +871,8 @@ async function updateAmountMenu(taskID, classroomID, menuOptionID, amount){ //PR
         'SELECT * FROM OPCIONES_MENU_TAREA WHERE ID_tarea = ? AND ID_opcion = ? AND ID_aula = ?',
         [taskID, menuOptionID, classroomID]
     );
+
+    console.log (rows1);
 
     if (rows1.length === 0) {
         throw new Error('There is no menu option with that id.');
@@ -835,5 +920,7 @@ module.exports = {
     getListClassrooms,
     getListMenuTasks,
     updateAmountMenu,
-    getClassroomsMenuTask
+    getClassroomsMenuTask,
+    getClassroomInfo,
+    getIdStudentByLastnames
 };
