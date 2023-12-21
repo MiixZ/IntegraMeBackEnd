@@ -132,6 +132,47 @@ async function GetPassword(nickname) {
   return password;
 }
 
+async function registStudentFormats (idStudent, contentAdaptationFormats) {
+  const connection = await conectar();
+
+  for (let format of contentAdaptationFormats) {
+    await connection.execute(
+      'INSERT INTO FORMATOS_ALUMNOS (ID_alumno, Nom_formato) VALUES (?, ?)',
+      [idStudent, format]
+    );
+  }
+
+  return "formats registed";
+}
+
+async function registStudentInteractions (idStudent, interactionMethods) {
+  const connection = await conectar();
+
+  for (let interaction of interactionMethods) {
+    await connection.execute(
+      'INSERT INTO INTERACCION_ALUMNOS (ID_alumno, Nom_interaccion) VALUES (?, ?)',
+      [idStudent, interaction]
+    );
+  }
+
+  return "interactions registed";
+}
+
+async function registContentProfile(idStudent, contentAdaptationFormats, interactionMethods) {
+  await registStudentFormats(idStudent, contentAdaptationFormats);
+  await registStudentInteractions(idStudent, interactionMethods);
+}
+
+async function registPerfilStudent(idStudent, nickname, avatarId, idSet, passwordFormat, password){
+  const connection = await conectar();
+  
+  await connection.execute(
+    'INSERT INTO PERFIL_ALUMNOS (ID_alumno, NickName, Avatar_id, ID_set, FormatoPassword, Password_hash) VALUES (?, ?, ?, ?, ?, ?)',
+    [idStudent, nickname, avatarId, idSet, passwordFormat, password]
+  );
+
+  return "perfil registed";
+}
 
 module.exports = {
   InsertarAlumno,
@@ -140,5 +181,9 @@ module.exports = {
   AdminData,
   InsertarAdmin,
   ActualizarAulaProfesor,
-  InsertarAula
+  InsertarAula,
+  registStudentFormats,
+  registStudentInteractions,
+  registContentProfile,
+  registPerfilStudent
 };

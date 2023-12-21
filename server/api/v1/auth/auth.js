@@ -95,13 +95,13 @@ AuthRouter.get('/students/:userID/profile', studentsFN.getProfile);
 /**
  * @api {get} /registProfileStudent Registra el perfil del alumno.
  * @apiName Insert Profile
- * @apiGroup students && teachers
+ * @apiGroup admins
  * 
  * @apiSuccess {String} El perfil del alumno.
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfilStudent);
+AuthRouter.post('/admins/:userID/RegistProfileStudent', teachersFN.registPerfilStudent);
 
 /**
  * @api {get} /getTaskCards Devuelve las tareas del alumno.

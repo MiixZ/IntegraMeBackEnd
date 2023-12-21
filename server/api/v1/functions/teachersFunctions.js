@@ -2,7 +2,6 @@ const database = require('../../../database/DB_profesores.js');
 const general = require('../../../database/general.js');
 const { encrypt, compare, checkearToken } = require('../../../database/general.js');
 
-
 const jwt = require('jsonwebtoken');
 const secret_teacher = process.env.JWT_SECRET_TEACHER;
 
@@ -167,5 +166,7 @@ module.exports = {
     getTeachers,
     login,
     registPerfilStudent,
-    insertMenu
+    insertMenu,
+    getTeachers,
+    login
 };
