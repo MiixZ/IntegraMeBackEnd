@@ -10,6 +10,7 @@
     </header>
 
     <form class="regist-form" onsubmit="event.preventDefault(); sendPostRequest()">
+        <h2> DATOS ESTUDIANTE </h2>
         <div class="input-group">
             <label for="name" class="labels">Nombre: </label>
             <input type="text" id="nombre" name="name">
@@ -36,6 +37,15 @@
         </div>
     
         <input type="submit" value="Registrar" class="boton">
+    </form>
+
+    <form class="regist-form" onsubmit="event.preventDefault(); sendPostRequest()">
+        <h2> DATOS DEL PERFIL DE ALUMNO </h2>
+        <div class="input-group">
+            <label for="name" class="labels">NickName: </label>
+            <input type="text" id="nombre" name="name">
+
+            <label for="apellido1" class="labels">ID avatar (si no se sabe, introducir "1"): </label>
     </form>
 
     <footer>
