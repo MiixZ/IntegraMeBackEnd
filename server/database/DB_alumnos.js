@@ -55,22 +55,25 @@ async function getImagesAndSteps(idSet) {
     const connection = await conectar();
 
     const [rows, fields] = await connection.execute(
-        'SELECT C.Steps, IS.ID_imagen, I.Descripcion ' +
-        'FROM CONJUNTOS AS C ' +
-        'INNER JOIN IMAGENES_SET AS IS ON C.ID_set = IS.ID_set ' +
-        'INNER JOIN IMAGENES AS I ON IS.ID_imagen = I.ID_imagen ' +
-        'WHERE C.ID_set = ?',
+        'SELECT * FROM IMAGENES_SET WHERE ID_set = ?',
         [idSet], (error, results, fields) => {
             if (error) {
-                throw new Error('Error getting images and steps.', error);
+                throw new Error('Error getting images set.', error);
             }
         }
     );
 
-    const steps = rows[0].Steps;
-    const images = rows.map(result => [result.ID_imagen, result.Descripcion]);
-    
-    return [steps, images];
+    for(let row of rows){
+        try{
+            row.imageList = await database.getImageContent(row.ID_imagen);
+        }catch{
+            throw new Error('Error getting image content.', error);
+        }
+    }
+
+    const data = rows.map(row => row.imageList);
+
+    return data;
 }
 
 async function getAuthMethod(idStudent) {
@@ -204,11 +207,13 @@ async function getProfileData(id) {
     }
 
     const data = {
+        Student_id: row[0].ID_alumno,
         Avatar_id: row[0].Avatar_id,
         ID_set: row[0].ID_set,
         PasswordFormat: row[0].FormatoPassword,
         Password: row[0].Password_hash,
-        NickName: row[0].NickName
+        NickName: row[0].NickName,
+        Steps: row[0].Steps
     };
 
     return data;
@@ -369,6 +374,8 @@ async function getMaterialTaskModel(idTask) {
         throw new Error('There is no task with that id.');
     }
 
+    console.log(rows);
+
     if (rows[0].Tipo_tarea !== 'MaterialTask') {
         throw new Error('This task is not a material task.');
     }
@@ -398,6 +405,8 @@ async function getMaterialTaskModel(idTask) {
                                     + rows[0].Recompensa_tipo);
     }
 
+    console.log("sdjikgbn");
+
     // Contamos cuántos materiales hay en MATERIALES_TAREA.
     const [rows2, fields2] = await connection.execute(
         'SELECT COUNT(*) FROM MATERIALES_TAREA WHERE ID_tarea = ?',
@@ -413,6 +422,9 @@ async function getMaterialTaskModel(idTask) {
     }
 
     n_materiales = rows2[0]['COUNT(*)'];
+
+    console.log(n_materiales);
+    console.log(rows);
     
     try {
         imageTask = await database.getImageContent(rows[0].Img_tarea);
@@ -428,6 +440,8 @@ async function getMaterialTaskModel(idTask) {
         reward: recompensa,
         requests: n_materiales
     };
+
+    console.log(data);
 
     return data;
 }
@@ -580,7 +594,7 @@ async function getTaskType(idTask) {
 
 async function getMaterialRequest(TaskId, RequestId) {
     const connection = await conectar();
-
+    RequestId = Number(RequestId) + 1;
     const [rows, fields] = await connection.execute(
         'SELECT * FROM MATERIALES_TAREA WHERE ID_tarea = ? AND num_peticion = ?',
         [TaskId, RequestId], (error, results, fields) => {
@@ -593,6 +607,8 @@ async function getMaterialRequest(TaskId, RequestId) {
     if (rows.length === 0) {
         throw new Error('There is no material request with that id.');
     }
+
+    console.log(rows);
 
     // Cogemos los datos del material y la imagen del mismo.
     try {
@@ -613,7 +629,7 @@ async function getMaterialRequest(TaskId, RequestId) {
 
 async function toggleDelivered(TaskId, RequestId, isDelivered) {
     const connection = await conectar();
-
+    RequestId = Number(RequestId) + 1;
     const [rows, fields] = await connection.execute(
         'UPDATE MATERIALES_TAREA SET Esta_entregado = ? WHERE ID_tarea = ? AND num_peticion = ?',
         [isDelivered, TaskId, RequestId], (error, results, fields) => {

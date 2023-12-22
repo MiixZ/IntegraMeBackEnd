@@ -60,12 +60,12 @@ async function getStudent(idStudent) {
   return student;
 }
 
-async function registPerfilStudent(idStudent, nickname, avatarId, idSet, passwordFormat, password){
+async function registPerfilStudent(idStudent, nickname, avatarId, idSet, passwordFormat, password, steps){
   const connection = await conectar();
   
   await connection.execute(
-    'INSERT INTO PERFIL_ALUMNOS (ID_alumno, NickName, Avatar_id, ID_set, FormatoPassword, Password_hash) VALUES (?, ?, ?, ?, ?, ?)',
-    [idStudent, nickname, avatarId, idSet, passwordFormat, password]
+    'INSERT INTO PERFIL_ALUMNOS (ID_alumno, NickName, Avatar_id, ID_set, FormatoPassword, Password_hash, Steps) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [idStudent, nickname, avatarId, idSet, passwordFormat, password,steps]
   );
 
   return "perfil registed";

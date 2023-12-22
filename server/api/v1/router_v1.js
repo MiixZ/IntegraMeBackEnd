@@ -107,6 +107,8 @@ routerv1.get('/students/:userID/contentProfile', studentsFN.getProfileContent);
  */
 routerv1.post('/students/signin/', studentsFN.loginStudent);
 
+routerv1.post('/students/:userID/checkImagePassword', studentsFN.checkImagePassword);
+
 // ------------------------- FUNCIONES DE PROFESORES -------------------------------------
 
 /** 

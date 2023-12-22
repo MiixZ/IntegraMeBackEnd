@@ -81,34 +81,34 @@ async function getAuthMethod(req, res) {
 
     // Obtener datos del cuerpo de la solicitud.
     const userID = req.params.userID;
-    let formatoPassword = "";
-    let ID_set = -1;
 
     // Obtener método de autenticación del alumno.
     try {
-        [formatoPassword, ID_set] = await database.getAuthMethod(userID);
+        perfilAlumno = await database.getProfileData(userID);
     } catch (error) {
-        return res.status(404).json({ error: 'Error getting AuthMethod.' });
+        return res.status(404).json({ error: 'Error getting AuthMethod or Student Profile.' });
     }
 
-    if (formatoPassword === "TextAuth") {
+    if (perfilAlumno.PasswordFormat === "TextAuth") {
         res.json({
-            type: formatoPassword
+            type: perfilAlumno.PasswordFormat
         });
-    } else if (formatoPassword === "ImageAuth" && ID_set) {
+    } else if (perfilAlumno.PasswordFormat === "ImageAuth" && perfilAlumno.ID_set) {
         try { 
-            const imagesAndSteps = await database.getImagesAndSteps(ID_set);
-            const steps = imagesAndSteps.steps;
-            const images = imagesAndSteps.images.map(image => ({
-                id: image.id,
-                altDescription: image.altDescription
-            }));
+            const imagesAndSteps = await database.getImagesAndSteps(perfilAlumno.ID_set);
+            const steps = perfilAlumno.Steps;
 
-            res.json({
-                type: formatoPassword,
-                images: images,
-                steps: steps
-            });
+            console.log(imagesAndSteps);
+
+            const data = {
+                type: perfilAlumno.PasswordFormat, 
+                imageList: imagesAndSteps,
+                steps: steps,
+            }
+
+            console.log(data);
+
+            res.json(data);
         } catch (error) {
             return res.status(404).json({ error: 'Error getting images and steps.' });
         }
@@ -116,6 +116,36 @@ async function getAuthMethod(req, res) {
         return res.status(404).json({ error: 'Auth is not Text or Image or authMethod' +
                                              ' has no set assigned.' });
     }
+}
+
+async function checkImagePassword(req, res) {
+    const userID = req.params.userID;
+
+    const imagePassword = req.body.password;
+
+    console.log(imagePassword);
+
+    try {
+        perfilAlumno = await database.getProfileData(userID);
+    } catch (error) {
+        return res.status(404).json({ error: 'Error getting AuthMethod or Student Profile.' });
+    }
+    
+    if (perfilAlumno.PasswordFormat === "ImageAuth" && perfilAlumno.ID_set) {
+        splitPassword = perfilAlumno.Password.split(",");
+
+        for (let i = 0; i < imagePassword.length; i++) {
+            if (splitPassword[i] != imagePassword[i]) {
+                return res.status(401).json({ error: 'Incorrect password.' });
+            }
+        }
+        
+        return res.status(200).json({ message: 'Correct password.' });
+    }else{
+        return res.status(404).json({ error: 'Incorret type of login'});
+    
+    }
+
 }
 
 async function getProfileContent(req, res) {        // FUNCIONA
@@ -140,6 +170,8 @@ async function getProfileContent(req, res) {        // FUNCIONA
     for (let i = 0; i < interacciones.length; i++) {
         arrayIteractions.push(interacciones[i].Nom_interaccion);
     }
+
+    console.log(arrayFormats);
 
     // Enviar respuesta al cliente.
     if (arrayIteractions.length >= 1 && arrayFormats.length >= 1) {
@@ -327,10 +359,56 @@ async function loginStudent(req, res) {             // Probar.
         return res.status(500).json({ error: 'Error getting student or password' });
     }
 
+    if (profileData.PasswordFormat === "TextAuth") {
+        return loginStudentText(req, res, profileData, password);
+    }else if (profileData.PasswordFormat === "ImageAuth") {
+        return loginStudentImage(req, res, profileData, password);
+    }
+
+
+   
+}
+
+async function loginStudentText (req, res, profileData, password) {
     let correcta = false;
     hash = profileData.Password;
+    idStudent = profileData.Student_id;
+
     try {
         correcta = await compare(password, hash);
+    } catch (error) {
+        return res.status(500).json({ error: 'Error comparing password.' });
+    }
+
+    if (correcta) {
+        const fecha = new Date(Date.now() + 24 * 60 * 60 * 1000); // Creamos una fecha de expiración del token (24 horas más al día actual)
+        const token = jwt.sign({ idStudent, nickname: profileData.NickName, EXP: fecha}, secret); //{ expiresIn: '1h' });
+        try {
+            await general.insertarToken(idStudent, token, fecha);
+            const respuesta = {
+                userId : idStudent,
+                token: token
+            }
+            res.status(200).json(respuesta);
+        } catch {
+            return res.status(500).json({ error: 'Error saving token' });
+        }
+    } else {
+        return res.status(401).json({ error: 'Incorrect Credentials.' });
+    }
+}
+
+async function loginStudentImage (req, res, profileData, password) {
+    let correcta = true;
+    idStudent = profileData.Student_id;
+
+    try {
+        splitPassword = perfilAlumno.Password.split(",");
+        for (let i = 0; i < password.length; i++) {
+            if (splitPassword[i] != password[i]) {
+                correcta = false;
+            }
+        }
     } catch (error) {
         return res.status(500).json({ error: 'Error comparing password.' });
     }
@@ -804,5 +882,6 @@ module.exports = {
     getMenuTaskModel,
     getListClassrooms,
     getListMenuTasks,
-    updateAmountMenu
+    updateAmountMenu,
+    checkImagePassword
 };
