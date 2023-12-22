@@ -60,12 +60,12 @@ async function getStudent(idStudent) {
   return student;
 }
 
-async function registPerfilStudent(idStudent, nickname, avatarId, idSet, passwordFormat, password){
+async function registPerfilStudent(idStudent, nickname, avatarId, idSet, passwordFormat, password, steps){
   const connection = await conectar();
   
   await connection.execute(
-    'INSERT INTO PERFIL_ALUMNOS (ID_alumno, NickName, Avatar_id, ID_set, FormatoPassword, Password_hash) VALUES (?, ?, ?, ?, ?, ?)',
-    [idStudent, nickname, avatarId, idSet, passwordFormat, password]
+    'INSERT INTO PERFIL_ALUMNOS (ID_alumno, NickName, Avatar_id, ID_set, FormatoPassword, Password_hash, Steps) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [idStudent, nickname, avatarId, idSet, passwordFormat, password,steps]
   );
 
   return "perfil registed";
@@ -102,12 +102,55 @@ async function registContentProfile(idStudent, contentAdaptationFormats, interac
   await registStudentInteractions(idStudent, interactionMethods);
 }
 
+async function insertMenu (taskID, classroomID, menuOptionID, amount){  ////PROBAR-> SERA PARA EL PROFESOR QUE EL JERMU ES GILIPOLLAS
+  const connection = await conectar();
+
+  const [rows1, fields] = await connection.execute(
+      'SELECT * FROM TAREA WHERE ID_tarea = ?',
+      [taskID]
+  );
+
+  if (rows1.length === 0) {
+      throw new Error('There is no task with that id.');
+  }
+
+  const [rows2, fields2] = await connection.execute(
+      'SELECT * FROM AULAS WHERE Num_aula = ?',
+      [classroomID]
+  );
+
+  if (rows2.length === 0) {
+      throw new Error('There is no classroom with that id.');
+  }
+
+  const [rows3, fields3] = await connection.execute(
+      'SELECT * FROM OPCIONES_MENU WHERE ID_opcion = ?',
+      [menuOptionID]
+  );
+
+  if (rows3.length === 0) {
+      throw new Error('There is no menu option with that id.');
+  }
+
+  const [rows4, fields4] = await connection.execute(
+      'INSERT INTO OPCIONES_MENU_TAREA (ID_tarea, ID_opcion, Cantidad, ID_aula, Fecha) VALUES (?, ?, ?, ?, CURDATE())',
+      [taskID, menuOptionID, classroomID, amount], (error, results, fields) => {
+          if (error) {
+              throw new Error('Error inserting menu', error);
+          }
+      }
+  );
+
+  return rows4;
+}
+
 module.exports = {
   TeacherData,
   getPassword,
   getTeachers,
   registPerfilStudent,
   getStudent,
-  registContentProfile
+  registContentProfile,
+  insertMenu
 };
 

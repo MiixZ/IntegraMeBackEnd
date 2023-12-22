@@ -2,7 +2,6 @@ const database = require('../../../database/DB_profesores.js');
 const general = require('../../../database/general.js');
 const { encrypt, compare, checkearToken } = require('../../../database/general.js');
 
-
 const jwt = require('jsonwebtoken');
 const secret_teacher = process.env.JWT_SECRET_TEACHER;
 
@@ -52,10 +51,13 @@ async function login(req, res) {                // Probar.
         const token = jwt.sign({ idTeacher: idTeacher, nickname, EXP: fecha}, secret_teacher);
         try {
             await general.insertarToken(idTeacher, token, fecha);
-            res.status(200).json({ token });
+            const respuesta = {
+                userId : idTeacher,
+                token: token
+            }
+            res.status(200).json(respuesta);
         } catch {
-            reject(error);
-            return;
+            return res.status(500).json({ error: 'Error saving token' });
         }
     } else {
         res.status(401).json({ error: 'Incorrect Credentials.' });
@@ -137,8 +139,36 @@ async function registPerfilStudent(req, res) {  // SE HA PROBADO SIN IDSET, FALT
     }
 }
 
+async function insertMenu(req, res) { //PROBAR-> SERA PARA EL PROFESOR QUE EL JERMU ES GILIPOLLAS
+    // Obtener datos del cuerpo de la solicitud.
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: 'Token not sent' });
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+
+    const taskID = req.params.taskId;
+    const classroomID = req.params.classroomId;
+    const menuOptionID = req.params.menuOptionId;
+    const amount = req.body.amount;
+
+    try {
+        decodedToken = await checkearToken(token, secret_teacher);
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    try{
+        await database.insertMenu(taskID, classroomID, menuOptionID, amount);
+    }catch (error) {
+        return res.status(500).json({ error: 'Error inserting menu. ' + error });
+    }
+}
+
 module.exports = {
     getTeachers,
     login,
-    registPerfilStudent
+    registPerfilStudent,
+    insertMenu,
+    getTeachers
 };

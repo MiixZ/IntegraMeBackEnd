@@ -80,7 +80,6 @@ async function checkearToken(token, typeSecret) {
     }
 }
 
-
 async function VerificarToken(token) {              // Cambio en la tabla tokens?
     const connection = await conectarBD();
 
@@ -112,7 +111,6 @@ async function getImage(idImage) {
 }
 
 // TODO: Si la url de imagen, video o audio es null, se devuelve el endpoint local.
-
 async function getImageContent(idImage) {
     const connection = await conectarBD();
 
@@ -218,7 +216,9 @@ async function getMaterial(idMaterial) {
     fotoMaterial = await getImageContent(rows[0].Foto_material);
 
     data = {
-        displayName: rows[0].Nombre,
+        displayName: {
+            text: rows[0].Nombre
+        },
         displayImage: fotoMaterial,
     };
 
@@ -226,7 +226,9 @@ async function getMaterial(idMaterial) {
         fotoPropiedad = await getImageContent(rows[0].Foto_propiedades);
 
         propiedad = {
-            displayName: rows[0].Propiedad,
+            displayName: {
+                text: rows[0].Propiedad
+            },
             displayImage: fotoPropiedad
         };
 
@@ -275,6 +277,29 @@ async function getAvatar(idUser) {
     return avatar;
 }
 
+async function getAvatars() {
+    const connection = await conectarBD();
+
+    const [rows, fields] = await connection.execute(
+        'SELECT * FROM IMAGENES WHERE Tipo = "AVATAR"'
+    );
+
+    let datas = []
+
+    for (let i = 0; i < rows.length; i++) {
+        const data = {
+            id: rows[i].ID_imagen,
+            Description: rows[i].Descripcion,
+            Tipo: rows[i].Tipo,
+            imageUrl: rows[i].Imagen_url
+        };
+
+        datas.push(data);
+    }
+
+    return datas;
+}
+
 const job = schedule.scheduleJob('0 * * * *', cleanUpTokens);
 
 module.exports = {
@@ -293,5 +318,6 @@ module.exports = {
     getImageContent,
     getAudio,
     getVideo,
-    getMaterial
+    getMaterial,
+    getAvatars
 };

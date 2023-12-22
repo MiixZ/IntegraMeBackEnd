@@ -107,6 +107,8 @@ routerv1.get('/students/:userID/contentProfile', studentsFN.getProfileContent);
  */
 routerv1.post('/students/signin/', studentsFN.loginStudent);
 
+routerv1.post('/students/:userID/checkImagePassword', studentsFN.checkImagePassword);
+
 // ------------------------- FUNCIONES DE PROFESORES -------------------------------------
 
 /** 
@@ -136,12 +138,12 @@ routerv1.post('/teachers/signin/', teachersFN.login);
  */
 routerv1.post('/generateHash/', generalFN.generateHash);
 
-
 // ------------------------- FUNCIONES DE ADMIN -------------------------------------
 routerv1.post('/admins/regist/', adminFN.registAdmin);
 routerv1.post('/admins/login/', adminFN.loginAdmin);
 routerv1.post('/admins/insertStudent/', adminFN.insertStudent);
 routerv1.post('/admins/insertClass/', adminFN.insertClass);
 routerv1.post('/admins/insertTeacher/', adminFN.insertTeacher);
+routerv1.get('/admins/getAvatars/', generalFN.getAvatars);
 
 module.exports = routerv1;

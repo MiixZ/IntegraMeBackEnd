@@ -95,13 +95,13 @@ AuthRouter.get('/students/:userID/profile', studentsFN.getProfile);
 /**
  * @api {get} /registProfileStudent Registra el perfil del alumno.
  * @apiName Insert Profile
- * @apiGroup students && teachers
+ * @apiGroup admins
  * 
  * @apiSuccess {String} El perfil del alumno.
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.post('/teachers/:userID/RegistProfileStudent', teachersFN.registPerfilStudent);
+AuthRouter.post('/admins/registProfileStudent', adminsFN.registPerfilStudent);
 
 /**
  * @api {get} /getTaskCards Devuelve las tareas del alumno.
@@ -135,7 +135,7 @@ AuthRouter.post('/students/tasks/general/:taskId/:numPaso/state', studentsFN.upd
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.get('/students/tasks/material/:taskId', studentsFN.getTaskModel);
+AuthRouter.get('/students/tasks/material/:taskId', studentsFN.getMaterialTaskModel);
 
 /**
  * @api {get} /getMaterialRequest Devuelve una petición de material de la tarea.
@@ -161,13 +161,28 @@ AuthRouter.get('/students/tasks/material/:taskId/:requestId', studentsFN.getMate
  * @apiError {String} Error en la solicitud.
  * @apiError {String} Token expirado.
  */
-AuthRouter.post('/students/tasks/:taskId/:requestId/ToggleDelivered', studentsFN.toggleDelivered);
+AuthRouter.post('/students/tasks/material/:taskId/:requestId/delivered', studentsFN.toggleDelivered);
 
 AuthRouter.get('/students/tasks/generic/:taskId', studentsFN.getGenericTaskModel);
 
 AuthRouter.get('/students/tasks/generic/:taskId/:stepId', studentsFN.getGenericTaskStep);
 
-AuthRouter.post('/students/tasks/:taskId/:stepId/completed', studentsFN.toggleStepCompleted);
+AuthRouter.post('/students/tasks/generic/:taskId/addStep', studentsFN.addGenericTaskStep);
+
+AuthRouter.post('/students/tasks/generic/:taskId/:stepId/completed', studentsFN.toggleStepCompleted);
+
+AuthRouter.get('/students/tasks/:taskId', studentsFN.getTaskModel);
+
+// ENDPOINTS DE MENUS
+AuthRouter.get('/students/getClassrooms', studentsFN.getListClassrooms);
+
+AuthRouter.get('/students/tasks/menu/:taskId', studentsFN.getMenuTaskModel);
+
+AuthRouter.get('/students/tasks/menu/:taskId/:classroomId/menu', studentsFN.getListMenuTasks);
+
+AuthRouter.post('/students/menuTasks/info', teachersFN.insertMenu);
+
+AuthRouter.post('/students/tasks/menu/:taskId/:classroomId/:menuOptionId', studentsFN.updateAmountMenu); //PARA ACTUALIZAR LA CANTIDAD DE UN MENU
 
 /*
 AuthRouter.post('/register/studentProfile', async (req, res) => {

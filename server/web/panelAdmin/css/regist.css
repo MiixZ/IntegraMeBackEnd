@@ -16,6 +16,14 @@ header {
     width: 100%;
 }
 
+#perfil_ {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding-right: 10px;
+}
+
 footer {
     position: fixed;
     bottom: 0;

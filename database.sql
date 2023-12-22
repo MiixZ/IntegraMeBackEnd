@@ -1,6 +1,8 @@
 CREATE TABLE AULAS (
     Num_aula INT PRIMARY KEY,
     Capacidad INT NOT NULL
+    Nombre VARCHAR(20) NOT NULL,
+    Imagen_clase INT NOT NULL
 );
 
 CREATE TABLE PROFESORES ( 
@@ -37,6 +39,7 @@ CREATE TABLE PERFIL_ALUMNOS(
     ID_set INT DEFAULT NULL,
     FormatoPassword ENUM('TextAuth', 'ImageAuth') NOT NULL,
     Password_hash VARCHAR(255) NOT NULL,
+    Steps INT DEFAULT NULL,
     FOREIGN KEY (ID_alumno) REFERENCES ALUMNOS(ID_alumno) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (Avatar_id) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ID_set) REFERENCES CONJUNTOS(ID_set) ON DELETE CASCADE ON UPDATE CASCADE
@@ -101,7 +104,7 @@ CREATE TABLE IMAGENES (
     ID_imagen INT AUTO_INCREMENT PRIMARY KEY,
     Descripcion VARCHAR(100) NOT NULL,
     Tipo VARCHAR(20) DEFAULT NULL,
-    Imagen_url VARCHAR(255)
+    Imagen_url VARCHAR(255) DEFAULT NULL
 );
 
 CREATE TABLE CONJUNTOS (
@@ -243,6 +246,35 @@ CREATE TABLE PROFESORES_TAREA (
     FOREIGN KEY (ID_Tarea) REFERENCES TAREA(ID_tarea) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE OPCIONES_MENU_TAREA (
+    ID_tarea INT NOT NULL,
+    ID_opcion INT NOT NULL,
+    Cantidad INT DEFAULT -1,
+    ID_aula INT NOT NULL,
+    Fecha DATE NOT NULL,
+    PRIMARY KEY (ID_opcion, ID_aula, Fecha),
+    FOREIGN KEY (ID_aula) REFERENCES AULAS(Num_aula) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_opcion) REFERENCES OPCIONES_MENU(ID_opcion) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ID_tarea) REFERENCES TAREA(ID_tarea) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE OPCIONES_MENU (
+    ID_opcion INT NOT NULL AUTO_INCREMENT,
+    Nombre VARCHAR(50) NOT NULL UNIQUE,
+    Descripcion VARCHAR(100) NOT NULL,
+    Imagen_opcion INT NOT NULL,
+    PRIMARY KEY (ID_opcion),
+    FOREIGN KEY (Imagen_opcion) REFERENCES IMAGENES(ID_imagen) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+/* CREATE TABLE OPCIONES_AULAS (
+    ID_opcion INT NOT NULL,
+    Num_aula INT NOT NULL,
+    PRIMARY KEY (ID_opcion, Num_aula),
+    FOREIGN KEY (ID_opcion) REFERENCES OPCIONES_MENU(ID_opcion) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Num_aula) REFERENCES AULAS(Num_aula) ON DELETE CASCADE ON UPDATE CASCADE
+); */
+
 -- Crear un disparador para insertar automáticamente en la tabla usuarios cuando se añade un profesor
 DELIMITER //
 CREATE TRIGGER Profesor_insert_trigger
@@ -279,14 +311,14 @@ DELIMITER;
 --IMPORTANTE --> Los delimiters cambian los ";" por "//" y viceversa
 
 DELIMITER //
-CREATE PROCEDURE InsertPaso(IN Nombre VARCHAR(20), IN Descripcion VARCHAR(100), IN Imagen_tarea INT, IN Audio_tarea INT, IN Video_tarea INT, IN Texto_tarea VARCHAR(100), IN ID_tarea INT)
+CREATE PROCEDURE InsertPaso(IN pNombre VARCHAR(20), IN pDescripcion VARCHAR(100), IN pImagen_tarea INT, IN pAudio_tarea INT, IN pVideo_tarea INT, IN pTexto_tarea VARCHAR(100), IN pID_tarea INT)
 BEGIN
     DECLARE paso_id INT;
 
-    SELECT COALESCE(MAX(ID_paso), 0) + 1 INTO paso_id FROM PASO_GENERAL WHERE ID_tarea = ID_tarea;
+    SELECT COALESCE((SELECT MAX(ID_paso) FROM PASO_GENERAL WHERE ID_tarea = pID_tarea), 0) + 1 INTO paso_id;
 
     INSERT INTO PASO_GENERAL(ID_tarea, ID_paso, Nombre, Descripcion, Imagen_tarea, Audio_tarea, Video_tarea, Texto_tarea, Estado)
-    VALUES (ID_tarea, paso_id, Nombre, Descripcion, Imagen_tarea, Audio_tarea, Video_tarea, Texto_tarea, 'false');
+    VALUES (pID_tarea, paso_id, pNombre, pDescripcion, pImagen_tarea, pAudio_tarea, pVideo_tarea, pTexto_tarea, 'false');
 END//
 DELIMITER ;
 
